@@ -14,6 +14,12 @@ A human-readable, YAML-based specification for defining workout plans and export
 
 Both formats are portable, version-controllable YAML files that can be shared across any fitness application.
 
+### Philosophy
+
+- **Your data, your choice.** PWF exists so you can move your workout data wherever you want.
+- **Unopinionated by design.** The spec defines structure, not workflow. Adopters decide how to use it.
+- **Language agnostic.** Works with any programming language (it's just YAML). Content can be in any human language (UTF-8).
+
 ## Quick Example
 
 ### Plan (Workout Template)
@@ -220,14 +226,16 @@ Add to your `.vscode/settings.json`:
 - [x] Plan specification
 - [x] History export specification
 - [x] Four modalities (strength, countdown, stopwatch, interval)
-- [x] Personal records and body measurements
+- [x] Personal records and body measurements (including rep-specific PRs: 3RM, 5RM, 8RM, 10RM)
+- [x] RPE and RIR tracking on sets
+- [x] Plan status (draft/active/completed/archived)
+- [x] Preferred units in exports
 - [x] JSON Schema
 - [x] Rust CLI validator
 
 ### v1.1 (Planned)
 - [ ] Superset/circuit grouping
 - [ ] Rest period specifications
-- [ ] RPE/RIR targets
 - [ ] Percentage-based loading
 
 ### v2.0 (Future)
