@@ -6,7 +6,7 @@ Thank you for your interest in improving the Workout Plan Specification!
 
 ### 1. Report Issues
 
-Found a bug in the validator or an ambiguity in the spec? [Open an issue](https://github.com/wps-spec/wps/issues).
+Found a bug in the validator or an ambiguity in the spec? [Open an issue](https://github.com/bcarlson/workout-plan-spec/issues).
 
 Include:
 - What you expected
@@ -53,7 +53,7 @@ Submit example plans that demonstrate:
 
 ```bash
 # Clone the repo
-git clone https://github.com/wps-spec/wps.git
+git clone https://github.com/bcarlson/workout-plan-spec.git
 cd wps
 
 # Build
@@ -177,7 +177,7 @@ Changes to `SPECIFICATION.md` or `docs/` require:
 
 ## Questions?
 
-- Open a [discussion](https://github.com/wps-spec/wps/discussions)
+- Open a [discussion](https://github.com/bcarlson/workout-plan-spec/discussions)
 - Check existing issues and PRs
 
 ## License
