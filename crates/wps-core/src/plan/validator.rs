@@ -2,7 +2,7 @@
 
 use super::parser::parse;
 use super::types::{PlanStatistics, WpsPlan};
-use crate::error::{Severity, ValidationIssue};
+use crate::error::ValidationIssue;
 use crate::Modality;
 use std::collections::HashSet;
 
@@ -204,8 +204,10 @@ pub fn validate(yaml: &str) -> ValidationResult {
 }
 
 fn calculate_statistics(plan: &WpsPlan) -> PlanStatistics {
-    let mut stats = PlanStatistics::default();
-    stats.total_days = plan.cycle.days.len();
+    let mut stats = PlanStatistics {
+        total_days: plan.cycle.days.len(),
+        ..Default::default()
+    };
 
     for day in &plan.cycle.days {
         stats.total_exercises += day.exercises.len();

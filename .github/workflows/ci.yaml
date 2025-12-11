@@ -74,7 +74,7 @@ jobs:
         run: cargo build --release -p wps
 
       - name: Validate example plans
-        run: ./target/release/wps validate examples/*.yaml
+        run: ./target/release/wps validate examples/beginner-strength.yaml examples/minimal.yaml examples/mixed-modalities.yaml
 
       - name: Validate history examples
         run: ./target/release/wps history examples/history-*.yaml
