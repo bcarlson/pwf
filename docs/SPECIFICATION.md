@@ -1,18 +1,18 @@
-# WPS Specification
+# PWF Specification
 
-This document provides a complete reference for the Workout Plan Specification (WPS) format.
+This document provides a complete reference for the Portable Workout Format (PWF) format.
 
 ## Version
 
-This documentation covers **WPS v1.0**.
+This documentation covers **PWF v1.0**.
 
 ## File Format
 
-WPS plans are written in [YAML 1.2](https://yaml.org/spec/1.2.2/). Files should use the `.yaml` or `.yml` extension.
+PWF plans are written in [YAML 1.2](https://yaml.org/spec/1.2.2/). Files should use the `.yaml` or `.yml` extension.
 
 ## Document Structure
 
-A WPS document consists of three top-level elements:
+A PWF document consists of three top-level elements:
 
 ```yaml
 plan_version: 1          # Required - Specification version
@@ -32,7 +32,7 @@ cycle: { ... }           # Required - Training cycle
 
 ## Modalities
 
-WPS supports four exercise modalities:
+PWF supports four exercise modalities:
 
 | Modality | Use Case | Documentation |
 |----------|----------|---------------|

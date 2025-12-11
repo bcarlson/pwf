@@ -1,13 +1,13 @@
-# WPS v1 - Mixed Modalities Demo
-# Demonstrates all four WPS modalities in one plan
+# PWF v1 - Mixed Modalities Demo
+# Demonstrates all four PWF modalities in one plan
 
 plan_version: 1
 
 meta:
   id: "mixed-modality-demo"
   title: "Mixed Modality Training"
-  description: "A 2-day plan demonstrating all WPS modalities: strength, countdown, stopwatch, and interval."
-  author: "WPS Examples"
+  description: "A 2-day plan demonstrating all PWF modalities: strength, countdown, stopwatch, and interval."
+  author: "PWF Examples"
   equipment: [kettlebell, bands]
   daysPerWeek: 2
   tags: [conditioning, kettlebell, demo]

@@ -1,10 +1,10 @@
 [package]
-name = "wps-core"
+name = "pwf-core"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
-description = "Core library for parsing and validating WPS workout plans and history"
+description = "Core library for parsing and validating PWF workout plans and history"
 
 [dependencies]
 serde.workspace = true

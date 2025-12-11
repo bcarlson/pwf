@@ -1,6 +1,6 @@
-//! # WPS Core
+//! # PWF Core
 //!
-//! Core library for parsing and validating Workout Plan Specification (WPS) documents.
+//! Core library for parsing and validating Portable Workout Format (PWF) documents.
 //!
 //! This crate provides:
 //! - Plan parsing and validation (`plan` module)
@@ -12,7 +12,7 @@
 //! ### Validating a Plan
 //!
 //! ```rust
-//! use wps_core::plan;
+//! use pwf_core::plan;
 //!
 //! let yaml = r#"
 //! plan_version: 1
@@ -30,7 +30,7 @@
 //! ### Validating Workout History
 //!
 //! ```rust
-//! use wps_core::history;
+//! use pwf_core::history;
 //!
 //! let yaml = r#"
 //! history_version: 1

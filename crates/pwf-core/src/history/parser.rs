@@ -1,4 +1,4 @@
-//! YAML parsing for WPS history exports
+//! YAML parsing for PWF history exports
 
 use super::types::WpsHistory;
 use crate::error::ParseError;

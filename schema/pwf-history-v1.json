@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://wps-spec.dev/schema/v1/history.json",
-  "title": "WPS History Export v1",
-  "description": "Schema for validating WPS workout history exports",
+  "$id": "https://pwf.dev/schema/v1/history.json",
+  "title": "PWF History Export v1",
+  "description": "Schema for validating PWF workout history exports",
   "type": "object",
   "required": ["history_version", "exported_at", "workouts"],
   "additionalProperties": false,
@@ -120,7 +120,7 @@
         },
         "plan_id": {
           "type": "string",
-          "description": "Reference to WPS plan"
+          "description": "Reference to PWF plan"
         },
         "plan_day_id": {
           "type": "string",

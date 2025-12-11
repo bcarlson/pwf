@@ -1,6 +1,6 @@
-//! Plan parsing and validation
+//! Workout history parsing and validation
 //!
-//! This module handles WPS plan documents (workout templates).
+//! This module handles PWF history documents (completed workout exports).
 
 mod parser;
 mod types;
