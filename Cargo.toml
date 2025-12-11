@@ -6,12 +6,12 @@ members = ["crates/*"]
 version = "1.0.0"
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/bcarlson/workout-plan-spec"
-homepage = "https://wps-spec.dev"
-description = "Workout Plan Specification - validator and library"
+repository = "https://github.com/bcarlson/pwf"
+homepage = "https://pwf.dev"
+description = "Portable Workout Format - validator and library"
 keywords = ["fitness", "workout", "yaml", "validator", "cli"]
 categories = ["command-line-utilities", "parser-implementations"]
-authors = ["WPS Contributors"]
+authors = ["PWF Contributors"]
 
 [workspace.dependencies]
 serde = { version = "1.0", features = ["derive"] }

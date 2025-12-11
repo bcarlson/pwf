@@ -1,12 +1,12 @@
-# Contributing to WPS
+# Contributing to PWF
 
-Thank you for your interest in improving the Workout Plan Specification!
+Thank you for your interest in improving the Portable Workout Format!
 
 ## Ways to Contribute
 
 ### 1. Report Issues
 
-Found a bug in the validator or an ambiguity in the spec? [Open an issue](https://github.com/bcarlson/workout-plan-spec/issues).
+Found a bug in the validator or an ambiguity in the spec? [Open an issue](https://github.com/bcarlson/pwf/issues).
 
 Include:
 - What you expected
@@ -53,8 +53,8 @@ Submit example plans that demonstrate:
 
 ```bash
 # Clone the repo
-git clone https://github.com/bcarlson/workout-plan-spec.git
-cd wps
+git clone https://github.com/bcarlson/pwf.git
+cd pwf
 
 # Build
 cargo build
@@ -66,19 +66,19 @@ cargo test
 cargo build --release
 
 # Run the CLI
-./target/release/wps --help
+./target/release/pwf --help
 ```
 
 ### Project Structure
 
 ```
-wps/
+pwf/
 ├── crates/
-│   ├── wps-core/      # Library crate (parsing, validation)
+│   ├── pwf-core/      # Library crate (parsing, validation)
 │   │   └── src/
 │   │       ├── plan/      # Plan parsing & validation
 │   │       └── history/   # History parsing & validation
-│   └── wps-cli/       # Binary crate (CLI)
+│   └── pwf-cli/       # Binary crate (CLI)
 ├── schema/            # JSON Schema files
 ├── examples/          # Example YAML files
 └── docs/              # Documentation
@@ -91,7 +91,7 @@ wps/
 cargo test
 
 # Specific crate
-cargo test -p wps-core
+cargo test -p pwf-core
 
 # With output
 cargo test -- --nocapture
@@ -104,13 +104,13 @@ cargo test -- --nocapture
 cargo build --release
 
 # Validate all example plans
-./target/release/wps validate examples/*.yaml
+./target/release/pwf validate examples/*.yaml
 
 # Validate history exports
-./target/release/wps history examples/history-*.yaml
+./target/release/pwf history examples/history-*.yaml
 
 # Ensure invalid examples fail
-./target/release/wps validate examples/invalid/*.yaml && echo "FAIL: should have failed" || echo "OK: correctly rejected"
+./target/release/pwf validate examples/invalid/*.yaml && echo "FAIL: should have failed" || echo "OK: correctly rejected"
 ```
 
 ## Pull Request Process
@@ -177,7 +177,7 @@ Changes to `SPECIFICATION.md` or `docs/` require:
 
 ## Questions?
 
-- Open a [discussion](https://github.com/bcarlson/workout-plan-spec/discussions)
+- Open a [discussion](https://github.com/bcarlson/pwf/discussions)
 - Check existing issues and PRs
 
 ## License

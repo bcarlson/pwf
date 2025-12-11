@@ -1,4 +1,4 @@
-//! Validation rules for WPS plans
+//! Validation rules for PWF plans
 
 use super::parser::parse;
 use super::types::{PlanStatistics, WpsPlan};
@@ -28,7 +28,7 @@ impl ValidationResult {
     }
 }
 
-/// Validate a YAML string as a WPS plan
+/// Validate a YAML string as a PWF plan
 pub fn validate(yaml: &str) -> ValidationResult {
     let mut errors = Vec::new();
     let mut warnings = Vec::new();
