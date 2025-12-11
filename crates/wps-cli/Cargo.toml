@@ -1,0 +1,21 @@
+[package]
+name = "wps"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "CLI validator for Workout Plan Specification (WPS) plans and history exports"
+
+[[bin]]
+name = "wps"
+path = "src/main.rs"
+
+[dependencies]
+wps-core = { path = "../wps-core" }
+clap = { version = "4.5", features = ["derive", "color"] }
+colored = "2.1"
+serde_json.workspace = true
+
+[dev-dependencies]
+assert_cmd = "2.0"
+predicates = "3.1"

@@ -1,0 +1,11 @@
+# INVALID: Missing plan_version
+# This file should fail validation
+
+meta:
+  title: "Invalid Plan"
+
+cycle:
+  days:
+    - exercises:
+        - name: "Push-ups"
+          modality: strength

@@ -1,0 +1,119 @@
+# WPS v1 - Beginner Strength Program
+# A 3-day full body routine for new lifters
+
+plan_version: 1
+
+meta:
+  id: "beginner-strength-3day"
+  title: "Beginner Strength Program"
+  description: "A 3-day full body routine for new lifters focusing on compound movements."
+  author: "WPS Examples"
+  equipment: [barbell, dumbbells, bench, pullup_bar]
+  daysPerWeek: 3
+  recommendedFirst: true
+  tags: [beginner, strength, full-body, compound]
+
+cycle:
+  notes: "Focus on form over weight. Add 5 lbs to upper body and 10 lbs to lower body lifts each week when all reps are completed."
+
+  days:
+    # Day A - Squat Focus
+    - id: "day-a"
+      order: 0
+      focus: "Full Body A - Squat Focus"
+      target_session_length_min: 60
+      notes: "Rest 2-3 minutes between sets of main lifts."
+      exercises:
+        - id: "squat"
+          name: "Barbell Back Squat"
+          modality: strength
+          target_sets: 3
+          target_reps: 5
+          target_notes: "Depth: hip crease below knee. Brace core before each rep."
+
+        - id: "bench"
+          name: "Bench Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 5
+          target_notes: "Pause briefly on chest. Control the descent."
+
+        - id: "row"
+          name: "Barbell Row"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          target_notes: "Pull to lower chest. Squeeze shoulder blades at top."
+
+        - id: "plank-a"
+          name: "Plank"
+          modality: countdown
+          target_duration_sec: 45
+          target_notes: "Keep body straight. Don't let hips sag."
+
+    # Day B - Deadlift Focus
+    - id: "day-b"
+      order: 1
+      focus: "Full Body B - Hinge Focus"
+      target_session_length_min: 55
+      exercises:
+        - id: "deadlift"
+          name: "Deadlift"
+          modality: strength
+          target_sets: 1
+          target_reps: 5
+          target_notes: "One heavy set after warm-up sets. Reset between each rep."
+
+        - id: "ohp"
+          name: "Overhead Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 5
+          target_notes: "Squeeze glutes. Full lockout overhead."
+
+        - id: "pullups"
+          name: "Pull-ups"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          target_notes: "Use band assist if needed. Full dead hang at bottom."
+
+        - id: "farmers"
+          name: "Farmer's Walk"
+          modality: stopwatch
+          target_duration_sec: 60
+          target_notes: "Heavy as possible. Walk for time, rest, repeat."
+
+    # Day C - Volume Focus
+    - id: "day-c"
+      order: 2
+      focus: "Full Body C - Volume"
+      target_session_length_min: 50
+      exercises:
+        - id: "front-squat"
+          name: "Front Squat"
+          modality: strength
+          target_sets: 3
+          target_reps: 6
+          target_notes: "Keep elbows high. Lighter than back squat."
+
+        - id: "incline-db"
+          name: "Incline Dumbbell Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+          target_notes: "30-45 degree incline. Full range of motion."
+
+        - id: "db-row"
+          name: "Dumbbell Row"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+          target_notes: "One arm at a time. Brace on bench."
+
+        - id: "ab-circuit"
+          name: "Ab Circuit"
+          modality: interval
+          target_sets: 3
+          target_duration_sec: 30
+          target_notes: "Dead bug, bird dog, side plank. 30s each, no rest."

@@ -1,0 +1,10 @@
+# INVALID: Unknown modality
+# This file should fail validation
+
+plan_version: 1
+
+cycle:
+  days:
+    - exercises:
+        - name: "Push-ups"
+          modality: cardio  # Invalid: not a supported modality

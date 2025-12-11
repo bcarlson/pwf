@@ -1,0 +1,329 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://wps-spec.dev/schema/v1/history.json",
+  "title": "WPS History Export v1",
+  "description": "Schema for validating WPS workout history exports",
+  "type": "object",
+  "required": ["history_version", "exported_at", "workouts"],
+  "additionalProperties": false,
+  "properties": {
+    "history_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Specification version (must be 1)"
+    },
+    "exported_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 datetime when export was created"
+    },
+    "export_source": {
+      "$ref": "#/$defs/ExportSource"
+    },
+    "units": {
+      "$ref": "#/$defs/Units"
+    },
+    "workouts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Workout"
+      },
+      "description": "Completed workout sessions"
+    },
+    "personal_records": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/PersonalRecord"
+      },
+      "description": "Personal records achieved"
+    },
+    "body_measurements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/BodyMeasurement"
+      },
+      "description": "Body measurements recorded"
+    }
+  },
+  "$defs": {
+    "ExportSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "app_name": {
+          "type": "string",
+          "description": "Application name"
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        },
+        "platform": {
+          "type": "string",
+          "enum": ["ios", "android", "web", "desktop"],
+          "description": "Platform"
+        }
+      }
+    },
+    "Units": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "weight": {
+          "type": "string",
+          "enum": ["kg", "lb"],
+          "default": "kg"
+        },
+        "distance": {
+          "type": "string",
+          "enum": ["meters", "kilometers", "miles", "feet", "yards"],
+          "default": "meters"
+        }
+      }
+    },
+    "Workout": {
+      "type": "object",
+      "required": ["date", "exercises"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique workout identifier"
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Workout date (YYYY-MM-DD)"
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Start timestamp"
+        },
+        "ended_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "End timestamp"
+        },
+        "duration_sec": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total duration in seconds"
+        },
+        "title": {
+          "type": "string",
+          "description": "Workout title"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Workout notes"
+        },
+        "plan_id": {
+          "type": "string",
+          "description": "Reference to WPS plan"
+        },
+        "plan_day_id": {
+          "type": "string",
+          "description": "Reference to plan day"
+        },
+        "exercises": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CompletedExercise"
+          },
+          "description": "Exercises performed"
+        }
+      }
+    },
+    "CompletedExercise": {
+      "type": "object",
+      "required": ["name", "sets"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique exercise identifier"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Exercise name"
+        },
+        "modality": {
+          "type": "string",
+          "enum": ["strength", "countdown", "stopwatch", "interval"],
+          "description": "Exercise modality"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Exercise-level notes"
+        },
+        "sets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CompletedSet"
+          },
+          "description": "Completed sets"
+        }
+      }
+    },
+    "CompletedSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "set_number": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Set order (1-indexed)"
+        },
+        "set_type": {
+          "type": "string",
+          "enum": ["working", "warmup", "dropset", "failure", "amrap"],
+          "default": "working",
+          "description": "Type of set"
+        },
+        "reps": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Repetitions completed"
+        },
+        "weight_kg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Weight in kilograms"
+        },
+        "weight_lb": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Weight in pounds"
+        },
+        "duration_sec": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Duration in seconds"
+        },
+        "distance_meters": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Distance in meters"
+        },
+        "rpe": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Rate of Perceived Exertion"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Set-level notes"
+        },
+        "is_pr": {
+          "type": "boolean",
+          "description": "Whether this set was a personal record"
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When set was completed"
+        }
+      }
+    },
+    "PersonalRecord": {
+      "type": "object",
+      "required": ["exercise_name", "record_type", "value", "achieved_at"],
+      "additionalProperties": false,
+      "properties": {
+        "exercise_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Exercise name"
+        },
+        "record_type": {
+          "type": "string",
+          "enum": ["1rm", "max_weight", "max_reps", "max_volume", "max_duration", "max_distance", "fastest_time"],
+          "description": "Type of record"
+        },
+        "value": {
+          "type": "number",
+          "description": "Record value"
+        },
+        "unit": {
+          "type": "string",
+          "description": "Unit for the value"
+        },
+        "achieved_at": {
+          "type": "string",
+          "format": "date",
+          "description": "Date achieved"
+        },
+        "workout_id": {
+          "type": "string",
+          "description": "Reference to workout"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional notes"
+        }
+      }
+    },
+    "BodyMeasurement": {
+      "type": "object",
+      "required": ["date"],
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Measurement date"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Exact timestamp"
+        },
+        "weight_kg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Body weight in kg"
+        },
+        "weight_lb": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Body weight in lb"
+        },
+        "body_fat_percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Body fat percentage"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Notes"
+        },
+        "measurements": {
+          "$ref": "#/$defs/BodyDimensions"
+        }
+      }
+    },
+    "BodyDimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "neck_cm": { "type": "number", "minimum": 0 },
+        "shoulders_cm": { "type": "number", "minimum": 0 },
+        "chest_cm": { "type": "number", "minimum": 0 },
+        "waist_cm": { "type": "number", "minimum": 0 },
+        "hips_cm": { "type": "number", "minimum": 0 },
+        "bicep_left_cm": { "type": "number", "minimum": 0 },
+        "bicep_right_cm": { "type": "number", "minimum": 0 },
+        "forearm_left_cm": { "type": "number", "minimum": 0 },
+        "forearm_right_cm": { "type": "number", "minimum": 0 },
+        "thigh_left_cm": { "type": "number", "minimum": 0 },
+        "thigh_right_cm": { "type": "number", "minimum": 0 },
+        "calf_left_cm": { "type": "number", "minimum": 0 },
+        "calf_right_cm": { "type": "number", "minimum": 0 }
+      }
+    }
+  }
+}

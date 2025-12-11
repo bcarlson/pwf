@@ -1,0 +1,19 @@
+[package]
+name = "wps-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Core library for parsing and validating WPS workout plans and history"
+
+[dependencies]
+serde.workspace = true
+serde_yaml.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+url.workspace = true
+
+[dev-dependencies]
+pretty_assertions = "1.4"

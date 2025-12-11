@@ -1,0 +1,10 @@
+# INVALID: Empty days array
+# This file should fail validation
+
+plan_version: 1
+
+meta:
+  title: "Empty Plan"
+
+cycle:
+  days: []

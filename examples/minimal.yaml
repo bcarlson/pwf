@@ -1,0 +1,10 @@
+# WPS v1 - Minimal Valid Plan
+# The smallest possible valid plan
+
+plan_version: 1
+
+cycle:
+  days:
+    - exercises:
+        - name: "Push-ups"
+          modality: strength
