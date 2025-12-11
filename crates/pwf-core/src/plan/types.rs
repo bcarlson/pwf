@@ -23,6 +23,8 @@ pub struct PlanMeta {
     #[serde(default)]
     pub author: Option<String>,
     #[serde(default)]
+    pub status: Option<PlanStatus>,
+    #[serde(default)]
     pub equipment: Vec<String>,
     #[serde(default, rename = "daysPerWeek")]
     pub days_per_week: Option<u8>,
@@ -30,6 +32,17 @@ pub struct PlanMeta {
     pub recommended_first: bool,
     #[serde(default)]
     pub tags: Vec<String>,
+}
+
+/// Plan status
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum PlanStatus {
+    #[default]
+    Draft,
+    Active,
+    Completed,
+    Archived,
 }
 
 /// Training cycle

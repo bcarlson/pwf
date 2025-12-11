@@ -44,6 +44,12 @@
           "type": "string",
           "description": "Coach or creator name"
         },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "active", "completed", "archived"],
+          "default": "draft",
+          "description": "Plan status"
+        },
         "equipment": {
           "type": "array",
           "items": {
