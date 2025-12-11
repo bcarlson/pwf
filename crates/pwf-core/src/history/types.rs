@@ -28,6 +28,8 @@ pub struct ExportSource {
     pub app_version: Option<String>,
     #[serde(default)]
     pub platform: Option<String>,
+    #[serde(default)]
+    pub preferred_units: Option<Units>,
 }
 
 /// Default units for the export
@@ -104,6 +106,8 @@ pub struct CompletedSet {
     #[serde(default)]
     pub rpe: Option<f64>,
     #[serde(default)]
+    pub rir: Option<u32>,
+    #[serde(default)]
     pub notes: Option<String>,
     #[serde(default)]
     pub is_pr: Option<bool>,
@@ -144,6 +148,14 @@ pub struct PersonalRecord {
 pub enum RecordType {
     #[serde(rename = "1rm")]
     OneRepMax,
+    #[serde(rename = "max_weight_3rm")]
+    MaxWeight3rm,
+    #[serde(rename = "max_weight_5rm")]
+    MaxWeight5rm,
+    #[serde(rename = "max_weight_8rm")]
+    MaxWeight8rm,
+    #[serde(rename = "max_weight_10rm")]
+    MaxWeight10rm,
     MaxWeight,
     MaxReps,
     MaxVolume,

@@ -8,6 +8,7 @@ meta:
   title: "Beginner Strength Program"
   description: "A 3-day full body routine for new lifters focusing on compound movements."
   author: "PWF Examples"
+  status: active
   equipment: [barbell, dumbbells, bench, pullup_bar]
   daysPerWeek: 3
   recommendedFirst: true

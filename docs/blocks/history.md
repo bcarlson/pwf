@@ -155,7 +155,20 @@ Information about the exporting application.
 |-------|------|----------|-------------|
 | `app_name` | `string` | No | Application name |
 | `app_version` | `string` | No | Application version |
-| `platform` | `string` | No | Platform (ios, android, web) |
+| `platform` | `string` | No | Platform (ios, android, web, desktop) |
+| `preferred_units` | [Units Block](#units-block) | No | User's preferred display units |
+
+### Example
+
+```yaml
+export_source:
+  app_name: "OwnLift"
+  app_version: "1.0.0"
+  platform: "ios"
+  preferred_units:
+    weight: kg
+    distance: meters
+```
 
 ---
 
@@ -189,7 +202,11 @@ A personal record achievement.
 | Type | Description |
 |------|-------------|
 | `1rm` | Estimated one-rep max |
-| `max_weight` | Heaviest weight lifted |
+| `max_weight_3rm` | Heaviest weight for 3 reps |
+| `max_weight_5rm` | Heaviest weight for 5 reps |
+| `max_weight_8rm` | Heaviest weight for 8 reps |
+| `max_weight_10rm` | Heaviest weight for 10 reps |
+| `max_weight` | Heaviest weight lifted (any rep count) |
 | `max_reps` | Most reps at a weight |
 | `max_volume` | Highest total volume |
 | `max_duration` | Longest duration |

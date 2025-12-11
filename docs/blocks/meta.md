@@ -78,6 +78,29 @@ meta:
 
 ---
 
+### `status`
+
+- **Type:** `string`
+- **Required:** No
+- **Default:** `draft`
+- **Valid Values:** `draft`, `active`, `completed`, `archived`
+
+The current status of the plan. Useful for tracking plan lifecycle.
+
+| Status | Description |
+|--------|-------------|
+| `draft` | Plan is being developed |
+| `active` | Plan is currently in use |
+| `completed` | Plan has been finished |
+| `archived` | Plan is no longer active |
+
+```yaml
+meta:
+  status: active
+```
+
+---
+
 ### `equipment`
 
 - **Type:** `array` of `string`
