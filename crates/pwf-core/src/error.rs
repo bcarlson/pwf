@@ -1,4 +1,4 @@
-//! Error types for WPS parsing and validation
+//! Error types for PWF parsing and validation
 
 use thiserror::Error;
 
@@ -49,7 +49,7 @@ impl ValidationIssue {
     }
 }
 
-/// Combined error type for WPS operations
+/// Combined error type for PWF operations
 #[derive(Debug, Error)]
 pub enum WpsError {
     #[error(transparent)]

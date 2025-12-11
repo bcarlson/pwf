@@ -1,13 +1,13 @@
-# WPS - Workout Plan Specification
+# PWF - Portable Workout Format
 
 A human-readable, YAML-based specification for defining workout plans and exporting workout history.
 
-[![CI](https://github.com/bcarlson/workout-plan-spec/actions/workflows/ci.yaml/badge.svg)](https://github.com/bcarlson/workout-plan-spec/actions/workflows/ci.yaml)
+[![CI](https://github.com/bcarlson/pwf/actions/workflows/ci.yaml/badge.svg)](https://github.com/bcarlson/pwf/actions/workflows/ci.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## Overview
 
-**WPS** (Workout Plan Specification) is an open standard for:
+**PWF** (Portable Workout Format) is an open standard for:
 
 1. **Plans** - Workout templates that define exercises, sets, reps, and modalities
 2. **History** - Completed workout exports including PRs and body measurements
@@ -63,7 +63,7 @@ personal_records:
     achieved_at: "2025-01-15"
 ```
 
-## Why WPS?
+## Why PWF?
 
 | Problem | Solution |
 |---------|----------|
@@ -79,25 +79,25 @@ personal_records:
 
 ```bash
 # macOS (Apple Silicon)
-curl -sSL https://github.com/bcarlson/workout-plan-spec/releases/latest/download/wps-darwin-arm64 -o wps
-chmod +x wps
-sudo mv wps /usr/local/bin/
+curl -sSL https://github.com/bcarlson/pwf/releases/latest/download/pwf-darwin-arm64 -o pwf
+chmod +x pwf
+sudo mv pwf /usr/local/bin/
 
 # macOS (Intel)
-curl -sSL https://github.com/bcarlson/workout-plan-spec/releases/latest/download/wps-darwin-amd64 -o wps
-chmod +x wps
-sudo mv wps /usr/local/bin/
+curl -sSL https://github.com/bcarlson/pwf/releases/latest/download/pwf-darwin-amd64 -o pwf
+chmod +x pwf
+sudo mv pwf /usr/local/bin/
 
 # Linux (x64)
-curl -sSL https://github.com/bcarlson/workout-plan-spec/releases/latest/download/wps-linux-amd64 -o wps
-chmod +x wps
-sudo mv wps /usr/local/bin/
+curl -sSL https://github.com/bcarlson/pwf/releases/latest/download/pwf-linux-amd64 -o pwf
+chmod +x pwf
+sudo mv pwf /usr/local/bin/
 ```
 
 ### From Source
 
 ```bash
-cargo install --git https://github.com/bcarlson/workout-plan-spec.git wps
+cargo install --git https://github.com/bcarlson/pwf.git pwf
 ```
 
 ## Usage
@@ -106,45 +106,45 @@ cargo install --git https://github.com/bcarlson/workout-plan-spec.git wps
 
 ```bash
 # Validate a plan file
-wps validate my-plan.yaml
+pwf validate my-plan.yaml
 
 # Strict mode (warnings become errors)
-wps validate --strict my-plan.yaml
+pwf validate --strict my-plan.yaml
 
 # JSON output for CI/CD
-wps validate --format json plans/*.yaml
+pwf validate --format json plans/*.yaml
 ```
 
 ### Validate History Exports
 
 ```bash
 # Validate a history export
-wps history my-export.yaml
+pwf history my-export.yaml
 
 # JSON output
-wps history --format json exports/*.yaml
+pwf history --format json exports/*.yaml
 ```
 
 ### Generate Templates
 
 ```bash
 # Create a new plan template
-wps init plan.yaml
+pwf init plan.yaml
 
 # Create a history export template
-wps init --history export.yaml
+pwf init --history export.yaml
 ```
 
 ### Example Output
 
 ```
-$ wps validate beginner-strength.yaml
+$ pwf validate beginner-strength.yaml
 
 ✓ beginner-strength.yaml
   3 days, 12 exercises
   ⚠ cycle.days[1].exercises[2]: Strength exercise missing target_sets/target_reps
 
-$ wps history workout-export.yaml
+$ pwf history workout-export.yaml
 
 ✓ workout-export.yaml
   15 workouts, 187 sets, 45,230 kg total volume
@@ -185,7 +185,7 @@ $ wps history workout-export.yaml
 
 ## Modalities
 
-WPS supports four exercise modalities:
+PWF supports four exercise modalities:
 
 | Modality | Use Case | Key Fields |
 |----------|----------|------------|
@@ -198,8 +198,8 @@ WPS supports four exercise modalities:
 
 JSON Schema files are provided for editor autocompletion and programmatic validation:
 
-- [`schema/wps-v1.json`](schema/wps-v1.json) - Plan schema
-- [`schema/wps-history-v1.json`](schema/wps-history-v1.json) - History export schema
+- [`schema/pwf-v1.json`](schema/pwf-v1.json) - Plan schema
+- [`schema/pwf-history-v1.json`](schema/pwf-history-v1.json) - History export schema
 
 ### VS Code Setup
 
@@ -208,8 +208,8 @@ Add to your `.vscode/settings.json`:
 ```json
 {
   "yaml.schemas": {
-    "./schema/wps-v1.json": ["**/plans/*.yaml"],
-    "./schema/wps-history-v1.json": ["**/exports/*.yaml"]
+    "./schema/pwf-v1.json": ["**/plans/*.yaml"],
+    "./schema/pwf-history-v1.json": ["**/exports/*.yaml"]
   }
 }
 ```
@@ -240,7 +240,7 @@ Add to your `.vscode/settings.json`:
 
 - [OwnLift](https://ownlift.com) - Privacy-first workout tracking
 
-*Using WPS? [Open a PR](https://github.com/bcarlson/workout-plan-spec/pulls) to add your app!*
+*Using PWF? [Open a PR](https://github.com/bcarlson/pwf/pulls) to add your app!*
 
 ## Contributing
 

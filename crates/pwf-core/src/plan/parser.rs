@@ -1,4 +1,4 @@
-//! YAML parsing for WPS plans
+//! YAML parsing for PWF plans
 
 use super::types::WpsPlan;
 use crate::error::ParseError;

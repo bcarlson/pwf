@@ -5,8 +5,8 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 #[derive(Parser)]
-#[command(name = "wps")]
-#[command(author, version, about = "Workout Plan Specification validator", long_about = None)]
+#[command(name = "pwf")]
+#[command(author, version, about = "Portable Workout Format validator", long_about = None)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -14,7 +14,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Validate WPS plan files
+    /// Validate PWF plan files
     Validate {
         /// Plan files to validate
         #[arg(required = true)]
@@ -33,7 +33,7 @@ enum Commands {
         quiet: bool,
     },
 
-    /// Validate WPS history export files
+    /// Validate PWF history export files
     History {
         /// History files to validate
         #[arg(required = true)]
@@ -86,7 +86,7 @@ fn main() -> ExitCode {
             strict,
         } => validate_history(&files, format, strict),
         Commands::Info => {
-            println!("{}", "WPS - Workout Plan Specification".bold());
+            println!("{}", "PWF - Portable Workout Format".bold());
             println!();
             println!("Specification version: {}", "1.0".cyan());
             println!(
@@ -104,7 +104,7 @@ fn main() -> ExitCode {
             println!("  {} - Open-ended timing", "stopwatch".yellow());
             println!("  {} - Repeating work periods", "interval".yellow());
             println!();
-            println!("Documentation: {}", "https://wps-spec.dev".underline());
+            println!("Documentation: {}", "https://pwf.dev".underline());
             ExitCode::SUCCESS
         }
         Commands::Init { output, history } => {
@@ -131,7 +131,7 @@ fn validate_plans(files: &[PathBuf], format: OutputFormat, strict: bool, quiet: 
             }
         };
 
-        let result = wps_core::plan::validate(&content);
+        let result = pwf_core::plan::validate(&content);
         let is_valid = result.valid && (!strict || result.warnings.is_empty());
 
         if !is_valid {
@@ -164,7 +164,7 @@ fn validate_history(files: &[PathBuf], format: OutputFormat, strict: bool) -> Ex
             }
         };
 
-        let result = wps_core::history::validate(&content);
+        let result = pwf_core::history::validate(&content);
         let is_valid = result.valid && (!strict || result.warnings.is_empty());
 
         if !is_valid {
@@ -184,7 +184,7 @@ fn validate_history(files: &[PathBuf], format: OutputFormat, strict: bool) -> Ex
 }
 
 fn output_plan_results(
-    results: &[(PathBuf, wps_core::plan::ValidationResult)],
+    results: &[(PathBuf, pwf_core::plan::ValidationResult)],
     format: OutputFormat,
     strict: bool,
     quiet: bool,
@@ -276,7 +276,7 @@ fn output_plan_results(
 }
 
 fn output_history_results(
-    results: &[(PathBuf, wps_core::history::ValidationResult)],
+    results: &[(PathBuf, pwf_core::history::ValidationResult)],
     format: OutputFormat,
     strict: bool,
 ) {
@@ -360,8 +360,8 @@ fn output_history_results(
 }
 
 fn init_plan(output: &PathBuf) -> ExitCode {
-    let template = r#"# WPS Plan v1
-# Documentation: https://wps-spec.dev/docs/SPECIFICATION
+    let template = r#"# PWF Plan v1
+# Documentation: https://pwf.dev/docs/SPECIFICATION
 
 plan_version: 1
 
@@ -398,8 +398,8 @@ cycle:
 }
 
 fn init_history(output: &PathBuf) -> ExitCode {
-    let template = r#"# WPS History Export v1
-# Documentation: https://wps-spec.dev/docs/blocks/history
+    let template = r#"# PWF History Export v1
+# Documentation: https://pwf.dev/docs/blocks/history
 
 history_version: 1
 exported_at: "2025-01-15T10:30:00Z"
@@ -472,7 +472,7 @@ fn write_template(output: &PathBuf, template: &str) -> ExitCode {
             println!("  1. Edit {} to add your data", output.display());
             println!(
                 "  2. Run {} to validate",
-                format!("wps validate {}", output.display()).cyan()
+                format!("pwf validate {}", output.display()).cyan()
             );
             ExitCode::SUCCESS
         }

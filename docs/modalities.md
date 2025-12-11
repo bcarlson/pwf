@@ -1,6 +1,6 @@
 # Modalities
 
-WPS supports four exercise modalities, each designed for different training styles.
+PWF supports four exercise modalities, each designed for different training styles.
 
 ## Overview
 

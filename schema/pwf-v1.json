@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://wps-spec.dev/schema/v1/plan.json",
-  "title": "WPS Plan v1",
-  "description": "Workout Plan Specification v1 schema for validating plan documents",
+  "$id": "https://pwf.dev/schema/v1/plan.json",
+  "title": "PWF Plan v1",
+  "description": "Portable Workout Format v1 schema for validating plan documents",
   "type": "object",
   "required": ["plan_version", "cycle"],
   "additionalProperties": false,

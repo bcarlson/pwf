@@ -22,26 +22,26 @@ jobs:
           # Linux
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
-            name: wps-linux-amd64
+            name: pwf-linux-amd64
 
           - target: aarch64-unknown-linux-gnu
             os: ubuntu-latest
-            name: wps-linux-arm64
+            name: pwf-linux-arm64
             cross: true
 
           # macOS
           - target: x86_64-apple-darwin
             os: macos-latest
-            name: wps-darwin-amd64
+            name: pwf-darwin-amd64
 
           - target: aarch64-apple-darwin
             os: macos-latest
-            name: wps-darwin-arm64
+            name: pwf-darwin-arm64
 
           # Windows
           - target: x86_64-pc-windows-msvc
             os: windows-latest
-            name: wps-windows-amd64.exe
+            name: pwf-windows-amd64.exe
 
     steps:
       - uses: actions/checkout@v4
@@ -57,19 +57,19 @@ jobs:
 
       - name: Build (cross)
         if: matrix.cross
-        run: cross build --release --target ${{ matrix.target }} -p wps
+        run: cross build --release --target ${{ matrix.target }} -p pwf
 
       - name: Build (native)
         if: "!matrix.cross"
-        run: cargo build --release --target ${{ matrix.target }} -p wps
+        run: cargo build --release --target ${{ matrix.target }} -p pwf
 
       - name: Rename binary (Unix)
         if: runner.os != 'Windows'
-        run: mv target/${{ matrix.target }}/release/wps ${{ matrix.name }}
+        run: mv target/${{ matrix.target }}/release/pwf ${{ matrix.name }}
 
       - name: Rename binary (Windows)
         if: runner.os == 'Windows'
-        run: mv target/${{ matrix.target }}/release/wps.exe ${{ matrix.name }}
+        run: mv target/${{ matrix.target }}/release/pwf.exe ${{ matrix.name }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -92,13 +92,13 @@ jobs:
       - name: Create checksums
         run: |
           cd artifacts
-          sha256sum */wps-* > checksums.txt
+          sha256sum */pwf-* > checksums.txt
           cat checksums.txt
 
       - name: Flatten artifacts
         run: |
           mkdir release
-          find artifacts -type f -name 'wps-*' -exec mv {} release/ \;
+          find artifacts -type f -name 'pwf-*' -exec mv {} release/ \;
           mv artifacts/checksums.txt release/
 
       - name: Create Release

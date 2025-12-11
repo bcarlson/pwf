@@ -1,6 +1,6 @@
 # Plan (Root Block)
 
-The root block defines the top-level structure of a WPS document.
+The root block defines the top-level structure of a PWF document.
 
 ## Example Usage
 
@@ -37,7 +37,7 @@ The specification version this plan conforms to. Currently, only version `1` is 
 plan_version: 1
 ```
 
-> **Note:** Future versions of WPS may introduce breaking changes. The `plan_version` field ensures validators and importers handle plans correctly.
+> **Note:** Future versions of PWF may introduce breaking changes. The `plan_version` field ensures validators and importers handle plans correctly.
 
 ---
 
@@ -87,7 +87,7 @@ See [Cycle Block](cycle.md) for all available arguments.
 
 ## Minimal Valid Plan
 
-The smallest valid WPS document:
+The smallest valid PWF document:
 
 ```yaml
 plan_version: 1
