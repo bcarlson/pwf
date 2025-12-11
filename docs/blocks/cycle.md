@@ -95,7 +95,7 @@ The `cycle` block contains the following nested blocks:
 
 ## Multi-Week Cycles (Future)
 
-> **Note:** WPS v1.0 supports single-cycle plans. Multi-week periodization with multiple cycles is planned for v2.0.
+> **Note:** PWF v1.0 supports single-cycle plans. Multi-week periodization with multiple cycles is planned for v2.0.
 
 Current workaround for multi-week programs:
 

@@ -1,4 +1,4 @@
-# WPS v1 - Beginner Strength Program
+# PWF v1 - Beginner Strength Program
 # A 3-day full body routine for new lifters
 
 plan_version: 1
@@ -7,7 +7,7 @@ meta:
   id: "beginner-strength-3day"
   title: "Beginner Strength Program"
   description: "A 3-day full body routine for new lifters focusing on compound movements."
-  author: "WPS Examples"
+  author: "PWF Examples"
   equipment: [barbell, dumbbells, bench, pullup_bar]
   daysPerWeek: 3
   recommendedFirst: true

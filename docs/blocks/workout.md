@@ -123,7 +123,7 @@ Notes about the workout (how it felt, observations, etc.).
 - **Type:** `string`
 - **Required:** No
 
-Reference to the WPS plan this workout was based on.
+Reference to the PWF plan this workout was based on.
 
 ```yaml
 - plan_id: "beginner-strength-v1"

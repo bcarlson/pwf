@@ -1,4 +1,4 @@
-//! Validation rules for WPS history exports
+//! Validation rules for PWF history exports
 
 use super::parser::parse;
 use super::types::{HistoryStatistics, WpsHistory};
@@ -26,7 +26,7 @@ impl ValidationResult {
     }
 }
 
-/// Validate a YAML string as a WPS history export
+/// Validate a YAML string as a PWF history export
 pub fn validate(yaml: &str) -> ValidationResult {
     let mut errors = Vec::new();
     let mut warnings = Vec::new();

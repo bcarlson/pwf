@@ -71,18 +71,18 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Build CLI
-        run: cargo build --release -p wps
+        run: cargo build --release -p pwf
 
       - name: Validate example plans
-        run: ./target/release/wps validate examples/beginner-strength.yaml examples/minimal.yaml examples/mixed-modalities.yaml
+        run: ./target/release/pwf validate examples/beginner-strength.yaml examples/minimal.yaml examples/mixed-modalities.yaml
 
       - name: Validate history examples
-        run: ./target/release/wps history examples/history-*.yaml
+        run: ./target/release/pwf history examples/history-*.yaml
 
       - name: Ensure invalid examples fail
         run: |
           set +e
-          ./target/release/wps validate examples/invalid/*.yaml
+          ./target/release/pwf validate examples/invalid/*.yaml
           if [ $? -eq 0 ]; then
             echo "ERROR: Invalid examples should have failed validation"
             exit 1
