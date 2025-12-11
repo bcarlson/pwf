@@ -2,7 +2,7 @@
 
 A human-readable, YAML-based specification for defining workout plans and exporting workout history.
 
-[![CI](https://github.com/wps-spec/wps/actions/workflows/ci.yaml/badge.svg)](https://github.com/wps-spec/wps/actions/workflows/ci.yaml)
+[![CI](https://github.com/bcarlson/workout-plan-spec/actions/workflows/ci.yaml/badge.svg)](https://github.com/bcarlson/workout-plan-spec/actions/workflows/ci.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## Overview
@@ -79,17 +79,17 @@ personal_records:
 
 ```bash
 # macOS (Apple Silicon)
-curl -sSL https://github.com/wps-spec/wps/releases/latest/download/wps-darwin-arm64 -o wps
+curl -sSL https://github.com/bcarlson/workout-plan-spec/releases/latest/download/wps-darwin-arm64 -o wps
 chmod +x wps
 sudo mv wps /usr/local/bin/
 
 # macOS (Intel)
-curl -sSL https://github.com/wps-spec/wps/releases/latest/download/wps-darwin-amd64 -o wps
+curl -sSL https://github.com/bcarlson/workout-plan-spec/releases/latest/download/wps-darwin-amd64 -o wps
 chmod +x wps
 sudo mv wps /usr/local/bin/
 
 # Linux (x64)
-curl -sSL https://github.com/wps-spec/wps/releases/latest/download/wps-linux-amd64 -o wps
+curl -sSL https://github.com/bcarlson/workout-plan-spec/releases/latest/download/wps-linux-amd64 -o wps
 chmod +x wps
 sudo mv wps /usr/local/bin/
 ```
@@ -97,7 +97,7 @@ sudo mv wps /usr/local/bin/
 ### From Source
 
 ```bash
-cargo install --git https://github.com/wps-spec/wps.git wps
+cargo install --git https://github.com/bcarlson/workout-plan-spec.git wps
 ```
 
 ## Usage
@@ -240,7 +240,7 @@ Add to your `.vscode/settings.json`:
 
 - [OwnLift](https://ownlift.com) - Privacy-first workout tracking
 
-*Using WPS? [Open a PR](https://github.com/wps-spec/wps/pulls) to add your app!*
+*Using WPS? [Open a PR](https://github.com/bcarlson/workout-plan-spec/pulls) to add your app!*
 
 ## Contributing
 

@@ -2,7 +2,7 @@
 
 use super::parser::parse;
 use super::types::{HistoryStatistics, WpsHistory};
-use crate::error::{Severity, ValidationIssue};
+use crate::error::ValidationIssue;
 
 /// Result of history validation
 #[derive(Debug, Clone, serde::Serialize)]
@@ -197,11 +197,12 @@ pub fn validate(yaml: &str) -> ValidationResult {
 }
 
 fn calculate_statistics(history: &WpsHistory) -> HistoryStatistics {
-    let mut stats = HistoryStatistics::default();
-
-    stats.total_workouts = history.workouts.len();
-    stats.personal_records_count = history.personal_records.len();
-    stats.body_measurements_count = history.body_measurements.len();
+    let mut stats = HistoryStatistics {
+        total_workouts: history.workouts.len(),
+        personal_records_count: history.personal_records.len(),
+        body_measurements_count: history.body_measurements.len(),
+        ..Default::default()
+    };
 
     let mut dates: Vec<&str> = Vec::new();
 

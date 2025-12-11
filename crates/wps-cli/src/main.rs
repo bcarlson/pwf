@@ -89,7 +89,10 @@ fn main() -> ExitCode {
             println!("{}", "WPS - Workout Plan Specification".bold());
             println!();
             println!("Specification version: {}", "1.0".cyan());
-            println!("Validator version:     {}", env!("CARGO_PKG_VERSION").cyan());
+            println!(
+                "Validator version:     {}",
+                env!("CARGO_PKG_VERSION").cyan()
+            );
             println!();
             println!("{}", "Supported formats:".bold());
             println!("  {} - Workout plan templates", "plan".green());
@@ -114,12 +117,7 @@ fn main() -> ExitCode {
     }
 }
 
-fn validate_plans(
-    files: &[PathBuf],
-    format: OutputFormat,
-    strict: bool,
-    quiet: bool,
-) -> ExitCode {
+fn validate_plans(files: &[PathBuf], format: OutputFormat, strict: bool, quiet: bool) -> ExitCode {
     let mut all_valid = true;
     let mut results = Vec::new();
 
