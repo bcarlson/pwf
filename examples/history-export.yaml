@@ -8,6 +8,9 @@ export_source:
   app_name: "OwnLift"
   app_version: "1.2.0"
   platform: "ios"
+  preferred_units:
+    weight: kg
+    distance: meters
 
 units:
   weight: kg
@@ -56,6 +59,7 @@ workouts:
             reps: 5
             weight_kg: 100
             rpe: 9
+            rir: 1
             is_pr: true
             notes: "New 5RM!"
 
@@ -164,7 +168,7 @@ workouts:
 
 personal_records:
   - exercise_name: "Bench Press"
-    record_type: max_weight
+    record_type: max_weight_5rm
     value: 100
     unit: kg
     achieved_at: "2025-01-15"

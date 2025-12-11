@@ -62,6 +62,10 @@
           "type": "string",
           "enum": ["ios", "android", "web", "desktop"],
           "description": "Platform"
+        },
+        "preferred_units": {
+          "$ref": "#/$defs/Units",
+          "description": "User's preferred units"
         }
       }
     },
@@ -211,7 +215,13 @@
           "type": "number",
           "minimum": 0,
           "maximum": 10,
-          "description": "Rate of Perceived Exertion"
+          "description": "Rate of Perceived Exertion (1-10 scale)"
+        },
+        "rir": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Reps in Reserve (alternative to RPE)"
         },
         "notes": {
           "type": "string",
@@ -240,7 +250,7 @@
         },
         "record_type": {
           "type": "string",
-          "enum": ["1rm", "max_weight", "max_reps", "max_volume", "max_duration", "max_distance", "fastest_time"],
+          "enum": ["1rm", "max_weight_3rm", "max_weight_5rm", "max_weight_8rm", "max_weight_10rm", "max_weight", "max_reps", "max_volume", "max_duration", "max_distance", "fastest_time"],
           "description": "Type of record"
         },
         "value": {

@@ -199,6 +199,7 @@ A single completed set.
 | `duration_sec` | `integer` | Conditional | Duration in seconds |
 | `distance_meters` | `number` | Conditional | Distance in meters |
 | `rpe` | `number` | No | Rate of Perceived Exertion (0-10) |
+| `rir` | `integer` | No | Reps in Reserve (0-10) |
 | `notes` | `string` | No | Set-level notes |
 | `is_pr` | `boolean` | No | Whether this set was a PR |
 | `completed_at` | `string` | No | ISO 8601 datetime |
