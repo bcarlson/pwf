@@ -10,7 +10,8 @@ pub const MISSING_EXPORTED_AT: &str = "PWF-H002";
 // Workout validation (100-199)
 pub const MISSING_WORKOUT_DATE: &str = "PWF-H101";
 pub const NO_EXERCISES: &str = "PWF-H102";
-pub const INVALID_WORKOUT_DATE: &str = "PWF-H103";
+#[allow(dead_code)]
+pub const INVALID_WORKOUT_DATE: &str = "PWF-H103"; // Reserved for future use
 
 // Exercise validation (200-299)
 pub const MISSING_EXERCISE_NAME: &str = "PWF-H201";
@@ -33,4 +34,5 @@ pub const NO_BM_VALUES: &str = "PWF-H502";
 
 // Preferred units validation (600-699)
 pub const PREFERRED_UNITS_MISMATCH: &str = "PWF-H601";
-pub const NO_WEIGHT_DATA: &str = "PWF-H602";
+#[allow(dead_code)]
+pub const NO_WEIGHT_DATA: &str = "PWF-H602"; // Reserved for future use

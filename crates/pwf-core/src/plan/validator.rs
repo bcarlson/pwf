@@ -116,15 +116,17 @@ pub fn validate(yaml: &str) -> ValidationResult {
         }
 
         // Validate temporal order (activated_at must be before completed_at)
-        if let (Some(ref activated), Some(ref completed)) = (&meta.activated_at, &meta.completed_at) {
-            if is_valid_iso8601_datetime(activated) && is_valid_iso8601_datetime(completed) {
-                if !is_timestamp_before(activated, completed) {
-                    errors.push(ValidationIssue::error_with_code(
-                        "meta",
-                        "activated_at must be before completed_at",
-                        "PWF-P005",
-                    ));
-                }
+        if let (Some(ref activated), Some(ref completed)) = (&meta.activated_at, &meta.completed_at)
+        {
+            if is_valid_iso8601_datetime(activated)
+                && is_valid_iso8601_datetime(completed)
+                && !is_timestamp_before(activated, completed)
+            {
+                errors.push(ValidationIssue::error_with_code(
+                    "meta",
+                    "activated_at must be before completed_at",
+                    "PWF-P005",
+                ));
             }
         }
     } else {
@@ -138,7 +140,10 @@ pub fn validate(yaml: &str) -> ValidationResult {
     if plan.glossary.len() > 100 {
         errors.push(ValidationIssue::error_with_code(
             "glossary",
-            format!("Glossary has {} entries but maximum is 100", plan.glossary.len()),
+            format!(
+                "Glossary has {} entries but maximum is 100",
+                plan.glossary.len()
+            ),
             "PWF-P006",
         ));
     }
@@ -154,10 +159,16 @@ pub fn validate(yaml: &str) -> ValidationResult {
         }
 
         // Validate term characters (alphanumeric, space, hyphen, apostrophe)
-        if !term.chars().all(|c| c.is_alphanumeric() || c == ' ' || c == '-' || c == '\'') {
+        if !term
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == ' ' || c == '-' || c == '\'')
+        {
             errors.push(ValidationIssue::error_with_code(
                 format!("glossary.{}", term),
-                format!("Term '{}' contains invalid characters (use alphanumeric, space, -, or ')", term),
+                format!(
+                    "Term '{}' contains invalid characters (use alphanumeric, space, -, or ')",
+                    term
+                ),
                 "PWF-P008",
             ));
         }
@@ -174,7 +185,11 @@ pub fn validate(yaml: &str) -> ValidationResult {
         if definition.len() > 500 {
             errors.push(ValidationIssue::error_with_code(
                 format!("glossary.{}", term),
-                format!("Definition for '{}' exceeds 500 characters ({} chars)", term, definition.len()),
+                format!(
+                    "Definition for '{}' exceeds 500 characters ({} chars)",
+                    term,
+                    definition.len()
+                ),
                 "PWF-P010",
             ));
         }
@@ -459,7 +474,10 @@ cycle:
         let result = validate(yaml);
         assert!(result.is_valid());
         // Should not have PWF-P003 warning since activated_at is present
-        assert!(!result.warnings.iter().any(|w| w.code == Some("PWF-P003".to_string())));
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some("PWF-P003".to_string())));
     }
 
     #[test]
@@ -476,7 +494,10 @@ cycle:
 "#;
         let result = validate(yaml);
         assert!(!result.is_valid());
-        assert!(result.errors.iter().any(|e| e.code == Some("PWF-P001".to_string())));
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("PWF-P001".to_string())));
     }
 
     #[test]
@@ -493,7 +514,10 @@ cycle:
 "#;
         let result = validate(yaml);
         assert!(!result.is_valid());
-        assert!(result.errors.iter().any(|e| e.code == Some("PWF-P002".to_string())));
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("PWF-P002".to_string())));
     }
 
     #[test]
@@ -510,7 +534,10 @@ cycle:
 "#;
         let result = validate(yaml);
         assert!(result.is_valid());
-        assert!(result.warnings.iter().any(|w| w.code == Some("PWF-P003".to_string())));
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some("PWF-P003".to_string())));
     }
 
     #[test]
@@ -527,7 +554,10 @@ cycle:
 "#;
         let result = validate(yaml);
         assert!(result.is_valid());
-        assert!(result.warnings.iter().any(|w| w.code == Some("PWF-P004".to_string())));
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some("PWF-P004".to_string())));
     }
 
     #[test]
@@ -545,7 +575,10 @@ cycle:
 "#;
         let result = validate(yaml);
         assert!(!result.is_valid());
-        assert!(result.errors.iter().any(|e| e.code == Some("PWF-P005".to_string())));
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("PWF-P005".to_string())));
     }
 
     #[test]
@@ -577,7 +610,10 @@ cycle:
         );
         let result = validate(&yaml);
         assert!(!result.is_valid());
-        assert!(result.errors.iter().any(|e| e.code == Some("PWF-P006".to_string())));
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("PWF-P006".to_string())));
     }
 
     #[test]
@@ -593,7 +629,10 @@ cycle:
 "#;
         let result = validate(yaml);
         assert!(!result.is_valid());
-        assert!(result.errors.iter().any(|e| e.code == Some("PWF-P008".to_string())));
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("PWF-P008".to_string())));
     }
 
     #[test]
@@ -609,7 +648,10 @@ cycle:
 "#;
         let result = validate(yaml);
         assert!(!result.is_valid());
-        assert!(result.errors.iter().any(|e| e.code == Some("PWF-P009".to_string())));
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("PWF-P009".to_string())));
     }
 
     #[test]
@@ -621,6 +663,9 @@ cycle:
         );
         let result = validate(&yaml);
         assert!(!result.is_valid());
-        assert!(result.errors.iter().any(|e| e.code == Some("PWF-P010".to_string())));
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("PWF-P010".to_string())));
     }
 }

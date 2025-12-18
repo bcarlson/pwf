@@ -415,7 +415,10 @@ workouts:
         let result = validate(yaml);
         assert!(result.is_valid()); // Still valid, just a warning
         assert!(result.has_warnings());
-        assert!(result.warnings.iter().any(|w| w.code == Some(error_codes::RIR_OUT_OF_RANGE.to_string())));
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::RIR_OUT_OF_RANGE.to_string())));
     }
 
     #[test]
@@ -434,7 +437,10 @@ workouts:
 "#;
         let result = validate(yaml);
         assert!(result.is_valid());
-        assert!(!result.warnings.iter().any(|w| w.code == Some(error_codes::RIR_OUT_OF_RANGE.to_string())));
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::RIR_OUT_OF_RANGE.to_string())));
     }
 
     #[test]
@@ -455,7 +461,10 @@ workouts:
         let result = validate(yaml);
         assert!(result.is_valid()); // Still valid, just a warning
         assert!(result.has_warnings());
-        assert!(result.warnings.iter().any(|w| w.code == Some(error_codes::RPE_RIR_BOTH_SET.to_string())));
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::RPE_RIR_BOTH_SET.to_string())));
     }
 
     #[test]
@@ -473,7 +482,10 @@ personal_records:
         let result = validate(yaml);
         assert!(result.is_valid()); // Still valid, just a warning
         assert!(result.has_warnings());
-        assert!(result.warnings.iter().any(|w| w.code == Some(error_codes::PR_MISSING_UNIT.to_string())));
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::PR_MISSING_UNIT.to_string())));
     }
 
     #[test]
@@ -491,7 +503,10 @@ personal_records:
 "#;
         let result = validate(yaml);
         assert!(result.is_valid());
-        assert!(!result.warnings.iter().any(|w| w.code == Some(error_codes::PR_MISSING_UNIT.to_string())));
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::PR_MISSING_UNIT.to_string())));
     }
 
     #[test]
@@ -514,7 +529,10 @@ workouts:
         let result = validate(yaml);
         assert!(result.is_valid());
         assert!(result.has_warnings());
-        assert!(result.warnings.iter().any(|w| w.code == Some(error_codes::PREFERRED_UNITS_MISMATCH.to_string())));
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::PREFERRED_UNITS_MISMATCH.to_string())));
     }
 
     #[test]
@@ -537,7 +555,10 @@ workouts:
         let result = validate(yaml);
         assert!(result.is_valid());
         assert!(result.has_warnings());
-        assert!(result.warnings.iter().any(|w| w.code == Some(error_codes::PREFERRED_UNITS_MISMATCH.to_string())));
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::PREFERRED_UNITS_MISMATCH.to_string())));
     }
 
     #[test]
@@ -559,6 +580,9 @@ workouts:
 "#;
         let result = validate(yaml);
         assert!(result.is_valid());
-        assert!(!result.warnings.iter().any(|w| w.code == Some(error_codes::PREFERRED_UNITS_MISMATCH.to_string())));
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::PREFERRED_UNITS_MISMATCH.to_string())));
     }
 }
