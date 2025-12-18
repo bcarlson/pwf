@@ -1,0 +1,30 @@
+# Invalid PWF History - Preferred Units Mismatch
+# Warning: PWF-H601
+# Preferred weight unit is 'lb', but only kg values are present in workouts
+
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+
+export_source:
+  app_name: "Sample Fitness App"
+  app_version: "2.1.0"
+  preferred_units:
+    weight: lb  # Preferred unit is lb
+    distance: miles
+
+workouts:
+  - date: "2025-01-15"
+    exercises:
+      - name: "Squat"
+        sets:
+          - reps: 5
+            weight_kg: 140  # Only kg data present - triggers PWF-H601 warning
+          - reps: 5
+            weight_kg: 140
+
+  - date: "2025-01-16"
+    exercises:
+      - name: "Bench Press"
+        sets:
+          - reps: 8
+            weight_kg: 100  # Still only kg data

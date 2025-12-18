@@ -1,0 +1,18 @@
+# INVALID: Incorrect datetime format for activated_at
+# Should fail with error code PWF-P001
+#
+# Expected Error: Invalid ISO 8601 datetime format
+# The activated_at field uses a space instead of 'T' separator
+
+plan_version: 1
+
+meta:
+  title: "Invalid Timestamp Format Example"
+  status: active
+  activated_at: "2025-01-15 10:30:00"  # Invalid: missing 'T' separator and 'Z' timezone
+
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength

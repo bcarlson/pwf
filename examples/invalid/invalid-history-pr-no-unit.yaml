@@ -1,0 +1,21 @@
+# Invalid PWF History - Personal Record Missing Unit
+# Warning: PWF-H403
+# Weight-based personal records should specify a unit (kg or lb)
+
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+
+workouts: []
+
+personal_records:
+  - exercise_name: "Deadlift"
+    record_type: 1rm
+    value: 405.0
+    achieved_at: "2025-01-10"
+    # Missing 'unit' field triggers PWF-H403 warning
+
+  - exercise_name: "Squat"
+    record_type: max_weight_5rm
+    value: 315.0
+    achieved_at: "2025-01-12"
+    # Missing 'unit' field triggers PWF-H403 warning

@@ -1,0 +1,19 @@
+# INVALID: completed_at timestamp is before activated_at
+# Should fail with error code PWF-P005
+#
+# Expected Error: activated_at must be before completed_at
+# This plan claims to have been completed before it was activated
+
+plan_version: 1
+
+meta:
+  title: "Invalid Timestamp Order Example"
+  status: completed
+  activated_at: "2025-03-31T20:00:00Z"  # Activated on March 31
+  completed_at: "2025-01-01T08:00:00Z"  # But completed on January 1 - impossible!
+
+cycle:
+  days:
+    - exercises:
+        - name: "Bench Press"
+          modality: strength

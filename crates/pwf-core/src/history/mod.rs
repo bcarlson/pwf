@@ -2,6 +2,7 @@
 //!
 //! This module handles PWF history documents (completed workout exports).
 
+mod error_codes;
 mod parser;
 mod types;
 mod validator;
