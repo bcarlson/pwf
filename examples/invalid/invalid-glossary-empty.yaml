@@ -1,0 +1,21 @@
+# INVALID: Glossary definition is empty
+# Should fail with error code PWF-P009
+#
+# Expected Error: Definition for 'RPE' cannot be empty
+# All glossary definitions must have content
+
+plan_version: 1
+
+meta:
+  title: "Empty Glossary Definition Example"
+
+glossary:
+  RPE: ""  # Invalid: empty definition not allowed
+  RIR: "Reps in Reserve - how many more reps you could perform"  # This one is valid
+
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          target_notes: "Work up to RPE 8"

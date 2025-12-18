@@ -2,6 +2,7 @@
 
 use crate::Modality;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 /// Root plan structure
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -9,6 +10,8 @@ pub struct WpsPlan {
     pub plan_version: u32,
     #[serde(default)]
     pub meta: Option<PlanMeta>,
+    #[serde(default)]
+    pub glossary: HashMap<String, String>,
     pub cycle: PlanCycle,
 }
 
@@ -24,6 +27,10 @@ pub struct PlanMeta {
     pub author: Option<String>,
     #[serde(default)]
     pub status: Option<PlanStatus>,
+    #[serde(default)]
+    pub activated_at: Option<String>,
+    #[serde(default)]
+    pub completed_at: Option<String>,
     #[serde(default)]
     pub equipment: Vec<String>,
     #[serde(default, rename = "daysPerWeek")]

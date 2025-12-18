@@ -1,0 +1,21 @@
+# Invalid PWF History - RPE Out of Range
+# Warning: PWF-H302
+# RPE (Rate of Perceived Exertion) should be between 0 and 10
+
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+
+workouts:
+  - date: "2025-01-15"
+    exercises:
+      - name: "Deadlift"
+        sets:
+          - reps: 3
+            weight_kg: 180
+            rpe: 11.5  # Invalid: RPE > 10 triggers PWF-H302 warning
+
+      - name: "Romanian Deadlift"
+        sets:
+          - reps: 8
+            weight_kg: 100
+            rpe: -1.0  # Invalid: RPE < 0 triggers PWF-H302 warning

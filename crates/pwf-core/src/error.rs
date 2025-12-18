@@ -29,6 +29,8 @@ pub struct ValidationIssue {
     pub path: String,
     pub message: String,
     pub severity: Severity,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
 }
 
 impl ValidationIssue {
@@ -37,6 +39,7 @@ impl ValidationIssue {
             path: path.into(),
             message: message.into(),
             severity: Severity::Error,
+            code: None,
         }
     }
 
@@ -45,6 +48,33 @@ impl ValidationIssue {
             path: path.into(),
             message: message.into(),
             severity: Severity::Warning,
+            code: None,
+        }
+    }
+
+    pub fn error_with_code(
+        path: impl Into<String>,
+        message: impl Into<String>,
+        code: impl Into<String>,
+    ) -> Self {
+        Self {
+            path: path.into(),
+            message: message.into(),
+            severity: Severity::Error,
+            code: Some(code.into()),
+        }
+    }
+
+    pub fn warning_with_code(
+        path: impl Into<String>,
+        message: impl Into<String>,
+        code: impl Into<String>,
+    ) -> Self {
+        Self {
+            path: path.into(),
+            message: message.into(),
+            severity: Severity::Warning,
+            code: Some(code.into()),
         }
     }
 }

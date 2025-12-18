@@ -170,6 +170,10 @@ export_source:
     distance: meters
 ```
 
+**Note on preferred_units**: This field indicates the user's preferred display units. PWF will validate that the preferred units match the actual data in workouts. For example, if `preferred_units.weight` is `lb` but all workout sets use `weight_kg`, a warning (PWF-H601) will be issued.
+
+
+
 ---
 
 ## Units Block
@@ -199,19 +203,21 @@ A personal record achievement.
 
 ### Record Types
 
-| Type | Description |
-|------|-------------|
-| `1rm` | Estimated one-rep max |
-| `max_weight_3rm` | Heaviest weight for 3 reps |
-| `max_weight_5rm` | Heaviest weight for 5 reps |
-| `max_weight_8rm` | Heaviest weight for 8 reps |
-| `max_weight_10rm` | Heaviest weight for 10 reps |
-| `max_weight` | Heaviest weight lifted (any rep count) |
-| `max_reps` | Most reps at a weight |
-| `max_volume` | Highest total volume |
-| `max_duration` | Longest duration |
-| `max_distance` | Longest distance |
-| `fastest_time` | Fastest completion time |
+| Type | Description | Recommended Unit |
+|------|-------------|------------------|
+| `1rm` | Estimated one-rep max | kg or lb |
+| `max_weight_3rm` | Heaviest weight for 3 reps | kg or lb |
+| `max_weight_5rm` | Heaviest weight for 5 reps | kg or lb |
+| `max_weight_8rm` | Heaviest weight for 8 reps | kg or lb |
+| `max_weight_10rm` | Heaviest weight for 10 reps | kg or lb |
+| `max_weight` | Heaviest weight lifted (any rep count) | kg or lb |
+| `max_reps` | Most reps at a weight | - |
+| `max_volume` | Highest total volume | kg or lb |
+| `max_duration` | Longest duration | seconds |
+| `max_distance` | Longest distance | meters, km, miles |
+| `fastest_time` | Fastest completion time | seconds |
+
+**Note**: Weight-based record types (`1rm`, `max_weight_*`) should include a `unit` field. PWF will warn if the unit is missing.
 
 ---
 
@@ -253,12 +259,19 @@ All measurements in centimeters.
 
 ## Validation Rules
 
-| Rule | Severity | Message |
-|------|----------|---------|
-| Missing `history_version` | Error | `history_version is required` |
-| `history_version` not 1 | Error | `Unsupported history_version` |
-| Missing `exported_at` | Error | `exported_at is required` |
-| Empty `workouts` | Warning | `No workouts in export` |
+| Rule | Severity | Error Code | Message |
+|------|----------|------------|---------|
+| Missing `history_version` | Error | - | `history_version is required` |
+| `history_version` not 1 | Error | PWF-H001 | `Unsupported history_version` |
+| Missing `exported_at` | Error | PWF-H002 | `exported_at is required` |
+| Missing PR exercise name | Error | PWF-H401 | `Personal record must have exercise_name` |
+| Missing PR date | Error | PWF-H402 | `Personal record must have achieved_at date` |
+| Weight-based PR missing unit | Warning | PWF-H403 | `Weight-based personal records should specify a unit` |
+| Missing body measurement date | Error | PWF-H501 | `Body measurement must have date` |
+| Body measurement with no values | Warning | PWF-H502 | `Body measurement entry has no recorded values` |
+| Preferred units mismatch | Warning | PWF-H601 | `Preferred weight unit doesn't match actual data` |
+
+See [workout.md](workout.md#validation-rules) for additional workout and set validation rules.
 
 ## Minimal Valid History
 

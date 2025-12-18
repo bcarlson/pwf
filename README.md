@@ -170,7 +170,8 @@ $ pwf history workout-export.yaml
 | Block | Description |
 |-------|-------------|
 | [Plan (Root)](docs/blocks/plan.md) | Top-level plan structure |
-| [Meta](docs/blocks/meta.md) | Plan metadata |
+| [Meta](docs/blocks/meta.md) | Plan metadata and lifecycle tracking |
+| [Glossary](docs/blocks/glossary.md) | Exercise terminology definitions |
 | [Cycle](docs/blocks/cycle.md) | Training cycle |
 | [Day](docs/blocks/day.md) | Training day |
 | [Exercise](docs/blocks/exercise.md) | Exercise definition |
@@ -222,15 +223,19 @@ Add to your `.vscode/settings.json`:
 
 ## Roadmap
 
-### v1.0 (Current)
-- [x] Plan specification
+### v1.0.1 (Current)
+- [x] Plan specification with lifecycle tracking
 - [x] History export specification
 - [x] Four modalities (strength, countdown, stopwatch, interval)
-- [x] Personal records and body measurements (including rep-specific PRs: 3RM, 5RM, 8RM, 10RM)
+- [x] Personal records and body measurements
+- [x] Rep-specific PR types (1RM, 3RM, 5RM, 8RM, 10RM)
 - [x] RPE and RIR tracking on sets
-- [x] Plan status (draft/active/completed/archived)
-- [x] Preferred units in exports
-- [x] JSON Schema
+- [x] Plan status with timestamps (draft/active/completed/archived)
+- [x] Plan lifecycle timestamps (activated_at, completed_at)
+- [x] Glossary block for terminology definitions
+- [x] Preferred units in exports with validation
+- [x] Comprehensive error codes (PWF-P### and PWF-H###)
+- [x] JSON Schema validation
 - [x] Rust CLI validator
 
 ### v1.1 (Planned)

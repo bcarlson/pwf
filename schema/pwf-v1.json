@@ -15,6 +15,21 @@
     "meta": {
       "$ref": "#/$defs/Meta"
     },
+    "glossary": {
+      "type": "object",
+      "description": "Term definitions for exercises and concepts used in this plan",
+      "maxProperties": 100,
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "propertyNames": {
+        "pattern": "^[a-zA-Z0-9\\s\\-']+$",
+        "minLength": 1,
+        "maxLength": 50
+      }
+    },
     "cycle": {
       "$ref": "#/$defs/Cycle"
     }
@@ -49,6 +64,18 @@
           "enum": ["draft", "active", "completed", "archived"],
           "default": "draft",
           "description": "Plan status"
+        },
+        "activated_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(Z|[+-]\\d{2}:\\d{2})$",
+          "description": "ISO 8601 timestamp when plan was activated"
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(Z|[+-]\\d{2}:\\d{2})$",
+          "description": "ISO 8601 timestamp when plan was completed"
         },
         "equipment": {
           "type": "array",
