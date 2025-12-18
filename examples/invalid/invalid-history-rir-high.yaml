@@ -1,0 +1,15 @@
+# Invalid PWF History - RIR Out of Range
+# Error: PWF-H303
+# RIR (Reps in Reserve) typically ranges 0-10, but this example has rir: 15
+
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+
+workouts:
+  - date: "2025-01-15"
+    exercises:
+      - name: "Squat"
+        sets:
+          - reps: 5
+            weight_kg: 140
+            rir: 15  # Invalid: RIR > 10 triggers PWF-H303 warning

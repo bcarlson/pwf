@@ -558,7 +558,7 @@ dependencies = [
 
 [[package]]
 name = "pwf"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "assert_cmd",
  "clap",
@@ -570,7 +570,7 @@ dependencies = [
 
 [[package]]
 name = "pwf-core"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "chrono",
  "pretty_assertions",

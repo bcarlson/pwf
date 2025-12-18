@@ -14,6 +14,13 @@ meta:
   recommendedFirst: true
   tags: [beginner, strength, full-body, compound]
 
+glossary:
+  "Compound Movement": "Multi-joint exercises that work multiple muscle groups simultaneously"
+  "Progressive Overload": "Gradually increasing weight, reps, or sets over time to build strength"
+  "AMRAP": "As Many Reps As Possible - perform reps until form breaks down"
+  "Dead Hang": "Hanging from a pull-up bar with arms fully extended and shoulders engaged"
+  "1RM": "One Rep Max - the maximum weight you can lift for a single repetition"
+
 cycle:
   notes: "Focus on form over weight. Add 5 lbs to upper body and 10 lbs to lower body lifts each week when all reps are completed."
 
