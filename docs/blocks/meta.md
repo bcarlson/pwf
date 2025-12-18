@@ -101,6 +101,43 @@ meta:
 
 ---
 
+### `activated_at`
+
+- **Type:** `string` (ISO 8601 datetime)
+- **Required:** No
+- **Format:** `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS±HH:MM`
+
+The timestamp when the plan was activated (started). Should be set when `status` changes to `active`.
+
+```yaml
+meta:
+  status: active
+  activated_at: "2025-01-06T08:00:00Z"
+```
+
+> **Note:** PWF will warn (PWF-P003) if `status` is `active` but `activated_at` is missing.
+
+---
+
+### `completed_at`
+
+- **Type:** `string` (ISO 8601 datetime)
+- **Required:** No
+- **Format:** `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS±HH:MM`
+
+The timestamp when the plan was completed (finished). Should be set when `status` changes to `completed`.
+
+```yaml
+meta:
+  status: completed
+  activated_at: "2025-01-06T08:00:00Z"
+  completed_at: "2025-02-03T20:00:00Z"
+```
+
+> **Note:** PWF will warn (PWF-P004) if `status` is `completed` but `completed_at` is missing. PWF will also error (PWF-P005) if `activated_at` is after `completed_at`.
+
+---
+
 ### `equipment`
 
 - **Type:** `array` of `string`
@@ -164,11 +201,16 @@ meta:
 
 ## Validation Rules
 
-| Rule | Severity | Message |
-|------|----------|---------|
-| Empty `title` | Error | `meta.title cannot be empty` |
-| `title` > 80 chars | Error | `meta.title exceeds 80 characters` |
-| `daysPerWeek` < 1 or > 7 | Warning | `daysPerWeek should be between 1 and 7` |
+| Rule | Severity | Error Code | Message |
+|------|----------|------------|---------|
+| Empty `title` | Error | - | `meta.title cannot be empty` |
+| `title` > 80 chars | Error | - | `meta.title exceeds 80 characters` |
+| `daysPerWeek` < 1 or > 7 | Warning | - | `daysPerWeek should be between 1 and 7` |
+| Invalid `activated_at` format | Error | PWF-P001 | `Invalid ISO 8601 datetime format` |
+| Invalid `completed_at` format | Error | PWF-P002 | `Invalid ISO 8601 datetime format` |
+| `status: active` without `activated_at` | Warning | PWF-P003 | `Plan status is 'active' but activated_at timestamp is missing` |
+| `status: completed` without `completed_at` | Warning | PWF-P004 | `Plan status is 'completed' but completed_at timestamp is missing` |
+| `activated_at` after `completed_at` | Error | PWF-P005 | `activated_at must be before completed_at` |
 
 ## Complete Example
 

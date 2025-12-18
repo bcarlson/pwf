@@ -198,8 +198,8 @@ A single completed set.
 | `weight_lb` | `number` | Conditional | Weight in pounds |
 | `duration_sec` | `integer` | Conditional | Duration in seconds |
 | `distance_meters` | `number` | Conditional | Distance in meters |
-| `rpe` | `number` | No | Rate of Perceived Exertion (0-10) |
-| `rir` | `integer` | No | Reps in Reserve (0-10) |
+| `rpe` | `number` | No | Rate of Perceived Exertion (0-10 scale) |
+| `rir` | `integer` | No | Reps in Reserve (how many more reps possible) |
 | `notes` | `string` | No | Set-level notes |
 | `is_pr` | `boolean` | No | Whether this set was a PR |
 | `completed_at` | `string` | No | ISO 8601 datetime |
@@ -214,10 +214,21 @@ A single completed set.
 | `failure` | Set to failure |
 | `amrap` | As Many Reps As Possible |
 
+### RPE vs RIR
+
+RPE (Rate of Perceived Exertion) and RIR (Reps in Reserve) are two methods for quantifying set difficulty:
+
+- **RPE (0-10 scale)**: How hard the set felt overall. 10 = maximum effort, unable to do more reps.
+- **RIR (integer)**: How many more reps you could have performed with good form. RIR 2 = could have done 2 more reps.
+
+These metrics are inversely related: RPE 8 ≈ RIR 2, RPE 9 ≈ RIR 1, RPE 10 ≈ RIR 0.
+
+**Best Practice**: Use one metric or the other, not both on the same set. PWF will warn if both are present.
+
 ### Examples
 
 ```yaml
-# Strength set
+# Strength set with RPE
 sets:
   - set_number: 1
     set_type: warmup
@@ -237,6 +248,24 @@ sets:
     rpe: 8.5
     is_pr: true
     notes: "New 5RM!"
+```
+
+```yaml
+# Strength set with RIR (alternative to RPE)
+sets:
+  - set_number: 1
+    set_type: working
+    reps: 8
+    weight_kg: 80
+    rir: 3
+    notes: "Easy warmup, 3 reps in reserve"
+
+  - set_number: 2
+    set_type: working
+    reps: 8
+    weight_kg: 90
+    rir: 1
+    notes: "Hard set, only 1 rep left"
 ```
 
 ```yaml
@@ -266,14 +295,16 @@ sets:
 
 ## Validation Rules
 
-| Rule | Severity | Message |
-|------|----------|---------|
-| Missing `date` | Error | `Workout date is required` |
-| Empty `exercises` | Warning | `Workout has no exercises` |
-| Missing `exercise.name` | Error | `Exercise name is required` |
-| Empty `sets` | Warning | `Exercise has no recorded sets` |
-| Set with no metrics | Warning | `Set has no recorded metrics` |
-| RPE out of range | Warning | `RPE should be between 0 and 10` |
+| Rule | Severity | Error Code | Message |
+|------|----------|------------|---------|
+| Missing `date` | Error | PWF-H101 | `Workout date is required` |
+| Empty `exercises` | Warning | PWF-H102 | `Workout has no exercises` |
+| Missing `exercise.name` | Error | PWF-H201 | `Exercise name is required` |
+| Empty `sets` | Warning | PWF-H202 | `Exercise has no recorded sets` |
+| Set with no metrics | Warning | PWF-H301 | `Set has no recorded metrics` |
+| RPE out of range (0-10) | Warning | PWF-H302 | `RPE should be between 0 and 10` |
+| RIR > 10 | Warning | PWF-H303 | `RIR typically ranges 0-10` |
+| Both RPE and RIR set | Warning | PWF-H304 | `Both RPE and RIR are set. Typically only one should be used.` |
 
 ---
 

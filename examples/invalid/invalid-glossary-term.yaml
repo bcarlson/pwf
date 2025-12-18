@@ -1,0 +1,21 @@
+# INVALID: Glossary terms contain invalid characters
+# Should fail with error code PWF-P008
+#
+# Expected Error: Term contains invalid characters
+# Glossary terms must use only alphanumeric characters, spaces, hyphens, and apostrophes
+
+plan_version: 1
+
+meta:
+  title: "Invalid Glossary Term Example"
+
+glossary:
+  "RPE@Max": "Invalid term with @ symbol"      # Invalid: @ not allowed
+  "Set#1": "Invalid term with # symbol"        # Invalid: # not allowed
+  "Weight (kg)": "Invalid term with parentheses"  # Invalid: () not allowed
+
+cycle:
+  days:
+    - exercises:
+        - name: "Deadlift"
+          modality: strength

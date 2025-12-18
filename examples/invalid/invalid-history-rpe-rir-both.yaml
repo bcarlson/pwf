@@ -1,0 +1,16 @@
+# Invalid PWF History - Both RPE and RIR Set
+# Warning: PWF-H304
+# Both RPE and RIR are set on the same set. Typically only one should be used.
+
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+
+workouts:
+  - date: "2025-01-15"
+    exercises:
+      - name: "Bench Press"
+        sets:
+          - reps: 5
+            weight_kg: 100
+            rpe: 8.0  # Setting both RPE and RIR
+            rir: 2    # triggers PWF-H304 warning
