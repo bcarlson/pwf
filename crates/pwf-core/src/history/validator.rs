@@ -585,4 +585,537 @@ workouts:
             .iter()
             .any(|w| w.code == Some(error_codes::PREFERRED_UNITS_MISMATCH.to_string())));
     }
+
+    // RecordType Tests - Testing all variants
+    #[test]
+    fn validate_pr_max_weight_missing_unit() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts: []
+personal_records:
+  - exercise_name: "Deadlift"
+    record_type: max_weight
+    value: 500.0
+    achieved_at: "2025-01-10"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::PR_MISSING_UNIT.to_string())));
+    }
+
+    #[test]
+    fn validate_pr_max_reps_no_unit_warning() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts: []
+personal_records:
+  - exercise_name: "Pull-ups"
+    record_type: max_reps
+    value: 25.0
+    achieved_at: "2025-01-10"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        // max_reps should NOT warn about missing unit
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::PR_MISSING_UNIT.to_string())));
+    }
+
+    #[test]
+    fn validate_pr_max_volume_missing_unit() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts: []
+personal_records:
+  - exercise_name: "Squat"
+    record_type: max_volume
+    value: 5000.0
+    achieved_at: "2025-01-10"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        // max_volume should NOT warn about missing unit (currently not implemented)
+        // This test documents current behavior
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::PR_MISSING_UNIT.to_string())));
+    }
+
+    #[test]
+    fn validate_pr_max_duration_missing_unit() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts: []
+personal_records:
+  - exercise_name: "Plank"
+    record_type: max_duration
+    value: 300.0
+    achieved_at: "2025-01-10"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        // max_duration should NOT warn about missing unit (currently not implemented)
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::PR_MISSING_UNIT.to_string())));
+    }
+
+    #[test]
+    fn validate_pr_max_distance_missing_unit() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts: []
+personal_records:
+  - exercise_name: "Run"
+    record_type: max_distance
+    value: 10000.0
+    achieved_at: "2025-01-10"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::PR_MISSING_UNIT.to_string())));
+    }
+
+    #[test]
+    fn validate_pr_fastest_time_missing_unit() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts: []
+personal_records:
+  - exercise_name: "5K Run"
+    record_type: fastest_time
+    value: 1200.0
+    achieved_at: "2025-01-10"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::PR_MISSING_UNIT.to_string())));
+    }
+
+    #[test]
+    fn validate_pr_max_weight_8rm_missing_unit() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts: []
+personal_records:
+  - exercise_name: "Bench Press"
+    record_type: max_weight_8rm
+    value: 185.0
+    achieved_at: "2025-01-10"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::PR_MISSING_UNIT.to_string())));
+    }
+
+    #[test]
+    fn validate_pr_max_weight_10rm_with_unit() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts: []
+personal_records:
+  - exercise_name: "Overhead Press"
+    record_type: max_weight_10rm
+    value: 135.0
+    unit: lb
+    achieved_at: "2025-01-10"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::PR_MISSING_UNIT.to_string())));
+    }
+
+    // Body Measurement Tests
+    #[test]
+    fn validate_body_measurement_missing_date() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts: []
+body_measurements:
+  - date: ""
+    weight_kg: 75.5
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some(error_codes::MISSING_BM_DATE.to_string())));
+    }
+
+    #[test]
+    fn validate_body_measurement_no_values() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts: []
+body_measurements:
+  - date: "2025-01-15"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::NO_BM_VALUES.to_string())));
+    }
+
+    #[test]
+    fn validate_body_measurement_valid() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts: []
+body_measurements:
+  - date: "2025-01-15"
+    weight_kg: 75.5
+    body_fat_percent: 15.2
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::NO_BM_VALUES.to_string())));
+    }
+
+    #[test]
+    fn validate_body_measurement_with_dimensions() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts: []
+body_measurements:
+  - date: "2025-01-15"
+    measurements:
+      chest_cm: 100.0
+      waist_cm: 85.0
+      bicep_left_cm: 38.5
+      bicep_right_cm: 38.0
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::NO_BM_VALUES.to_string())));
+    }
+
+    // Empty Array Tests
+    #[test]
+    fn validate_empty_exercises() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts:
+  - date: "2025-01-15"
+    exercises: []
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::NO_EXERCISES.to_string())));
+    }
+
+    #[test]
+    fn validate_empty_sets() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts:
+  - date: "2025-01-15"
+    exercises:
+      - name: "Bench Press"
+        sets: []
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::NO_SETS.to_string())));
+    }
+
+    #[test]
+    fn validate_set_no_metrics() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts:
+  - date: "2025-01-15"
+    exercises:
+      - name: "Bench Press"
+        sets:
+          - set_number: 1
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::NO_METRICS.to_string())));
+    }
+
+    // RPE Edge Cases
+    #[test]
+    fn validate_rpe_exactly_zero() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts:
+  - date: "2025-01-15"
+    exercises:
+      - name: "Warmup"
+        sets:
+          - reps: 10
+            rpe: 0.0
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::RPE_OUT_OF_RANGE.to_string())));
+    }
+
+    #[test]
+    fn validate_rpe_exactly_ten() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts:
+  - date: "2025-01-15"
+    exercises:
+      - name: "Max Effort"
+        sets:
+          - reps: 1
+            weight_kg: 200
+            rpe: 10.0
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::RPE_OUT_OF_RANGE.to_string())));
+    }
+
+    #[test]
+    fn validate_rpe_negative() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts:
+  - date: "2025-01-15"
+    exercises:
+      - name: "Squat"
+        sets:
+          - reps: 5
+            weight_kg: 100
+            rpe: -1.0
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::RPE_OUT_OF_RANGE.to_string())));
+    }
+
+    #[test]
+    fn validate_rpe_above_ten() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts:
+  - date: "2025-01-15"
+    exercises:
+      - name: "Squat"
+        sets:
+          - reps: 5
+            weight_kg: 100
+            rpe: 10.5
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::RPE_OUT_OF_RANGE.to_string())));
+    }
+
+    // Export Source Tests
+    #[test]
+    fn validate_export_source_missing_app_name() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+export_source:
+  platform: "iOS"
+  app_version: "1.0.0"
+workouts:
+  - date: "2025-01-15"
+    exercises:
+      - name: "Squat"
+        sets:
+          - reps: 5
+            weight_kg: 100
+"#;
+        let result = validate(yaml);
+        // app_name is optional, should still be valid
+        assert!(result.is_valid());
+    }
+
+    #[test]
+    fn validate_export_source_different_platforms() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+export_source:
+  app_name: "Fitness Tracker"
+  platform: "Android"
+  app_version: "2.1.0"
+workouts:
+  - date: "2025-01-15"
+    exercises:
+      - name: "Deadlift"
+        sets:
+          - reps: 5
+            weight_kg: 150
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+    }
+
+    // Statistics Edge Cases
+    #[test]
+    fn validate_statistics_empty_workouts() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts: []
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        let stats = result.statistics.unwrap();
+        assert_eq!(stats.total_workouts, 0);
+        assert_eq!(stats.total_exercises, 0);
+        assert_eq!(stats.total_sets, 0);
+        assert_eq!(stats.total_volume_kg, 0.0);
+        assert!(stats.date_range_start.is_none());
+        assert!(stats.date_range_end.is_none());
+    }
+
+    #[test]
+    fn validate_statistics_workout_no_sets() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts:
+  - date: "2025-01-15"
+    exercises:
+      - name: "Stretching"
+        sets: []
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        let stats = result.statistics.unwrap();
+        assert_eq!(stats.total_workouts, 1);
+        assert_eq!(stats.total_exercises, 1);
+        assert_eq!(stats.total_sets, 0);
+        assert_eq!(stats.total_volume_kg, 0.0);
+    }
+
+    #[test]
+    fn validate_statistics_single_workout_date_range() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts:
+  - date: "2025-01-10"
+    exercises:
+      - name: "Squat"
+        sets:
+          - reps: 5
+            weight_kg: 100
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        let stats = result.statistics.unwrap();
+        assert_eq!(stats.date_range_start, Some("2025-01-10".to_string()));
+        assert_eq!(stats.date_range_end, Some("2025-01-10".to_string()));
+    }
+
+    #[test]
+    fn validate_statistics_multiple_workouts_date_range() {
+        let yaml = r#"
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+workouts:
+  - date: "2025-01-05"
+    exercises:
+      - name: "Bench Press"
+        sets:
+          - reps: 5
+            weight_kg: 80
+  - date: "2025-01-10"
+    exercises:
+      - name: "Squat"
+        sets:
+          - reps: 5
+            weight_kg: 100
+  - date: "2025-01-15"
+    exercises:
+      - name: "Deadlift"
+        sets:
+          - reps: 3
+            weight_kg: 150
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        let stats = result.statistics.unwrap();
+        assert_eq!(stats.total_workouts, 3);
+        assert_eq!(stats.date_range_start, Some("2025-01-05".to_string()));
+        assert_eq!(stats.date_range_end, Some("2025-01-15".to_string()));
+    }
 }
