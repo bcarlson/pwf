@@ -20,9 +20,8 @@ fn examples_dir() -> PathBuf {
 /// Helper function to read a file from the examples directory
 fn read_example(filename: &str) -> String {
     let path = examples_dir().join(filename);
-    fs::read_to_string(&path).unwrap_or_else(|e| {
-        panic!("Failed to read example file {}: {}", path.display(), e)
-    })
+    fs::read_to_string(&path)
+        .unwrap_or_else(|e| panic!("Failed to read example file {}: {}", path.display(), e))
 }
 
 // ============================================================================
@@ -221,10 +220,7 @@ fn test_invalid_missing_version() {
     let yaml = read_example("invalid/missing-version.yaml");
     let result = plan::validate(&yaml);
 
-    assert!(
-        !result.is_valid(),
-        "missing-version.yaml should be invalid"
-    );
+    assert!(!result.is_valid(), "missing-version.yaml should be invalid");
 }
 
 #[test]
@@ -232,10 +228,7 @@ fn test_invalid_empty_days() {
     let yaml = read_example("invalid/empty-days.yaml");
     let result = plan::validate(&yaml);
 
-    assert!(
-        !result.is_valid(),
-        "empty-days.yaml should be invalid"
-    );
+    assert!(!result.is_valid(), "empty-days.yaml should be invalid");
 }
 
 #[test]
@@ -419,7 +412,10 @@ fn test_history_round_trip() {
     // Verify key fields match
     assert_eq!(history1.history_version, history2.history_version);
     assert_eq!(history1.workouts.len(), history2.workouts.len());
-    assert_eq!(history1.personal_records.len(), history2.personal_records.len());
+    assert_eq!(
+        history1.personal_records.len(),
+        history2.personal_records.len()
+    );
     assert_eq!(
         history1.body_measurements.len(),
         history2.body_measurements.len()
@@ -467,7 +463,10 @@ cycle:
 "#;
 
     let result = plan::validate(yaml_with_special_chars);
-    assert!(result.is_valid(), "Valid UTF-8 with special chars should parse");
+    assert!(
+        result.is_valid(),
+        "Valid UTF-8 with special chars should parse"
+    );
 }
 
 #[test]
@@ -642,12 +641,7 @@ fn test_exercise_set_counts() {
     // Verify warmup vs working set types
     let warmup_count = bench_sets
         .iter()
-        .filter(|s| {
-            matches!(
-                s.set_type,
-                Some(pwf_core::history::SetType::Warmup)
-            )
-        })
+        .filter(|s| matches!(s.set_type, Some(pwf_core::history::SetType::Warmup)))
         .count();
     assert_eq!(warmup_count, 3);
 }

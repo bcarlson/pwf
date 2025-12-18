@@ -305,11 +305,7 @@ fn test_validate_malformed_yaml() {
     // Write malformed YAML
     fs::write(&temp_file, "plan_version: 1\ninvalid: [unclosed").unwrap();
 
-    pwf_cmd()
-        .arg("validate")
-        .arg(&temp_file)
-        .assert()
-        .failure();
+    pwf_cmd().arg("validate").arg(&temp_file).assert().failure();
 
     // Cleanup
     let _ = fs::remove_file(&temp_file);
@@ -336,11 +332,7 @@ cycle:
     fs::write(&temp_file, content).unwrap();
 
     // Test without strict mode (should pass)
-    pwf_cmd()
-        .arg("validate")
-        .arg(&temp_file)
-        .assert()
-        .success();
+    pwf_cmd().arg("validate").arg(&temp_file).assert().success();
 
     // With strict mode, behavior depends on whether there are warnings
     // The command should still work
@@ -426,11 +418,7 @@ fn test_validate_empty_file() {
 
     fs::write(&temp_file, "").unwrap();
 
-    pwf_cmd()
-        .arg("validate")
-        .arg(&temp_file)
-        .assert()
-        .failure(); // Empty file should fail validation
+    pwf_cmd().arg("validate").arg(&temp_file).assert().failure(); // Empty file should fail validation
 
     // Cleanup
     let _ = fs::remove_file(&temp_file);

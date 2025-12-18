@@ -173,7 +173,10 @@ mod tests {
         let deserialized: WpsPlan = serde_yaml::from_str(&yaml).unwrap();
 
         assert_eq!(deserialized.glossary.len(), 2);
-        assert_eq!(deserialized.glossary.get("BB"), Some(&"Barbell".to_string()));
+        assert_eq!(
+            deserialized.glossary.get("BB"),
+            Some(&"Barbell".to_string())
+        );
         assert_eq!(
             deserialized.glossary.get("DB"),
             Some(&"Dumbbell".to_string())
@@ -261,7 +264,7 @@ title: "Basic Plan"
         assert_eq!(deserialized.completed_at, None);
         assert_eq!(deserialized.equipment, Vec::<String>::new());
         assert_eq!(deserialized.days_per_week, None);
-        assert_eq!(deserialized.recommended_first, false);
+        assert!(!deserialized.recommended_first);
         assert_eq!(deserialized.tags, Vec::<String>::new());
     }
 
@@ -278,7 +281,7 @@ title: "Basic Plan"
         assert_eq!(meta.completed_at, None);
         assert_eq!(meta.equipment, Vec::<String>::new());
         assert_eq!(meta.days_per_week, None);
-        assert_eq!(meta.recommended_first, false);
+        assert!(!meta.recommended_first);
         assert_eq!(meta.tags, Vec::<String>::new());
     }
 
@@ -482,7 +485,10 @@ title: "Basic Plan"
         let deserialized: PlanExercise = serde_yaml::from_str(&yaml).unwrap();
 
         assert_eq!(exercise.name, deserialized.name);
-        assert_eq!(exercise.target_duration_sec, deserialized.target_duration_sec);
+        assert_eq!(
+            exercise.target_duration_sec,
+            deserialized.target_duration_sec
+        );
     }
 
     #[test]
@@ -533,7 +539,10 @@ title: "Basic Plan"
         let deserialized: PlanExercise = serde_yaml::from_str(&yaml).unwrap();
 
         assert_eq!(exercise.target_sets, deserialized.target_sets);
-        assert_eq!(exercise.target_duration_sec, deserialized.target_duration_sec);
+        assert_eq!(
+            exercise.target_duration_sec,
+            deserialized.target_duration_sec
+        );
     }
 
     #[test]
@@ -730,7 +739,7 @@ recommendedFirst: false
         let deserialized: PlanMeta = serde_yaml::from_str(yaml_input).unwrap();
 
         assert_eq!(deserialized.days_per_week, Some(4));
-        assert_eq!(deserialized.recommended_first, false);
+        assert!(!deserialized.recommended_first);
     }
 
     #[test]

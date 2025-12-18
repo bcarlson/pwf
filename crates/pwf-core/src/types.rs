@@ -127,12 +127,18 @@ mod tests {
 
     #[test]
     fn test_modality_from_str_countdown() {
-        assert_eq!(Modality::from_str("countdown").unwrap(), Modality::Countdown);
+        assert_eq!(
+            Modality::from_str("countdown").unwrap(),
+            Modality::Countdown
+        );
     }
 
     #[test]
     fn test_modality_from_str_stopwatch() {
-        assert_eq!(Modality::from_str("stopwatch").unwrap(), Modality::Stopwatch);
+        assert_eq!(
+            Modality::from_str("stopwatch").unwrap(),
+            Modality::Stopwatch
+        );
     }
 
     #[test]
@@ -143,16 +149,28 @@ mod tests {
     #[test]
     fn test_modality_from_str_case_insensitive_uppercase() {
         assert_eq!(Modality::from_str("STRENGTH").unwrap(), Modality::Strength);
-        assert_eq!(Modality::from_str("COUNTDOWN").unwrap(), Modality::Countdown);
-        assert_eq!(Modality::from_str("STOPWATCH").unwrap(), Modality::Stopwatch);
+        assert_eq!(
+            Modality::from_str("COUNTDOWN").unwrap(),
+            Modality::Countdown
+        );
+        assert_eq!(
+            Modality::from_str("STOPWATCH").unwrap(),
+            Modality::Stopwatch
+        );
         assert_eq!(Modality::from_str("INTERVAL").unwrap(), Modality::Interval);
     }
 
     #[test]
     fn test_modality_from_str_case_insensitive_mixed() {
         assert_eq!(Modality::from_str("StReNgTh").unwrap(), Modality::Strength);
-        assert_eq!(Modality::from_str("CouNtDowN").unwrap(), Modality::Countdown);
-        assert_eq!(Modality::from_str("StopWatch").unwrap(), Modality::Stopwatch);
+        assert_eq!(
+            Modality::from_str("CouNtDowN").unwrap(),
+            Modality::Countdown
+        );
+        assert_eq!(
+            Modality::from_str("StopWatch").unwrap(),
+            Modality::Stopwatch
+        );
         assert_eq!(Modality::from_str("InTeRvAl").unwrap(), Modality::Interval);
     }
 
@@ -260,7 +278,7 @@ mod tests {
     #[test]
     fn test_modality_clone() {
         let modality = Modality::Strength;
-        let cloned = modality.clone();
+        let cloned = modality;
         assert_eq!(modality, cloned);
     }
 
@@ -359,7 +377,7 @@ mod tests {
     #[test]
     fn test_weight_unit_clone() {
         let unit = WeightUnit::Kg;
-        let cloned = unit.clone();
+        let cloned = unit;
         assert_eq!(unit, cloned);
     }
 
@@ -510,7 +528,7 @@ mod tests {
     #[test]
     fn test_distance_unit_clone() {
         let unit = DistanceUnit::Meters;
-        let cloned = unit.clone();
+        let cloned = unit;
         assert_eq!(unit, cloned);
     }
 

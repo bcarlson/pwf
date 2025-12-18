@@ -147,7 +147,9 @@ fn test_history_format_pretty() {
 fn test_history_invalid_rpe() {
     pwf()
         .arg("history")
-        .arg(fixture_path("invalid/invalid-history-rpe-out-of-range.yaml"))
+        .arg(fixture_path(
+            "invalid/invalid-history-rpe-out-of-range.yaml",
+        ))
         .assert()
         .success()
         .stdout(predicate::str::contains("✓"))
@@ -161,7 +163,9 @@ fn test_history_invalid_rpe_strict_mode() {
     pwf()
         .arg("history")
         .arg("--strict")
-        .arg(fixture_path("invalid/invalid-history-rpe-out-of-range.yaml"))
+        .arg(fixture_path(
+            "invalid/invalid-history-rpe-out-of-range.yaml",
+        ))
         .assert()
         .failure()
         .stdout(predicate::str::contains("✗"));
@@ -268,11 +272,7 @@ fn test_init_validates_created_plan() {
     let temp = TempFile::new("init_validate_plan.yaml");
 
     // Create the file
-    pwf()
-        .arg("init")
-        .arg(temp.path())
-        .assert()
-        .success();
+    pwf().arg("init").arg(temp.path()).assert().success();
 
     // Validate it
     pwf()
@@ -309,11 +309,7 @@ fn test_init_refuses_overwrite() {
     let temp = TempFile::new("init_no_overwrite.yaml");
 
     // Create the file first
-    pwf()
-        .arg("init")
-        .arg(temp.path())
-        .assert()
-        .success();
+    pwf().arg("init").arg(temp.path()).assert().success();
 
     // Try to create again - should fail
     pwf()
@@ -428,7 +424,9 @@ fn test_history_json_with_warnings() {
         .arg("history")
         .arg("--format")
         .arg("json")
-        .arg(fixture_path("invalid/invalid-history-rpe-out-of-range.yaml"))
+        .arg(fixture_path(
+            "invalid/invalid-history-rpe-out-of-range.yaml",
+        ))
         .assert()
         .success()
         .get_output()
@@ -458,7 +456,9 @@ fn test_history_json_strict_mode_marks_invalid() {
         .arg("--format")
         .arg("json")
         .arg("--strict")
-        .arg(fixture_path("invalid/invalid-history-rpe-out-of-range.yaml"))
+        .arg(fixture_path(
+            "invalid/invalid-history-rpe-out-of-range.yaml",
+        ))
         .assert()
         .failure()
         .get_output()

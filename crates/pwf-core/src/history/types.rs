@@ -306,10 +306,7 @@ mod tests {
         assert_eq!(deserialized.app_version, Some("2.0.0".to_string()));
         assert_eq!(deserialized.platform, Some("Android".to_string()));
         assert!(deserialized.preferred_units.is_some());
-        assert_eq!(
-            deserialized.preferred_units.unwrap().weight,
-            WeightUnit::Lb
-        );
+        assert_eq!(deserialized.preferred_units.unwrap().weight, WeightUnit::Lb);
     }
 
     #[test]

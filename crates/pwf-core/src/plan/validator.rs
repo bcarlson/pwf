@@ -766,10 +766,9 @@ cycle:
 "#;
         let result = validate(yaml);
         assert!(result.is_valid());
-        assert!(result
-            .warnings
-            .iter()
-            .any(|w| w.message.contains("Strength exercise missing target_sets/target_reps")));
+        assert!(result.warnings.iter().any(|w| w
+            .message
+            .contains("Strength exercise missing target_sets/target_reps")));
     }
 
     #[test]
@@ -784,10 +783,9 @@ cycle:
 "#;
         let result = validate(yaml);
         assert!(result.is_valid());
-        assert!(result
-            .warnings
-            .iter()
-            .any(|w| w.message.contains("Countdown exercise missing target_duration_sec")));
+        assert!(result.warnings.iter().any(|w| w
+            .message
+            .contains("Countdown exercise missing target_duration_sec")));
     }
 
     #[test]

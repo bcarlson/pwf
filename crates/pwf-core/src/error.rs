@@ -120,11 +120,8 @@ mod tests {
 
     #[test]
     fn test_validation_issue_error_with_code() {
-        let issue = ValidationIssue::error_with_code(
-            "plan.start_date",
-            "Invalid date format",
-            "E001"
-        );
+        let issue =
+            ValidationIssue::error_with_code("plan.start_date", "Invalid date format", "E001");
 
         assert_eq!(issue.path, "plan.start_date");
         assert_eq!(issue.message, "Invalid date format");
@@ -137,7 +134,7 @@ mod tests {
         let issue = ValidationIssue::warning_with_code(
             "exercises[2].rest",
             "Rest period is longer than recommended",
-            "W042"
+            "W042",
         );
 
         assert_eq!(issue.path, "exercises[2].rest");
@@ -185,8 +182,7 @@ mod tests {
 
     #[test]
     fn test_parse_error_yaml_syntax() {
-        let yaml_error = serde_yaml::from_str::<serde_yaml::Value>("{ invalid yaml")
-            .unwrap_err();
+        let yaml_error = serde_yaml::from_str::<serde_yaml::Value>("{ invalid yaml").unwrap_err();
         let parse_error = ParseError::from(yaml_error);
 
         let error_msg = format!("{}", parse_error);
@@ -286,7 +282,10 @@ mod tests {
         assert_eq!(format!("{}", parse_error), "Missing required field: name");
 
         let validation_error = WpsError::Validation("test validation".to_string());
-        assert_eq!(format!("{}", validation_error), "Validation failed: test validation");
+        assert_eq!(
+            format!("{}", validation_error),
+            "Validation failed: test validation"
+        );
     }
 
     #[test]
@@ -303,7 +302,7 @@ mod tests {
         let issue = ValidationIssue::error_with_code(
             "exercises[0].sets",
             "Sets must be positive",
-            "ERR_NEGATIVE_SETS"
+            "ERR_NEGATIVE_SETS",
         );
 
         let json = serde_json::to_value(&issue).unwrap();
@@ -355,11 +354,7 @@ mod tests {
 
     #[test]
     fn test_validation_issue_json_formatting() {
-        let issue = ValidationIssue::error_with_code(
-            "test.path",
-            "test message",
-            "TEST001"
-        );
+        let issue = ValidationIssue::error_with_code("test.path", "test message", "TEST001");
 
         let json = serde_json::to_string_pretty(&issue).unwrap();
 
