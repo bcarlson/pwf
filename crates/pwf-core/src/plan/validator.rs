@@ -241,6 +241,52 @@ pub fn validate(yaml: &str) -> ValidationResult {
                 ));
             }
 
+            // Validate grouping fields
+            if exercise.group.is_some() && exercise.group_type.is_none() {
+                errors.push(ValidationIssue::error_with_code(
+                    &ex_path,
+                    "group specified without group_type",
+                    "PWF-P017",
+                ));
+            }
+
+            if exercise.group_type.is_some() && exercise.group.is_none() {
+                errors.push(ValidationIssue::error_with_code(
+                    &ex_path,
+                    "group_type specified without group",
+                    "PWF-P018",
+                ));
+            }
+
+            // Validate group identifier format
+            if let Some(ref group) = exercise.group {
+                if group.is_empty() {
+                    errors.push(ValidationIssue::error_with_code(
+                        format!("{}.group", ex_path),
+                        "group identifier cannot be empty",
+                        "PWF-P019",
+                    ));
+                } else if group.len() > 50 {
+                    errors.push(ValidationIssue::error_with_code(
+                        format!("{}.group", ex_path),
+                        format!(
+                            "group identifier exceeds 50 characters ({} chars)",
+                            group.len()
+                        ),
+                        "PWF-P019",
+                    ));
+                } else if !group
+                    .chars()
+                    .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
+                {
+                    errors.push(ValidationIssue::error_with_code(
+                        format!("{}.group", ex_path),
+                        "group identifier must contain only alphanumeric characters, hyphens, or underscores",
+                        "PWF-P019",
+                    ));
+                }
+            }
+
             // Modality-specific validation
             match exercise.modality {
                 Modality::Strength => {
@@ -269,6 +315,95 @@ pub fn validate(yaml: &str) -> ValidationResult {
                 }
                 Modality::Stopwatch => {
                     // No required fields
+                }
+            }
+
+            // Validate percentage-based loading
+            let has_percent = exercise.target_weight_percent.is_some();
+            let has_percent_of = exercise.percent_of.is_some();
+            let has_target_load = exercise.target_load.is_some();
+
+            // PWF-P011: target_weight_percent requires percent_of
+            if has_percent && !has_percent_of {
+                errors.push(ValidationIssue::error_with_code(
+                    format!("{}.target_weight_percent", ex_path),
+                    "target_weight_percent requires percent_of to be set",
+                    "PWF-P011",
+                ));
+            }
+
+            // PWF-P012: percent_of requires target_weight_percent
+            if has_percent_of && !has_percent {
+                errors.push(ValidationIssue::error_with_code(
+                    format!("{}.percent_of", ex_path),
+                    "percent_of requires target_weight_percent to be set",
+                    "PWF-P012",
+                ));
+            }
+
+            // PWF-P013: Cannot use both target_weight_percent and target_load
+            if has_percent && has_target_load {
+                errors.push(ValidationIssue::error_with_code(
+                    format!("{}.target_weight_percent", ex_path),
+                    "Cannot use both target_weight_percent and target_load - choose one",
+                    "PWF-P013",
+                ));
+            }
+
+            // PWF-P014: Validate percentage range
+            if let Some(percent) = exercise.target_weight_percent {
+                if !(0.0..=200.0).contains(&percent) {
+                    errors.push(ValidationIssue::error_with_code(
+                        format!("{}.target_weight_percent", ex_path),
+                        format!(
+                            "target_weight_percent must be between 0 and 200 (got {})",
+                            percent
+                        ),
+                        "PWF-P014",
+                    ));
+                }
+            }
+
+            // PWF-P015: Validate percent_of enum
+            if let Some(ref percent_of) = exercise.percent_of {
+                let valid_values = ["1rm", "3rm", "5rm", "10rm"];
+                if !valid_values.contains(&percent_of.as_str()) {
+                    errors.push(ValidationIssue::error_with_code(
+                        format!("{}.percent_of", ex_path),
+                        format!(
+                            "Invalid percent_of value: '{}'. Must be one of: 1rm, 3rm, 5rm, 10rm",
+                            percent_of
+                        ),
+                        "PWF-P015",
+                    ));
+                }
+            }
+
+            // PWF-P016: Warning if reference_exercise doesn't match any exercise name
+            if let Some(ref ref_exercise) = exercise.reference_exercise {
+                let mut found = false;
+                for day in &plan.cycle.days {
+                    for ex in &day.exercises {
+                        if let Some(ref name) = ex.name {
+                            if name == ref_exercise {
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                    if found {
+                        break;
+                    }
+                }
+                if !found {
+                    warnings.push(ValidationIssue::warning_with_code(
+                        format!("{}.reference_exercise", ex_path),
+                        format!(
+                            "reference_exercise '{}' does not match any exercise name in the plan",
+                            ref_exercise
+                        ),
+                        "PWF-P016",
+                    ));
                 }
             }
 
@@ -1451,5 +1586,718 @@ cycle:
         assert_eq!(stats.total_days, 1);
         assert_eq!(stats.total_exercises, 1);
         assert!(stats.equipment.is_empty());
+    }
+
+    // GROUPING VALIDATION TESTS
+
+    #[test]
+    fn test_valid_superset_group() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Superset Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Bench Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          group: "A"
+          group_type: superset
+        - name: "Bent Over Row"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          group: "A"
+          group_type: superset
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+    }
+
+    #[test]
+    fn test_valid_circuit_group() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Circuit Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Squats"
+          modality: strength
+          group: "circuit1"
+          group_type: circuit
+        - name: "Push-ups"
+          modality: strength
+          group: "circuit1"
+          group_type: circuit
+        - name: "Burpees"
+          modality: strength
+          group: "circuit1"
+          group_type: circuit
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+    }
+
+    #[test]
+    fn test_group_without_group_type() {
+        let yaml = r#"
+plan_version: 1
+cycle:
+  days:
+    - exercises:
+        - name: "Bench Press"
+          modality: strength
+          group: "A"
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("PWF-P017".to_string())));
+    }
+
+    #[test]
+    fn test_group_type_without_group() {
+        let yaml = r#"
+plan_version: 1
+cycle:
+  days:
+    - exercises:
+        - name: "Row"
+          modality: strength
+          group_type: superset
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("PWF-P018".to_string())));
+    }
+
+    #[test]
+    fn test_empty_group_identifier() {
+        let yaml = r#"
+plan_version: 1
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          group: ""
+          group_type: superset
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("PWF-P019".to_string())));
+    }
+
+    #[test]
+    fn test_group_identifier_too_long() {
+        let yaml = r#"
+plan_version: 1
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          group: "this_is_a_very_long_group_identifier_that_exceeds_the_maximum_allowed_length_of_fifty_characters"
+          group_type: circuit
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("PWF-P019".to_string())
+                && e.message.contains("exceeds 50 characters")));
+    }
+
+    #[test]
+    fn test_group_identifier_invalid_characters() {
+        let yaml = r#"
+plan_version: 1
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          group: "group@1"
+          group_type: superset
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("PWF-P019".to_string()) && e.message.contains("alphanumeric")));
+    }
+
+    #[test]
+    fn test_group_identifier_with_hyphen() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          group: "group-1"
+          group_type: superset
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+    }
+
+    #[test]
+    fn test_group_identifier_with_underscore() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          group: "group_1"
+          group_type: circuit
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+    }
+
+    #[test]
+    fn test_mixed_groups_same_day() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Mixed Groups Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Bench Press"
+          modality: strength
+          group: "A"
+          group_type: superset
+        - name: "Row"
+          modality: strength
+          group: "A"
+          group_type: superset
+        - name: "Squat"
+          modality: strength
+          group: "B"
+          group_type: superset
+        - name: "Deadlift"
+          modality: strength
+          group: "B"
+          group_type: superset
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+    }
+
+    #[test]
+    fn test_group_with_different_modalities() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Mixed Modality Groups"
+cycle:
+  days:
+    - exercises:
+        - name: "Squats"
+          modality: strength
+          group: "circuit1"
+          group_type: circuit
+        - name: "Plank"
+          modality: countdown
+          target_duration_sec: 30
+          group: "circuit1"
+          group_type: circuit
+        - name: "Burpees"
+          modality: interval
+          target_sets: 1
+          target_duration_sec: 30
+          group: "circuit1"
+          group_type: circuit
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+    }
+
+    #[test]
+    fn test_exercise_without_group() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "No Groups"
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          target_sets: 5
+          target_reps: 5
+        - name: "Bench Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+    }
+
+    // ===== Percentage-Based Loading Tests =====
+
+    #[test]
+    fn test_percentage_loading_valid() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          target_sets: 5
+          target_reps: 5
+          target_weight_percent: 85
+          percent_of: "1rm"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.errors.is_empty());
+    }
+
+    #[test]
+    fn test_percentage_loading_with_reference_exercise() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          target_sets: 5
+          target_reps: 5
+        - name: "Front Squat"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          target_weight_percent: 70
+          percent_of: "1rm"
+          reference_exercise: "Squat"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.errors.is_empty());
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some("PWF-P016".to_string())));
+    }
+
+    #[test]
+    fn test_percentage_without_percent_of() {
+        let yaml = r#"
+plan_version: 1
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          target_weight_percent: 85
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("PWF-P011".to_string())));
+    }
+
+    #[test]
+    fn test_percent_of_without_percentage() {
+        let yaml = r#"
+plan_version: 1
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          percent_of: "1rm"
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("PWF-P012".to_string())));
+    }
+
+    #[test]
+    fn test_both_percentage_and_target_load() {
+        let yaml = r#"
+plan_version: 1
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          target_load: "225 lbs"
+          target_weight_percent: 85
+          percent_of: "1rm"
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("PWF-P013".to_string())));
+    }
+
+    #[test]
+    fn test_percentage_out_of_range_negative() {
+        let yaml = r#"
+plan_version: 1
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          target_weight_percent: -10
+          percent_of: "1rm"
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("PWF-P014".to_string())));
+    }
+
+    #[test]
+    fn test_percentage_out_of_range_too_high() {
+        let yaml = r#"
+plan_version: 1
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          target_weight_percent: 250
+          percent_of: "1rm"
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("PWF-P014".to_string())));
+    }
+
+    #[test]
+    fn test_percentage_at_boundary_zero() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          target_weight_percent: 0
+          percent_of: "1rm"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+    }
+
+    #[test]
+    fn test_percentage_at_boundary_200() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          target_weight_percent: 200
+          percent_of: "1rm"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+    }
+
+    #[test]
+    fn test_percentage_fractional() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          target_weight_percent: 87.5
+          percent_of: "1rm"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+    }
+
+    #[test]
+    fn test_invalid_percent_of_value() {
+        let yaml = r#"
+plan_version: 1
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          target_weight_percent: 85
+          percent_of: "2rm"
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some("PWF-P015".to_string())));
+    }
+
+    #[test]
+    fn test_percent_of_all_valid_values() {
+        let valid_values = ["1rm", "3rm", "5rm", "10rm"];
+        for value in &valid_values {
+            let yaml = format!(
+                r#"
+plan_version: 1
+meta:
+  title: "Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          target_weight_percent: 85
+          percent_of: "{}"
+"#,
+                value
+            );
+            let result = validate(&yaml);
+            assert!(result.is_valid(), "percent_of '{}' should be valid", value);
+        }
+    }
+
+    #[test]
+    fn test_reference_exercise_not_found() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Front Squat"
+          modality: strength
+          target_weight_percent: 70
+          percent_of: "1rm"
+          reference_exercise: "Back Squat"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some("PWF-P016".to_string())));
+    }
+
+    #[test]
+    fn test_reference_exercise_found_same_day() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+        - name: "Front Squat"
+          modality: strength
+          target_weight_percent: 70
+          percent_of: "1rm"
+          reference_exercise: "Squat"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some("PWF-P016".to_string())));
+    }
+
+    #[test]
+    fn test_reference_exercise_found_different_day() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+    - exercises:
+        - name: "Front Squat"
+          modality: strength
+          target_weight_percent: 70
+          percent_of: "1rm"
+          reference_exercise: "Squat"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some("PWF-P016".to_string())));
+    }
+
+    #[test]
+    fn test_percentage_loading_multiple_exercises() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          target_weight_percent: 85
+          percent_of: "1rm"
+        - name: "Bench Press"
+          modality: strength
+          target_weight_percent: 90
+          percent_of: "3rm"
+        - name: "Deadlift"
+          modality: strength
+          target_weight_percent: 75
+          percent_of: "5rm"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+    }
+
+    #[test]
+    fn test_percentage_loading_mixed_with_absolute() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          target_weight_percent: 85
+          percent_of: "1rm"
+        - name: "Bench Press"
+          modality: strength
+          target_load: "225 lbs"
+        - name: "Row"
+          modality: strength
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+    }
+
+    #[test]
+    fn test_reference_exercise_case_sensitive() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+        - name: "Front Squat"
+          modality: strength
+          target_weight_percent: 70
+          percent_of: "1rm"
+          reference_exercise: "squat"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some("PWF-P016".to_string())));
+    }
+
+    #[test]
+    fn test_percentage_loading_edge_case_100_percent() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          target_weight_percent: 100
+          percent_of: "1rm"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+    }
+
+    #[test]
+    fn test_percentage_loading_with_all_optional_fields() {
+        let yaml = r#"
+plan_version: 1
+meta:
+  title: "Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Squat"
+          modality: strength
+          target_sets: 5
+          target_reps: 5
+          target_weight_percent: 85
+          percent_of: "1rm"
+          reference_exercise: "Back Squat"
+          target_notes: "Progressive overload week 3"
+          cues: "Depth below parallel"
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some("PWF-P016".to_string())));
     }
 }

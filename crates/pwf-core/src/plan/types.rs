@@ -80,6 +80,14 @@ pub struct PlanDay {
     pub exercises: Vec<PlanExercise>,
 }
 
+/// Exercise grouping type for supersets and circuits
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum GroupType {
+    Superset,
+    Circuit,
+}
+
 /// Single exercise in a plan
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlanExercise {
@@ -99,6 +107,12 @@ pub struct PlanExercise {
     #[serde(default)]
     pub target_load: Option<String>,
     #[serde(default)]
+    pub target_weight_percent: Option<f64>,
+    #[serde(default)]
+    pub percent_of: Option<String>,
+    #[serde(default)]
+    pub reference_exercise: Option<String>,
+    #[serde(default)]
     pub cues: Option<String>,
     #[serde(default)]
     pub target_notes: Option<String>,
@@ -106,6 +120,14 @@ pub struct PlanExercise {
     pub link: Option<String>,
     #[serde(default)]
     pub image: Option<String>,
+    #[serde(default)]
+    pub group: Option<String>,
+    #[serde(default)]
+    pub group_type: Option<GroupType>,
+    #[serde(default)]
+    pub rest_between_sets_sec: Option<u32>,
+    #[serde(default)]
+    pub rest_after_sec: Option<u32>,
 }
 
 /// Statistics about a parsed plan
@@ -409,10 +431,17 @@ title: "Basic Plan"
             target_duration_sec: None,
             target_distance_meters: None,
             target_load: Some("80%".to_string()),
+            target_weight_percent: None,
+            percent_of: None,
+            reference_exercise: None,
             cues: Some("Keep shoulders back and down".to_string()),
             target_notes: Some("RPE 8".to_string()),
             link: Some("https://example.com/bench-press".to_string()),
             image: Some("bench-press.jpg".to_string()),
+            group: None,
+            group_type: None,
+            rest_between_sets_sec: None,
+            rest_after_sec: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -448,10 +477,17 @@ title: "Basic Plan"
                 target_duration_sec: None,
                 target_distance_meters: None,
                 target_load: None,
+                target_weight_percent: None,
+                percent_of: None,
+                reference_exercise: None,
                 cues: None,
                 target_notes: None,
                 link: None,
                 image: None,
+                group: None,
+                group_type: None,
+                rest_between_sets_sec: None,
+                rest_after_sec: None,
             };
 
             let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -475,10 +511,17 @@ title: "Basic Plan"
             target_duration_sec: Some(60),
             target_distance_meters: None,
             target_load: None,
+            target_weight_percent: None,
+            percent_of: None,
+            reference_exercise: None,
             cues: Some("Keep core tight".to_string()),
             target_notes: None,
             link: None,
             image: None,
+            group: None,
+            group_type: None,
+            rest_between_sets_sec: None,
+            rest_after_sec: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -502,10 +545,17 @@ title: "Basic Plan"
             target_duration_sec: None,
             target_distance_meters: Some(2000.0),
             target_load: None,
+            target_weight_percent: None,
+            percent_of: None,
+            reference_exercise: None,
             cues: Some("Maintain steady pace".to_string()),
             target_notes: Some("Target 2:00/500m split".to_string()),
             link: None,
             image: None,
+            group: None,
+            group_type: None,
+            rest_between_sets_sec: None,
+            rest_after_sec: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -529,10 +579,17 @@ title: "Basic Plan"
             target_duration_sec: Some(30),
             target_distance_meters: None,
             target_load: None,
+            target_weight_percent: None,
+            percent_of: None,
+            reference_exercise: None,
             cues: Some("Max effort".to_string()),
             target_notes: Some("30s work / 90s rest".to_string()),
             link: None,
             image: None,
+            group: None,
+            group_type: None,
+            rest_between_sets_sec: None,
+            rest_after_sec: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -611,10 +668,17 @@ title: "Basic Plan"
             target_duration_sec: Some(999999),
             target_distance_meters: Some(999999.999),
             target_load: None,
+            target_weight_percent: None,
+            percent_of: None,
+            reference_exercise: None,
             cues: None,
             target_notes: None,
             link: None,
             image: None,
+            group: None,
+            group_type: None,
+            rest_between_sets_sec: None,
+            rest_after_sec: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -667,10 +731,17 @@ title: "Basic Plan"
                             target_duration_sec: None,
                             target_distance_meters: None,
                             target_load: Some("100kg".to_string()),
+                            target_weight_percent: None,
+                            percent_of: None,
+                            reference_exercise: None,
                             cues: Some("Keep tight".to_string()),
                             target_notes: Some("RPE 8".to_string()),
                             link: Some("https://example.com".to_string()),
                             image: Some("bench.jpg".to_string()),
+                            group: None,
+                            group_type: None,
+                            rest_between_sets_sec: None,
+                            rest_after_sec: None,
                         },
                         PlanExercise {
                             id: Some("ex-2".to_string()),
@@ -681,10 +752,17 @@ title: "Basic Plan"
                             target_duration_sec: Some(60),
                             target_distance_meters: None,
                             target_load: None,
+                            target_weight_percent: None,
+                            percent_of: None,
+                            reference_exercise: None,
                             cues: None,
                             target_notes: None,
                             link: None,
                             image: None,
+                            group: None,
+                            group_type: None,
+                            rest_between_sets_sec: None,
+                            rest_after_sec: None,
                         },
                     ],
                 }],
@@ -761,5 +839,120 @@ recommendedFirst: false
 
         let deserialized: PlanDay = serde_yaml::from_str(&yaml).unwrap();
         assert_eq!(deserialized.target_session_length_min, Some(45));
+    }
+
+    #[test]
+    fn test_group_type_serialization() {
+        assert_eq!(
+            serde_yaml::to_string(&GroupType::Superset).unwrap().trim(),
+            "superset"
+        );
+        assert_eq!(
+            serde_yaml::to_string(&GroupType::Circuit).unwrap().trim(),
+            "circuit"
+        );
+    }
+
+    #[test]
+    fn test_group_type_deserialization() {
+        let superset: GroupType = serde_yaml::from_str("superset").unwrap();
+        assert_eq!(superset, GroupType::Superset);
+
+        let circuit: GroupType = serde_yaml::from_str("circuit").unwrap();
+        assert_eq!(circuit, GroupType::Circuit);
+    }
+
+    #[test]
+    fn test_plan_exercise_with_group() {
+        let exercise = PlanExercise {
+            id: Some("ex-1".to_string()),
+            name: Some("Bench Press".to_string()),
+            modality: Modality::Strength,
+            target_sets: Some(3),
+            target_reps: Some(8),
+            target_duration_sec: None,
+            target_distance_meters: None,
+            target_load: Some("135 lbs".to_string()),
+            target_weight_percent: None,
+            percent_of: None,
+            reference_exercise: None,
+            cues: None,
+            target_notes: None,
+            link: None,
+            image: None,
+            group: Some("A".to_string()),
+            group_type: Some(GroupType::Superset),
+            rest_between_sets_sec: None,
+            rest_after_sec: None,
+        };
+
+        let yaml = serde_yaml::to_string(&exercise).unwrap();
+        let deserialized: PlanExercise = serde_yaml::from_str(&yaml).unwrap();
+
+        assert_eq!(exercise.group, deserialized.group);
+        assert_eq!(exercise.group_type, deserialized.group_type);
+    }
+
+    #[test]
+    fn test_plan_exercise_without_group() {
+        let exercise = PlanExercise {
+            id: Some("ex-1".to_string()),
+            name: Some("Squat".to_string()),
+            modality: Modality::Strength,
+            target_sets: Some(5),
+            target_reps: Some(5),
+            target_duration_sec: None,
+            target_distance_meters: None,
+            target_load: None,
+            target_weight_percent: None,
+            percent_of: None,
+            reference_exercise: None,
+            cues: None,
+            target_notes: None,
+            link: None,
+            image: None,
+            group: None,
+            group_type: None,
+            rest_between_sets_sec: None,
+            rest_after_sec: None,
+        };
+
+        let yaml = serde_yaml::to_string(&exercise).unwrap();
+        let deserialized: PlanExercise = serde_yaml::from_str(&yaml).unwrap();
+
+        assert_eq!(deserialized.group, None);
+        assert_eq!(deserialized.group_type, None);
+    }
+
+    #[test]
+    fn test_plan_exercise_group_roundtrip() {
+        let yaml = r#"
+name: "Bench Press"
+modality: strength
+target_sets: 3
+target_reps: 8
+group: "A"
+group_type: superset
+"#;
+        let exercise: PlanExercise = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(exercise.group, Some("A".to_string()));
+        assert_eq!(exercise.group_type, Some(GroupType::Superset));
+
+        let serialized = serde_yaml::to_string(&exercise).unwrap();
+        assert!(serialized.contains("group: A"));
+        assert!(serialized.contains("group_type: superset"));
+    }
+
+    #[test]
+    fn test_plan_exercise_circuit_group() {
+        let yaml = r#"
+name: "Burpees"
+modality: strength
+group: "circuit1"
+group_type: circuit
+"#;
+        let exercise: PlanExercise = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(exercise.group, Some("circuit1".to_string()));
+        assert_eq!(exercise.group_type, Some(GroupType::Circuit));
     }
 }
