@@ -1,0 +1,41 @@
+plan_version: 1
+
+meta:
+  title: "Swimming Technique Session"
+  description: "Zone-based swimming with technique focus"
+  author: "PWF Endurance"
+  tags:
+    - swimming
+    - endurance
+    - technique
+
+cycle:
+  days:
+    - focus: "Endurance Swim"
+      target_session_length_min: 60
+      exercises:
+        - name: "Warm-up - Easy Swimming"
+          modality: swimming
+          target_distance_meters: 400
+          target_notes: "Mix of strokes, easy pace"
+
+        - name: "Main Set - Threshold Intervals"
+          modality: swimming
+          interval_phases:
+            - name: "work"
+              duration_sec: 240
+              target_hr_bpm: 150
+            - name: "recovery"
+              duration_sec: 60
+              target_hr_bpm: 120
+          target_sets: 8
+          target_distance_meters: 1600
+          target_notes: "8x200m with 1 min rest"
+
+        - name: "Cool-down"
+          modality: swimming
+          target_distance_meters: 200
+          zones:
+            - zone: 1
+              duration_sec: 300
+              target_hr_bpm: 110
