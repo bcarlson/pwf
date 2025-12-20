@@ -701,6 +701,46 @@ fn validate_exercise_library(
                 ));
             }
         }
+
+        // Validate modality-specific default fields
+        match lib_ex.modality {
+            Modality::Strength => {
+                if lib_ex.default_sets.is_none() && lib_ex.default_reps.is_none() {
+                    warnings.push(ValidationIssue::warning(
+                        &lib_path,
+                        "Strength exercise should define default_sets and/or default_reps",
+                    ));
+                }
+            }
+            Modality::Countdown => {
+                if lib_ex.default_duration_sec.is_none() {
+                    warnings.push(ValidationIssue::warning(
+                        &lib_path,
+                        "Countdown exercise should define default_duration_sec",
+                    ));
+                }
+            }
+            Modality::Interval => {
+                if lib_ex.default_sets.is_none() {
+                    warnings.push(ValidationIssue::warning(
+                        &lib_path,
+                        "Interval exercise should define default_sets",
+                    ));
+                }
+            }
+            Modality::Cycling | Modality::Running | Modality::Rowing | Modality::Swimming => {
+                if lib_ex.default_duration_sec.is_none() && lib_ex.default_distance_meters.is_none()
+                {
+                    warnings.push(ValidationIssue::warning(
+                        &lib_path,
+                        "Endurance exercise should define default_duration_sec and/or default_distance_meters",
+                    ));
+                }
+            }
+            Modality::Stopwatch => {
+                // No required defaults
+            }
+        }
     }
 }
 
@@ -714,7 +754,20 @@ fn calculate_statistics(plan: &WpsPlan) -> PlanStatistics {
         stats.total_exercises += day.exercises.len();
 
         for exercise in &day.exercises {
-            if let Some(modality) = exercise.modality {
+            // Resolve modality from exercise or library
+            let modality = if let Some(modality) = exercise.modality {
+                Some(modality)
+            } else if let Some(ref exercise_ref) = exercise.exercise_ref {
+                // Look up modality from library
+                plan.exercise_library
+                    .iter()
+                    .find(|lib| &lib.id == exercise_ref)
+                    .map(|lib| lib.modality)
+            } else {
+                None
+            };
+
+            if let Some(modality) = modality {
                 match modality {
                     Modality::Strength => stats.strength_count += 1,
                     Modality::Countdown => stats.countdown_count += 1,

@@ -43,7 +43,7 @@ pub fn resolve_exercise(
                 .name
                 .clone()
                 .unwrap_or_else(|| lib_exercise.name.clone()),
-            modality: exercise.modality.unwrap_or(lib_exercise.modality),
+            modality: lib_exercise.modality,
             target_sets: exercise.target_sets.or(lib_exercise.default_sets),
             target_reps: exercise.target_reps.or(lib_exercise.default_reps),
             target_duration_sec: exercise

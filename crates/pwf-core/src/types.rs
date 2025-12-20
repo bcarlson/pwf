@@ -133,6 +133,26 @@ mod tests {
     }
 
     #[test]
+    fn test_modality_display_cycling() {
+        assert_eq!(Modality::Cycling.to_string(), "cycling");
+    }
+
+    #[test]
+    fn test_modality_display_running() {
+        assert_eq!(Modality::Running.to_string(), "running");
+    }
+
+    #[test]
+    fn test_modality_display_rowing() {
+        assert_eq!(Modality::Rowing.to_string(), "rowing");
+    }
+
+    #[test]
+    fn test_modality_display_swimming() {
+        assert_eq!(Modality::Swimming.to_string(), "swimming");
+    }
+
+    #[test]
     fn test_modality_from_str_strength() {
         assert_eq!(Modality::from_str("strength").unwrap(), Modality::Strength);
     }
@@ -159,6 +179,26 @@ mod tests {
     }
 
     #[test]
+    fn test_modality_from_str_cycling() {
+        assert_eq!(Modality::from_str("cycling").unwrap(), Modality::Cycling);
+    }
+
+    #[test]
+    fn test_modality_from_str_running() {
+        assert_eq!(Modality::from_str("running").unwrap(), Modality::Running);
+    }
+
+    #[test]
+    fn test_modality_from_str_rowing() {
+        assert_eq!(Modality::from_str("rowing").unwrap(), Modality::Rowing);
+    }
+
+    #[test]
+    fn test_modality_from_str_swimming() {
+        assert_eq!(Modality::from_str("swimming").unwrap(), Modality::Swimming);
+    }
+
+    #[test]
     fn test_modality_from_str_case_insensitive_uppercase() {
         assert_eq!(Modality::from_str("STRENGTH").unwrap(), Modality::Strength);
         assert_eq!(
@@ -170,6 +210,10 @@ mod tests {
             Modality::Stopwatch
         );
         assert_eq!(Modality::from_str("INTERVAL").unwrap(), Modality::Interval);
+        assert_eq!(Modality::from_str("CYCLING").unwrap(), Modality::Cycling);
+        assert_eq!(Modality::from_str("RUNNING").unwrap(), Modality::Running);
+        assert_eq!(Modality::from_str("ROWING").unwrap(), Modality::Rowing);
+        assert_eq!(Modality::from_str("SWIMMING").unwrap(), Modality::Swimming);
     }
 
     #[test]
@@ -184,6 +228,10 @@ mod tests {
             Modality::Stopwatch
         );
         assert_eq!(Modality::from_str("InTeRvAl").unwrap(), Modality::Interval);
+        assert_eq!(Modality::from_str("CyCLiNg").unwrap(), Modality::Cycling);
+        assert_eq!(Modality::from_str("RuNnInG").unwrap(), Modality::Running);
+        assert_eq!(Modality::from_str("RoWiNg").unwrap(), Modality::Rowing);
+        assert_eq!(Modality::from_str("SwImMiNg").unwrap(), Modality::Swimming);
     }
 
     #[test]
