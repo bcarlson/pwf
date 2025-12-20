@@ -14,6 +14,8 @@ pub struct WpsPlan {
     pub glossary: HashMap<String, String>,
     #[serde(default)]
     pub exercise_library: Vec<LibraryExercise>,
+    #[serde(default)]
+    pub workout_templates: Vec<WorkoutTemplate>,
     pub cycle: PlanCycle,
 }
 
@@ -63,7 +65,58 @@ pub struct PlanCycle {
     pub start_date: Option<String>,
     #[serde(default)]
     pub notes: Option<String>,
+    #[serde(default)]
+    pub weeks: Option<Vec<PlanWeek>>,
     pub days: Vec<PlanDay>,
+}
+
+/// Week definition for multi-week periodization (PWF v2.0)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PlanWeek {
+    #[serde(default)]
+    pub week_number: Option<u32>,
+    #[serde(default)]
+    pub name: Option<String>,
+    #[serde(default)]
+    pub notes: Option<String>,
+    #[serde(default)]
+    pub overrides: Vec<ExerciseOverride>,
+}
+
+/// Exercise override for specific week(s) (PWF v2.0)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ExerciseOverride {
+    // Exercise identification (must match base exercise)
+    #[serde(default)]
+    pub exercise_id: Option<String>,
+    #[serde(default)]
+    pub exercise_name: Option<String>,
+
+    // Day identification (where this exercise lives)
+    #[serde(default)]
+    pub day_id: Option<String>,
+    #[serde(default)]
+    pub day_order: Option<u32>,
+
+    // Overridable training parameters
+    #[serde(default)]
+    pub target_sets: Option<u32>,
+    #[serde(default)]
+    pub target_reps: Option<u32>,
+    #[serde(default)]
+    pub target_duration_sec: Option<u32>,
+    #[serde(default)]
+    pub target_distance_meters: Option<f64>,
+    #[serde(default)]
+    pub target_load: Option<String>,
+    #[serde(default)]
+    pub target_weight_percent: Option<f64>,
+    #[serde(default)]
+    pub percent_of: Option<String>,
+    #[serde(default)]
+    pub target_notes: Option<String>,
+    #[serde(default)]
+    pub rest_between_sets_sec: Option<u32>,
 }
 
 /// Single training day
@@ -81,6 +134,9 @@ pub struct PlanDay {
     pub scheduled_date: Option<String>,
     #[serde(default, rename = "target_session_length_min")]
     pub target_session_length_min: Option<u32>,
+    #[serde(default)]
+    pub template_ref: Option<String>,
+    #[serde(default)]
     pub exercises: Vec<PlanExercise>,
 }
 
@@ -129,6 +185,22 @@ pub struct LibraryExercise {
     pub link: Option<String>,
     #[serde(default)]
     pub image: Option<String>,
+}
+
+/// Workout template - reusable group of exercises (PWF v2.0)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WorkoutTemplate {
+    pub id: String,
+    pub name: String,
+    #[serde(default)]
+    pub description: Option<String>,
+    #[serde(default)]
+    pub focus: Option<String>,
+    #[serde(default)]
+    pub target_session_length_min: Option<u32>,
+    #[serde(default)]
+    pub tags: Vec<String>,
+    pub exercises: Vec<PlanExercise>,
 }
 
 /// Training zone for endurance workouts
@@ -185,6 +257,63 @@ pub struct AthleteProfile {
     pub weight_kg: Option<f64>,
 }
 
+/// Progression type for automatic progressive overload
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ProgressionType {
+    Linear,
+    DoubleProgression,
+}
+
+/// Success condition for triggering progression
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SuccessCondition {
+    AllSetsCompleted,
+    LastSetCompleted,
+    AverageRepsReached,
+}
+
+/// Deload condition for regression
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DeloadCondition {
+    FailedOnceConsecutive,
+    FailedTwiceConsecutive,
+    FailedThreeConsecutive,
+    RirAboveTarget,
+}
+
+/// Progression rules for automatic progressive overload
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProgressionRules {
+    #[serde(rename = "type")]
+    pub progression_type: ProgressionType,
+    pub success_condition: SuccessCondition,
+    #[serde(default)]
+    pub weight_increment_kg: Option<f64>,
+    #[serde(default)]
+    pub weight_increment_lbs: Option<f64>,
+    #[serde(default)]
+    pub reps_increment: Option<u32>,
+    #[serde(default)]
+    pub reps_range_min: Option<u32>,
+    #[serde(default)]
+    pub reps_range_max: Option<u32>,
+    #[serde(default)]
+    pub deload_condition: Option<DeloadCondition>,
+    #[serde(default)]
+    pub deload_percent: Option<f64>,
+    #[serde(default)]
+    pub deload_weeks: Option<u32>,
+    #[serde(default)]
+    pub max_weight_kg: Option<f64>,
+    #[serde(default)]
+    pub max_weight_lbs: Option<f64>,
+    #[serde(default)]
+    pub notes: Option<String>,
+}
+
 /// Single exercise in a plan
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlanExercise {
@@ -234,6 +363,8 @@ pub struct PlanExercise {
     pub ramp: Option<RampConfig>,
     #[serde(default)]
     pub interval_phases: Option<Vec<IntervalPhase>>,
+    #[serde(default)]
+    pub progression_rules: Option<ProgressionRules>,
 }
 
 /// Statistics about a parsed plan
@@ -268,9 +399,11 @@ mod tests {
             }),
             glossary: HashMap::new(),
             exercise_library: vec![],
+            workout_templates: vec![],
             cycle: PlanCycle {
                 start_date: None,
                 notes: None,
+                weeks: None,
                 days: vec![],
             },
         };
@@ -297,9 +430,11 @@ mod tests {
             meta: None,
             glossary: glossary.clone(),
             exercise_library: vec![],
+            workout_templates: vec![],
             cycle: PlanCycle {
                 start_date: None,
                 notes: None,
+                weeks: None,
                 days: vec![],
             },
         };
@@ -471,6 +606,7 @@ title: "Basic Plan"
         let cycle = PlanCycle {
             start_date: Some("2024-01-01".to_string()),
             notes: Some("Week 1-4: Foundation phase".to_string()),
+            weeks: None,
             days: vec![
                 PlanDay {
                     id: Some("day-1".to_string()),
@@ -479,6 +615,7 @@ title: "Basic Plan"
                     notes: None,
                     scheduled_date: None,
                     target_session_length_min: Some(60),
+                    template_ref: None,
                     exercises: vec![],
                 },
                 PlanDay {
@@ -488,6 +625,7 @@ title: "Basic Plan"
                     notes: None,
                     scheduled_date: None,
                     target_session_length_min: Some(75),
+                    template_ref: None,
                     exercises: vec![],
                 },
             ],
@@ -518,6 +656,7 @@ title: "Basic Plan"
             notes: Some("Focus on explosive movements".to_string()),
             scheduled_date: Some("2024-01-15".to_string()),
             target_session_length_min: Some(90),
+            template_ref: None,
             exercises: vec![],
         };
 
@@ -561,6 +700,7 @@ title: "Basic Plan"
             zones: None,
             ramp: None,
             interval_phases: None,
+            progression_rules: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -612,6 +752,7 @@ title: "Basic Plan"
                 zones: None,
                 ramp: None,
                 interval_phases: None,
+                progression_rules: None,
             };
 
             let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -651,6 +792,7 @@ title: "Basic Plan"
             zones: None,
             ramp: None,
             interval_phases: None,
+            progression_rules: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -690,6 +832,7 @@ title: "Basic Plan"
             zones: None,
             ramp: None,
             interval_phases: None,
+            progression_rules: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -729,6 +872,7 @@ title: "Basic Plan"
             zones: None,
             ramp: None,
             interval_phases: None,
+            progression_rules: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -826,6 +970,7 @@ title: "Basic Plan"
             zones: None,
             ramp: None,
             interval_phases: None,
+            progression_rules: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -860,9 +1005,11 @@ title: "Basic Plan"
             }),
             glossary,
             exercise_library: vec![],
+            workout_templates: vec![],
             cycle: PlanCycle {
                 start_date: Some("2024-01-01".to_string()),
                 notes: Some("Cycle notes".to_string()),
+                weeks: None,
                 days: vec![PlanDay {
                     id: Some("day-1".to_string()),
                     order: Some(1),
@@ -870,6 +1017,7 @@ title: "Basic Plan"
                     notes: Some("Day notes".to_string()),
                     scheduled_date: Some("2024-01-01".to_string()),
                     target_session_length_min: Some(60),
+                    template_ref: None,
                     exercises: vec![
                         PlanExercise {
                             id: Some("ex-1".to_string()),
@@ -896,6 +1044,7 @@ title: "Basic Plan"
                             zones: None,
                             ramp: None,
                             interval_phases: None,
+                            progression_rules: None,
                         },
                         PlanExercise {
                             id: Some("ex-2".to_string()),
@@ -922,6 +1071,7 @@ title: "Basic Plan"
                             zones: None,
                             ramp: None,
                             interval_phases: None,
+                            progression_rules: None,
                         },
                     ],
                 }],
@@ -989,6 +1139,7 @@ recommendedFirst: false
             notes: None,
             scheduled_date: None,
             target_session_length_min: Some(45),
+            template_ref: None,
             exercises: vec![],
         };
 
@@ -1049,6 +1200,7 @@ recommendedFirst: false
             zones: None,
             ramp: None,
             interval_phases: None,
+            progression_rules: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -1085,6 +1237,7 @@ recommendedFirst: false
             zones: None,
             ramp: None,
             interval_phases: None,
+            progression_rules: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();

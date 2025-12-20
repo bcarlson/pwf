@@ -1,0 +1,229 @@
+plan_version: 2
+
+meta:
+  title: "Push/Pull/Legs with Templates"
+  description: "Example showing workout templates for reusable workout structures"
+  author: "PWF Examples"
+  equipment:
+    - barbell
+    - dumbbells
+    - cable_machine
+    - pull_up_bar
+  daysPerWeek: 3
+  tags:
+    - strength
+    - hypertrophy
+    - templates
+
+exercise_library:
+  - id: bench-press
+    name: "Barbell Bench Press"
+    modality: strength
+    default_sets: 4
+    default_reps: 8
+    equipment:
+      - barbell
+      - bench
+    muscle_groups:
+      - chest
+      - triceps
+    difficulty: intermediate
+    cues: "Retract scapula, lower to chest, drive up explosively"
+
+  - id: incline-db-press
+    name: "Incline Dumbbell Press"
+    modality: strength
+    default_sets: 3
+    default_reps: 10
+    equipment:
+      - dumbbells
+      - bench
+    muscle_groups:
+      - chest
+      - shoulders
+    difficulty: intermediate
+
+  - id: cable-fly
+    name: "Cable Chest Fly"
+    modality: strength
+    default_sets: 3
+    default_reps: 12
+    equipment:
+      - cable_machine
+    muscle_groups:
+      - chest
+    difficulty: beginner
+
+  - id: deadlift
+    name: "Barbell Deadlift"
+    modality: strength
+    default_sets: 4
+    default_reps: 6
+    equipment:
+      - barbell
+    muscle_groups:
+      - back
+      - hamstrings
+      - glutes
+    difficulty: advanced
+    cues: "Keep back flat, drive through heels, hinge at hips"
+
+  - id: pull-up
+    name: "Pull-ups"
+    modality: strength
+    default_sets: 4
+    default_reps: 8
+    equipment:
+      - pull_up_bar
+    muscle_groups:
+      - back
+      - biceps
+    difficulty: intermediate
+
+  - id: barbell-row
+    name: "Barbell Bent-Over Row"
+    modality: strength
+    default_sets: 4
+    default_reps: 10
+    equipment:
+      - barbell
+    muscle_groups:
+      - back
+      - biceps
+    difficulty: intermediate
+
+  - id: squat
+    name: "Barbell Back Squat"
+    modality: strength
+    default_sets: 4
+    default_reps: 8
+    equipment:
+      - barbell
+      - squat_rack
+    muscle_groups:
+      - quads
+      - glutes
+    difficulty: intermediate
+    cues: "Break at hips and knees, chest up, depth below parallel"
+
+  - id: leg-press
+    name: "Leg Press"
+    modality: strength
+    default_sets: 3
+    default_reps: 12
+    equipment:
+      - leg_press
+    muscle_groups:
+      - quads
+      - glutes
+    difficulty: beginner
+
+  - id: hamstring-curl
+    name: "Lying Hamstring Curl"
+    modality: strength
+    default_sets: 3
+    default_reps: 12
+    equipment:
+      - leg_curl_machine
+    muscle_groups:
+      - hamstrings
+    difficulty: beginner
+
+workout_templates:
+  - id: push-day
+    name: "Push Day - Chest, Shoulders, Triceps"
+    description: "Compound and isolation pushing movements"
+    focus: "Upper Body Push"
+    target_session_length_min: 75
+    tags:
+      - push
+      - chest
+      - shoulders
+    exercises:
+      - exercise_ref: bench-press
+        target_load: "Working weight"
+
+      - exercise_ref: incline-db-press
+        target_notes: "Focus on upper chest activation"
+
+      - exercise_ref: cable-fly
+        target_notes: "Squeeze at peak contraction"
+
+  - id: pull-day
+    name: "Pull Day - Back, Biceps"
+    description: "Compound and isolation pulling movements"
+    focus: "Upper Body Pull"
+    target_session_length_min: 70
+    tags:
+      - pull
+      - back
+      - biceps
+    exercises:
+      - exercise_ref: deadlift
+        target_load: "Heavy - use belt if needed"
+        target_notes: "Main lift of the day"
+
+      - exercise_ref: pull-up
+        target_notes: "Use assistance if needed"
+
+      - exercise_ref: barbell-row
+        target_notes: "Pull to lower chest"
+
+  - id: leg-day
+    name: "Leg Day - Quads, Hamstrings, Glutes"
+    description: "Compound and isolation leg movements"
+    focus: "Lower Body"
+    target_session_length_min: 80
+    tags:
+      - legs
+      - quads
+      - hamstrings
+    exercises:
+      - exercise_ref: squat
+        target_load: "Working weight"
+        target_notes: "Main lift - focus on depth"
+
+      - exercise_ref: leg-press
+        target_sets: 4
+        target_reps: 15
+        target_notes: "High volume accessory"
+
+      - exercise_ref: hamstring-curl
+        target_notes: "Controlled tempo, 2-1-2"
+
+cycle:
+  start_date: "2025-01-06"
+  notes: "Week 1 - Foundation phase. Use templates to ensure consistency."
+
+  days:
+    # Week 1
+    - order: 0
+      template_ref: push-day
+      scheduled_date: "2025-01-06"
+      notes: "First push day - establish baseline loads"
+
+    - order: 1
+      template_ref: pull-day
+      scheduled_date: "2025-01-08"
+      notes: "First pull day - establish baseline loads"
+
+    - order: 2
+      template_ref: leg-day
+      scheduled_date: "2025-01-10"
+      notes: "First leg day - establish baseline loads"
+
+    # Week 2 - Same templates, can add exercises or override
+    - order: 3
+      template_ref: push-day
+      scheduled_date: "2025-01-13"
+      notes: "Week 2 - increase weight 5-10lbs from week 1"
+
+    - order: 4
+      template_ref: pull-day
+      scheduled_date: "2025-01-15"
+      notes: "Week 2 - increase weight 5-10lbs from week 1"
+
+    - order: 5
+      template_ref: leg-day
+      scheduled_date: "2025-01-17"
+      notes: "Week 2 - increase weight 5-10lbs from week 1"

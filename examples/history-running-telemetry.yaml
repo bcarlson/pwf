@@ -1,0 +1,118 @@
+# PWF History Export v2 - Running with Telemetry
+# Demonstrates telemetry metrics for outdoor running with GPS, elevation, and environmental data
+
+history_version: 2
+exported_at: "2025-12-20T19:00:00Z"
+
+export_source:
+  app_name: "Garmin Connect"
+  app_version: "4.72.1"
+  platform: "ios"
+  preferred_units:
+    weight: lb
+    distance: miles
+
+units:
+  weight: lb
+  distance: miles
+
+workouts:
+  - id: "run-20251220-morning"
+    date: "2025-12-20"
+    started_at: "2025-12-20T06:30:00Z"
+    ended_at: "2025-12-20T07:25:00Z"
+    duration_sec: 3300
+    title: "Morning Trail Run - Griffith Park"
+    notes: "Beautiful morning! Elevation gain felt tough but finished strong."
+
+    telemetry:
+      heart_rate_avg: 158
+      heart_rate_max: 185
+      heart_rate_min: 92
+      total_distance_mi: 6.8
+      total_distance_km: 10.94
+      total_elevation_gain_ft: 820
+      total_elevation_gain_m: 250
+      total_elevation_loss_ft: 785
+      total_elevation_loss_m: 239
+      speed_avg_mph: 7.4
+      speed_avg_kph: 11.9
+      speed_max_mph: 9.8
+      speed_max_kph: 15.8
+      pace_avg_sec_per_mi: 487
+      pace_avg_sec_per_km: 303
+      cadence_avg: 172
+      temperature_f: 58
+      temperature_c: 14.4
+      humidity_percent: 72
+      total_calories: 785
+      gps_route_id: "griffith-observatory-loop"
+
+    exercises:
+      - name: "Trail Run"
+        modality: running
+        notes: "Out and back route with steady climb"
+        sets:
+          - set_number: 1
+            set_type: working
+            duration_sec: 1980
+            distance_meters: 5500
+            notes: "Outbound - uphill section"
+            telemetry:
+              heart_rate_avg: 165
+              heart_rate_max: 185
+              elevation_gain_ft: 650
+              elevation_gain_m: 198
+              elevation_loss_ft: 85
+              elevation_loss_m: 26
+              speed_avg_mph: 6.3
+              speed_avg_kph: 10.1
+              speed_max_mph: 8.5
+              speed_max_kph: 13.7
+              pace_avg_sec_per_mi: 571
+              pace_avg_sec_per_km: 355
+              cadence_avg: 168
+              temperature_f: 56
+              temperature_c: 13.3
+              humidity_percent: 75
+              calories: 425
+
+          - set_number: 2
+            set_type: working
+            duration_sec: 1320
+            distance_meters: 5440
+            notes: "Return - mostly downhill"
+            telemetry:
+              heart_rate_avg: 150
+              heart_rate_max: 172
+              elevation_gain_ft: 170
+              elevation_gain_m: 52
+              elevation_loss_ft: 700
+              elevation_loss_m: 213
+              speed_avg_mph: 8.9
+              speed_avg_kph: 14.3
+              speed_max_mph: 9.8
+              speed_max_kph: 15.8
+              pace_avg_sec_per_mi: 404
+              pace_avg_sec_per_km: 251
+              cadence_avg: 176
+              temperature_f: 60
+              temperature_c: 15.6
+              humidity_percent: 68
+              calories: 360
+
+personal_records:
+  - exercise_name: "5K Run"
+    record_type: fastest_time
+    value: 1245
+    unit: seconds
+    achieved_at: "2025-12-10"
+    notes: "20:45 - new PR on flat course"
+
+body_measurements:
+  - date: "2025-12-20"
+    recorded_at: "2025-12-20T06:00:00Z"
+    weight_lb: 165
+    weight_kg: 74.8
+    body_fat_percent: 12.5
+    notes: "Pre-run weigh-in"
