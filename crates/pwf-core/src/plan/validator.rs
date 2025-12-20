@@ -205,6 +205,16 @@ pub fn validate(yaml: &str) -> ValidationResult {
         ));
     }
 
+    // Validate workout templates (v2 only)
+    if plan.plan_version == 2 {
+        validate_workout_templates(&plan.workout_templates, &mut errors, &mut warnings);
+    } else if !plan.workout_templates.is_empty() {
+        warnings.push(ValidationIssue::warning(
+            "workout_templates",
+            "workout_templates is only supported in plan_version 2. This field will be ignored.",
+        ));
+    }
+
     // Validate days
     if plan.cycle.days.is_empty() {
         errors.push(ValidationIssue::error(
@@ -231,11 +241,47 @@ pub fn validate(yaml: &str) -> ValidationResult {
             seen_orders.insert(order);
         }
 
-        // Check exercises
-        if day.exercises.is_empty() {
+        // Validate template_ref (v2 only)
+        if plan.plan_version == 2 {
+            if let Some(ref template_ref) = day.template_ref {
+                // Check if template exists
+                if !plan
+                    .workout_templates
+                    .iter()
+                    .any(|tmpl| &tmpl.id == template_ref)
+                {
+                    errors.push(ValidationIssue::error_with_code(
+                        format!("{}.template_ref", day_path),
+                        format!(
+                            "template_ref '{}' not found in workout_templates",
+                            template_ref
+                        ),
+                        "PWF-P038",
+                    ));
+                }
+
+                // Warn if both template_ref and exercises are present
+                if !day.exercises.is_empty() {
+                    warnings.push(ValidationIssue::warning_with_code(
+                        &day_path,
+                        "Both template_ref and exercises specified. Exercises from template_ref will be merged with day exercises.",
+                        "PWF-P039",
+                    ));
+                }
+            }
+        } else if day.template_ref.is_some() {
+            warnings.push(ValidationIssue::warning(
+                format!("{}.template_ref", day_path),
+                "template_ref is only supported in plan_version 2. This field will be ignored.",
+            ));
+        }
+
+        // Check exercises (allow empty if template_ref is present in v2)
+        let has_template = plan.plan_version == 2 && day.template_ref.is_some();
+        if day.exercises.is_empty() && !has_template {
             errors.push(ValidationIssue::error(
                 format!("{}.exercises", day_path),
-                "Day must have at least 1 exercise",
+                "Day must have at least 1 exercise or a template_ref",
             ));
         }
 
@@ -577,6 +623,18 @@ pub fn validate(yaml: &str) -> ValidationResult {
                     ));
                 }
             }
+
+            // Validate progression rules (v2 only)
+            if let Some(ref progression_rules) = exercise.progression_rules {
+                validate_progression_rules(
+                    progression_rules,
+                    &ex_path,
+                    exercise.modality,
+                    plan.plan_version,
+                    &mut errors,
+                    &mut warnings,
+                );
+            }
         }
     }
 
@@ -595,6 +653,265 @@ pub fn validate(yaml: &str) -> ValidationResult {
         errors,
         warnings,
         statistics,
+    }
+}
+
+fn validate_progression_rules(
+    rules: &super::types::ProgressionRules,
+    ex_path: &str,
+    modality: Option<Modality>,
+    plan_version: u32,
+    errors: &mut Vec<ValidationIssue>,
+    warnings: &mut Vec<ValidationIssue>,
+) {
+    let rules_path = format!("{}.progression_rules", ex_path);
+
+    // PWF-P040: progression_rules only supported in v2
+    if plan_version < 2 {
+        warnings.push(ValidationIssue::warning_with_code(
+            &rules_path,
+            "progression_rules is only supported in plan_version 2 and above. This field will be ignored.",
+            "PWF-P040",
+        ));
+        return;
+    }
+
+    // PWF-P041: progression_rules only applicable to strength exercises
+    if let Some(modality) = modality {
+        if modality != Modality::Strength {
+            warnings.push(ValidationIssue::warning_with_code(
+                &rules_path,
+                format!(
+                    "progression_rules is designed for strength exercises, but exercise has modality '{:?}'",
+                    modality
+                ),
+                "PWF-P041",
+            ));
+        }
+    }
+
+    use super::types::ProgressionType;
+
+    // Validate progression type specific fields
+    match rules.progression_type {
+        ProgressionType::Linear => {
+            // PWF-P042: Linear progression requires weight increment
+            if rules.weight_increment_kg.is_none() && rules.weight_increment_lbs.is_none() {
+                errors.push(ValidationIssue::error_with_code(
+                    format!("{}.type", rules_path),
+                    "Linear progression requires either weight_increment_kg or weight_increment_lbs",
+                    "PWF-P042",
+                ));
+            }
+
+            // PWF-P043: Cannot specify both kg and lbs
+            if rules.weight_increment_kg.is_some() && rules.weight_increment_lbs.is_some() {
+                errors.push(ValidationIssue::error_with_code(
+                    &rules_path,
+                    "Cannot specify both weight_increment_kg and weight_increment_lbs - choose one",
+                    "PWF-P043",
+                ));
+            }
+
+            // Warn if reps fields are specified for linear progression
+            if rules.reps_range_min.is_some() || rules.reps_range_max.is_some() {
+                warnings.push(ValidationIssue::warning_with_code(
+                    &rules_path,
+                    "reps_range_min/max are not used in linear progression",
+                    "PWF-P044",
+                ));
+            }
+        }
+        ProgressionType::DoubleProgression => {
+            // PWF-P045: Double progression requires reps range
+            if rules.reps_range_min.is_none() || rules.reps_range_max.is_none() {
+                errors.push(ValidationIssue::error_with_code(
+                    format!("{}.type", rules_path),
+                    "Double progression requires both reps_range_min and reps_range_max",
+                    "PWF-P045",
+                ));
+            }
+
+            // PWF-P046: Double progression requires weight increment
+            if rules.weight_increment_kg.is_none() && rules.weight_increment_lbs.is_none() {
+                errors.push(ValidationIssue::error_with_code(
+                    format!("{}.type", rules_path),
+                    "Double progression requires either weight_increment_kg or weight_increment_lbs",
+                    "PWF-P046",
+                ));
+            }
+
+            // PWF-P047: Validate reps range
+            if let (Some(min), Some(max)) = (rules.reps_range_min, rules.reps_range_max) {
+                if min >= max {
+                    errors.push(ValidationIssue::error_with_code(
+                        format!("{}.reps_range_min", rules_path),
+                        format!(
+                            "reps_range_min ({}) must be less than reps_range_max ({})",
+                            min, max
+                        ),
+                        "PWF-P047",
+                    ));
+                }
+
+                if min == 0 {
+                    errors.push(ValidationIssue::error_with_code(
+                        format!("{}.reps_range_min", rules_path),
+                        "reps_range_min must be greater than 0",
+                        "PWF-P048",
+                    ));
+                }
+
+                if max > 100 {
+                    warnings.push(ValidationIssue::warning_with_code(
+                        format!("{}.reps_range_max", rules_path),
+                        format!("reps_range_max of {} is unusually high", max),
+                        "PWF-P049",
+                    ));
+                }
+            }
+        }
+    }
+
+    // PWF-P050: Validate weight increments are positive
+    if let Some(increment) = rules.weight_increment_kg {
+        if increment <= 0.0 {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.weight_increment_kg", rules_path),
+                format!(
+                    "weight_increment_kg must be greater than 0 (got {})",
+                    increment
+                ),
+                "PWF-P050",
+            ));
+        }
+        if increment > 50.0 {
+            warnings.push(ValidationIssue::warning_with_code(
+                format!("{}.weight_increment_kg", rules_path),
+                format!(
+                    "weight_increment_kg of {} kg is very large - typical values are 0.5-10 kg",
+                    increment
+                ),
+                "PWF-P051",
+            ));
+        }
+    }
+
+    if let Some(increment) = rules.weight_increment_lbs {
+        if increment <= 0.0 {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.weight_increment_lbs", rules_path),
+                format!(
+                    "weight_increment_lbs must be greater than 0 (got {})",
+                    increment
+                ),
+                "PWF-P052",
+            ));
+        }
+        if increment > 100.0 {
+            warnings.push(ValidationIssue::warning_with_code(
+                format!("{}.weight_increment_lbs", rules_path),
+                format!(
+                    "weight_increment_lbs of {} lbs is very large - typical values are 1-20 lbs",
+                    increment
+                ),
+                "PWF-P053",
+            ));
+        }
+    }
+
+    // PWF-P054: Validate deload_percent if present
+    if let Some(deload_percent) = rules.deload_percent {
+        if !(50.0..=100.0).contains(&deload_percent) {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.deload_percent", rules_path),
+                format!(
+                    "deload_percent must be between 50 and 100 (got {})",
+                    deload_percent
+                ),
+                "PWF-P054",
+            ));
+        }
+    }
+
+    // PWF-P055: Validate deload_weeks if present
+    if let Some(deload_weeks) = rules.deload_weeks {
+        if deload_weeks == 0 {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.deload_weeks", rules_path),
+                "deload_weeks must be greater than 0",
+                "PWF-P055",
+            ));
+        }
+        if deload_weeks > 8 {
+            warnings.push(ValidationIssue::warning_with_code(
+                format!("{}.deload_weeks", rules_path),
+                format!(
+                    "deload_weeks of {} is unusually long - typical deloads are 1-2 weeks",
+                    deload_weeks
+                ),
+                "PWF-P056",
+            ));
+        }
+    }
+
+    // PWF-P057: Validate max weight constraints
+    if rules.max_weight_kg.is_some() && rules.max_weight_lbs.is_some() {
+        errors.push(ValidationIssue::error_with_code(
+            &rules_path,
+            "Cannot specify both max_weight_kg and max_weight_lbs - choose one",
+            "PWF-P057",
+        ));
+    }
+
+    if let Some(max_weight) = rules.max_weight_kg {
+        if max_weight <= 0.0 {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.max_weight_kg", rules_path),
+                format!("max_weight_kg must be greater than 0 (got {})", max_weight),
+                "PWF-P058",
+            ));
+        }
+    }
+
+    if let Some(max_weight) = rules.max_weight_lbs {
+        if max_weight <= 0.0 {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.max_weight_lbs", rules_path),
+                format!("max_weight_lbs must be greater than 0 (got {})", max_weight),
+                "PWF-P059",
+            ));
+        }
+    }
+
+    // PWF-P060: Validate reps_increment if present
+    if let Some(reps_increment) = rules.reps_increment {
+        if reps_increment == 0 {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.reps_increment", rules_path),
+                "reps_increment must be greater than 0",
+                "PWF-P060",
+            ));
+        }
+        if reps_increment > 10 {
+            warnings.push(ValidationIssue::warning_with_code(
+                format!("{}.reps_increment", rules_path),
+                format!(
+                    "reps_increment of {} is very large - typical values are 1-2 reps",
+                    reps_increment
+                ),
+                "PWF-P061",
+            ));
+        }
+    }
+
+    // PWF-P062: Warn if deload_condition without deload_percent
+    if rules.deload_condition.is_some() && rules.deload_percent.is_none() {
+        warnings.push(ValidationIssue::warning_with_code(
+            &rules_path,
+            "deload_condition specified but deload_percent is missing - consider adding deload_percent",
+            "PWF-P062",
+        ));
     }
 }
 
@@ -741,6 +1058,98 @@ fn validate_exercise_library(
                 // No required defaults
             }
         }
+    }
+}
+
+fn validate_workout_templates(
+    templates: &[super::types::WorkoutTemplate],
+    errors: &mut Vec<ValidationIssue>,
+    _warnings: &mut Vec<ValidationIssue>,
+) {
+    if templates.len() > 100 {
+        errors.push(ValidationIssue::error_with_code(
+            "workout_templates",
+            format!(
+                "workout_templates has {} entries but maximum is 100",
+                templates.len()
+            ),
+            "PWF-P050",
+        ));
+    }
+
+    let mut seen_ids = HashSet::new();
+
+    for (idx, template) in templates.iter().enumerate() {
+        let tmpl_path = format!("workout_templates[{}]", idx);
+
+        // Validate unique IDs
+        if seen_ids.contains(&template.id) {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.id", tmpl_path),
+                format!("Duplicate workout template ID: {}", template.id),
+                "PWF-P051",
+            ));
+        }
+        seen_ids.insert(&template.id);
+
+        // Validate ID format
+        if template.id.is_empty() || template.id.len() > 100 {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.id", tmpl_path),
+                format!(
+                    "Workout template ID must be 1-100 characters (got {})",
+                    template.id.len()
+                ),
+                "PWF-P052",
+            ));
+        }
+
+        if !template
+            .id
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
+        {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.id", tmpl_path),
+                "Workout template ID must contain only alphanumeric characters, hyphens, or underscores",
+                "PWF-P052",
+            ));
+        }
+
+        // Validate name
+        if template.name.is_empty() || template.name.len() > 100 {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.name", tmpl_path),
+                format!(
+                    "Workout template name must be 1-100 characters (got {})",
+                    template.name.len()
+                ),
+                "PWF-P053",
+            ));
+        }
+
+        // Validate description length
+        if let Some(ref desc) = template.description {
+            if desc.len() > 500 {
+                errors.push(ValidationIssue::error_with_code(
+                    format!("{}.description", tmpl_path),
+                    format!("Description exceeds 500 characters ({} chars)", desc.len()),
+                    "PWF-P054",
+                ));
+            }
+        }
+
+        // Validate exercises
+        if template.exercises.is_empty() {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.exercises", tmpl_path),
+                "Workout template must have at least 1 exercise",
+                "PWF-P055",
+            ));
+        }
+
+        // Note: Exercise validation within templates happens during day validation
+        // We don't re-validate exercises here to avoid duplication
     }
 }
 

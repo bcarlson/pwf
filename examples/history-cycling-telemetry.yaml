@@ -1,0 +1,176 @@
+# PWF History Export v2 - Cycling with Telemetry
+# Demonstrates telemetry metrics for cycling workouts with power meter and HR data
+
+history_version: 2
+exported_at: "2025-12-20T18:30:00Z"
+
+export_source:
+  app_name: "Zwift"
+  app_version: "1.58.0"
+  platform: "desktop"
+  preferred_units:
+    weight: kg
+    distance: kilometers
+
+units:
+  weight: kg
+  distance: kilometers
+
+workouts:
+  - id: "cycling-20251220-001"
+    date: "2025-12-20"
+    started_at: "2025-12-20T14:00:00Z"
+    ended_at: "2025-12-20T15:30:00Z"
+    duration_sec: 5400
+    title: "FTP Intervals - Watopia"
+    notes: "Indoor cycling session on Zwift. Felt strong throughout."
+
+    telemetry:
+      heart_rate_avg: 155
+      heart_rate_max: 182
+      heart_rate_min: 98
+      power_avg: 245
+      power_max: 420
+      total_distance_km: 45.2
+      speed_avg_kph: 30.1
+      speed_max_kph: 52.3
+      cadence_avg: 88
+      total_calories: 680
+      temperature_c: 22.5
+
+    exercises:
+      - name: "Warm-up"
+        modality: cycling
+        sets:
+          - set_number: 1
+            duration_sec: 600
+            distance_meters: 5000
+            telemetry:
+              heart_rate_avg: 118
+              heart_rate_max: 132
+              power_avg: 150
+              power_max: 180
+              speed_avg_kph: 30.0
+              cadence_avg: 82
+              calories: 95
+
+      - name: "FTP Intervals"
+        modality: interval
+        notes: "4x8min @ 105% FTP with 4min recovery"
+        sets:
+          - set_number: 1
+            set_type: working
+            duration_sec: 480
+            distance_meters: 4200
+            telemetry:
+              heart_rate_avg: 168
+              heart_rate_max: 175
+              power_avg: 315
+              power_max: 340
+              speed_avg_kph: 31.5
+              cadence_avg: 92
+              calories: 142
+
+          - set_number: 2
+            set_type: working
+            duration_sec: 240
+            distance_meters: 2100
+            notes: "Recovery interval"
+            telemetry:
+              heart_rate_avg: 142
+              heart_rate_max: 155
+              power_avg: 120
+              power_max: 145
+              speed_avg_kph: 31.5
+              cadence_avg: 78
+              calories: 48
+
+          - set_number: 3
+            set_type: working
+            duration_sec: 480
+            distance_meters: 4150
+            telemetry:
+              heart_rate_avg: 172
+              heart_rate_max: 178
+              power_avg: 318
+              power_max: 335
+              speed_avg_kph: 31.1
+              cadence_avg: 91
+              calories: 144
+
+          - set_number: 4
+            set_type: working
+            duration_sec: 240
+            distance_meters: 2050
+            notes: "Recovery interval"
+            telemetry:
+              heart_rate_avg: 145
+              heart_rate_max: 158
+              power_avg: 118
+              power_max: 140
+              speed_avg_kph: 30.8
+              cadence_avg: 76
+              calories: 47
+
+          - set_number: 5
+            set_type: working
+            duration_sec: 480
+            distance_meters: 4100
+            telemetry:
+              heart_rate_avg: 175
+              heart_rate_max: 182
+              power_avg: 312
+              power_max: 345
+              speed_avg_kph: 30.8
+              cadence_avg: 90
+              calories: 143
+
+          - set_number: 6
+            set_type: working
+            duration_sec: 240
+            distance_meters: 2000
+            notes: "Recovery interval"
+            telemetry:
+              heart_rate_avg: 148
+              heart_rate_max: 160
+              power_avg: 115
+              power_max: 138
+              speed_avg_kph: 30.0
+              cadence_avg: 75
+              calories: 45
+
+          - set_number: 7
+            set_type: working
+            duration_sec: 480
+            distance_meters: 4050
+            telemetry:
+              heart_rate_avg: 177
+              heart_rate_max: 182
+              power_avg: 310
+              power_max: 342
+              speed_avg_kph: 30.4
+              cadence_avg: 89
+              calories: 142
+
+      - name: "Cool-down"
+        modality: cycling
+        sets:
+          - set_number: 1
+            duration_sec: 600
+            distance_meters: 4800
+            telemetry:
+              heart_rate_avg: 108
+              heart_rate_max: 125
+              power_avg: 105
+              power_max: 130
+              speed_avg_kph: 28.8
+              cadence_avg: 72
+              calories: 74
+
+personal_records:
+  - exercise_name: "FTP Test"
+    record_type: max_duration
+    value: 300
+    unit: watts
+    achieved_at: "2025-12-15"
+    notes: "20-minute FTP test result"

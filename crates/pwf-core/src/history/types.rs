@@ -19,6 +19,13 @@ pub struct WpsHistory {
     pub body_measurements: Vec<BodyMeasurement>,
 }
 
+impl WpsHistory {
+    /// Returns true if this is a v2 history export
+    pub fn is_v2(&self) -> bool {
+        self.history_version == 2
+    }
+}
+
 /// Information about the exporting application
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ExportSource {
@@ -71,6 +78,80 @@ pub struct Workout {
     #[serde(default)]
     pub plan_day_id: Option<String>,
     pub exercises: Vec<CompletedExercise>,
+    #[serde(default)]
+    pub telemetry: Option<WorkoutTelemetry>,
+}
+
+/// Telemetry metrics for an entire workout session (PWF v2)
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct WorkoutTelemetry {
+    // Heart Rate
+    #[serde(default)]
+    pub heart_rate_avg: Option<u32>,
+    #[serde(default)]
+    pub heart_rate_max: Option<u32>,
+    #[serde(default)]
+    pub heart_rate_min: Option<u32>,
+
+    // Power (watts)
+    #[serde(default)]
+    pub power_avg: Option<u32>,
+    #[serde(default)]
+    pub power_max: Option<u32>,
+
+    // Total distance (meters or feet)
+    #[serde(default)]
+    pub total_distance_m: Option<f64>,
+    #[serde(default)]
+    pub total_distance_km: Option<f64>,
+    #[serde(default)]
+    pub total_distance_mi: Option<f64>,
+
+    // Elevation
+    #[serde(default)]
+    pub total_elevation_gain_m: Option<f64>,
+    #[serde(default)]
+    pub total_elevation_gain_ft: Option<f64>,
+    #[serde(default)]
+    pub total_elevation_loss_m: Option<f64>,
+    #[serde(default)]
+    pub total_elevation_loss_ft: Option<f64>,
+
+    // Speed
+    #[serde(default)]
+    pub speed_avg_kph: Option<f64>,
+    #[serde(default)]
+    pub speed_avg_mph: Option<f64>,
+    #[serde(default)]
+    pub speed_max_kph: Option<f64>,
+    #[serde(default)]
+    pub speed_max_mph: Option<f64>,
+
+    // Pace
+    #[serde(default)]
+    pub pace_avg_sec_per_km: Option<u32>,
+    #[serde(default)]
+    pub pace_avg_sec_per_mi: Option<u32>,
+
+    // Cadence
+    #[serde(default)]
+    pub cadence_avg: Option<u32>,
+
+    // Environmental
+    #[serde(default)]
+    pub temperature_c: Option<f64>,
+    #[serde(default)]
+    pub temperature_f: Option<f64>,
+    #[serde(default)]
+    pub humidity_percent: Option<f64>,
+
+    // Calories burned
+    #[serde(default)]
+    pub total_calories: Option<u32>,
+
+    // GPS/Route data
+    #[serde(default)]
+    pub gps_route_id: Option<String>,
 }
 
 /// A completed exercise with recorded sets
@@ -113,6 +194,84 @@ pub struct CompletedSet {
     pub is_pr: Option<bool>,
     #[serde(default)]
     pub completed_at: Option<String>,
+    #[serde(default)]
+    pub telemetry: Option<SetTelemetry>,
+}
+
+/// Telemetry metrics for a completed set (PWF v2)
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SetTelemetry {
+    // Heart Rate
+    #[serde(default)]
+    pub heart_rate_avg: Option<u32>,
+    #[serde(default)]
+    pub heart_rate_max: Option<u32>,
+    #[serde(default)]
+    pub heart_rate_min: Option<u32>,
+
+    // Power (watts)
+    #[serde(default)]
+    pub power_avg: Option<u32>,
+    #[serde(default)]
+    pub power_max: Option<u32>,
+    #[serde(default)]
+    pub power_min: Option<u32>,
+
+    // Elevation (meters or feet depending on preferred_units)
+    #[serde(default)]
+    pub elevation_gain_m: Option<f64>,
+    #[serde(default)]
+    pub elevation_gain_ft: Option<f64>,
+    #[serde(default)]
+    pub elevation_loss_m: Option<f64>,
+    #[serde(default)]
+    pub elevation_loss_ft: Option<f64>,
+
+    // Speed (m/s, km/h, or mph depending on context)
+    #[serde(default)]
+    pub speed_avg_mps: Option<f64>,
+    #[serde(default)]
+    pub speed_avg_kph: Option<f64>,
+    #[serde(default)]
+    pub speed_avg_mph: Option<f64>,
+    #[serde(default)]
+    pub speed_max_mps: Option<f64>,
+    #[serde(default)]
+    pub speed_max_kph: Option<f64>,
+    #[serde(default)]
+    pub speed_max_mph: Option<f64>,
+
+    // Pace (seconds per km or mile)
+    #[serde(default)]
+    pub pace_avg_sec_per_km: Option<u32>,
+    #[serde(default)]
+    pub pace_avg_sec_per_mi: Option<u32>,
+
+    // Cadence
+    #[serde(default)]
+    pub cadence_avg: Option<u32>,
+    #[serde(default)]
+    pub cadence_max: Option<u32>,
+
+    // Environmental
+    #[serde(default)]
+    pub temperature_c: Option<f64>,
+    #[serde(default)]
+    pub temperature_f: Option<f64>,
+    #[serde(default)]
+    pub humidity_percent: Option<f64>,
+
+    // Calories burned (if calculated by tracking device)
+    #[serde(default)]
+    pub calories: Option<u32>,
+
+    // Stroke rate (for swimming/rowing)
+    #[serde(default)]
+    pub stroke_rate: Option<u32>,
+
+    // GPS/Route data
+    #[serde(default)]
+    pub gps_route_id: Option<String>,
 }
 
 /// Type of set (working, warmup, etc.)
@@ -365,6 +524,7 @@ mod tests {
             plan_id: Some("plan-456".to_string()),
             plan_day_id: Some("day-789".to_string()),
             exercises: vec![],
+            telemetry: None,
         };
 
         let json = serde_json::to_string(&workout).unwrap();
@@ -389,6 +549,7 @@ mod tests {
             plan_id: None,
             plan_day_id: None,
             exercises: vec![],
+            telemetry: None,
         };
 
         let json = serde_json::to_string(&workout).unwrap();
@@ -420,6 +581,7 @@ mod tests {
                     notes: None,
                     is_pr: Some(false),
                     completed_at: None,
+                    telemetry: None,
                 },
                 CompletedSet {
                     set_number: Some(2),
@@ -434,6 +596,7 @@ mod tests {
                     notes: None,
                     is_pr: Some(true),
                     completed_at: Some("2025-01-15T10:30:00Z".to_string()),
+                    telemetry: None,
                 },
             ],
         };
@@ -464,6 +627,7 @@ mod tests {
             notes: Some("Felt good".to_string()),
             is_pr: Some(true),
             completed_at: Some("2025-01-15T10:30:00Z".to_string()),
+            telemetry: None,
         };
 
         let json = serde_json::to_string(&set).unwrap();
@@ -496,6 +660,7 @@ mod tests {
             notes: None,
             is_pr: None,
             completed_at: None,
+            telemetry: None,
         };
 
         let json = serde_json::to_string(&set).unwrap();
@@ -740,8 +905,10 @@ mod tests {
                         notes: None,
                         is_pr: Some(true),
                         completed_at: None,
+                        telemetry: None,
                     }],
                 }],
+                telemetry: None,
             }],
             personal_records: vec![PersonalRecord {
                 exercise_name: "Bench Press".to_string(),

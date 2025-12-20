@@ -924,3 +924,269 @@ cycle:
         .iter()
         .any(|e| e.code == Some("PWF-P026".to_string())));
 }
+
+// ============================================================================
+// Workout Template Tests
+// ============================================================================
+
+#[test]
+fn test_workout_templates_basic_valid() {
+    let yaml = read_example("workout-templates-basic.yaml");
+    let result = plan::validate(&yaml);
+
+    assert!(
+        result.is_valid(),
+        "workout-templates-basic.yaml should be valid. Errors: {:?}",
+        result.errors
+    );
+    assert!(result.plan.is_some());
+
+    let plan_data = result.plan.unwrap();
+    assert_eq!(plan_data.plan_version, 2);
+    assert_eq!(plan_data.workout_templates.len(), 3);
+    assert_eq!(plan_data.cycle.days.len(), 6);
+
+    // Verify templates
+    let push_template = plan_data
+        .workout_templates
+        .iter()
+        .find(|t| t.id == "push-day")
+        .unwrap();
+    assert_eq!(push_template.name, "Push Day - Chest, Shoulders, Triceps");
+    assert_eq!(push_template.exercises.len(), 3);
+    assert_eq!(push_template.target_session_length_min, Some(75));
+
+    // Verify days use template_ref
+    assert_eq!(
+        plan_data.cycle.days[0].template_ref,
+        Some("push-day".to_string())
+    );
+    assert_eq!(
+        plan_data.cycle.days[1].template_ref,
+        Some("pull-day".to_string())
+    );
+    assert_eq!(
+        plan_data.cycle.days[2].template_ref,
+        Some("leg-day".to_string())
+    );
+}
+
+#[test]
+fn test_workout_templates_advanced_valid() {
+    let yaml = read_example("workout-templates-advanced.yaml");
+    let result = plan::validate(&yaml);
+
+    assert!(
+        result.is_valid(),
+        "workout-templates-advanced.yaml should be valid. Errors: {:?}",
+        result.errors
+    );
+    assert!(result.plan.is_some());
+
+    let plan_data = result.plan.unwrap();
+    assert_eq!(plan_data.plan_version, 2);
+    assert_eq!(plan_data.workout_templates.len(), 3);
+
+    // Verify templates have correct structure
+    let lower_template = plan_data
+        .workout_templates
+        .iter()
+        .find(|t| t.id == "lower-strength")
+        .unwrap();
+    assert_eq!(lower_template.exercises.len(), 2);
+
+    // Verify days with template_ref can have additional exercises
+    let first_day = &plan_data.cycle.days[0];
+    assert_eq!(first_day.template_ref, Some("lower-strength".to_string()));
+    assert_eq!(first_day.exercises.len(), 1); // Has additional exercise
+}
+
+#[test]
+fn test_template_ref_not_found() {
+    let yaml = r#"
+plan_version: 2
+meta:
+  title: "Invalid Template Ref"
+workout_templates:
+  - id: existing-template
+    name: "Existing Template"
+    exercises:
+      - name: "Test Exercise"
+        modality: strength
+        target_sets: 3
+        target_reps: 10
+cycle:
+  days:
+    - template_ref: nonexistent-template
+"#;
+
+    let result = plan::validate(yaml);
+    assert!(!result.is_valid());
+    assert!(result
+        .errors
+        .iter()
+        .any(|e| e.code == Some("PWF-P038".to_string())));
+}
+
+#[test]
+fn test_template_empty_exercises() {
+    let yaml = r#"
+plan_version: 2
+meta:
+  title: "Invalid Template"
+workout_templates:
+  - id: empty-template
+    name: "Empty Template"
+    exercises: []
+cycle:
+  days:
+    - exercises:
+        - name: "Test"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+"#;
+
+    let result = plan::validate(yaml);
+    assert!(!result.is_valid());
+    assert!(result
+        .errors
+        .iter()
+        .any(|e| e.code == Some("PWF-P055".to_string())));
+}
+
+#[test]
+fn test_template_duplicate_id() {
+    let yaml = r#"
+plan_version: 2
+meta:
+  title: "Duplicate Template IDs"
+workout_templates:
+  - id: duplicate
+    name: "First Template"
+    exercises:
+      - name: "Exercise 1"
+        modality: strength
+        target_sets: 3
+        target_reps: 10
+  - id: duplicate
+    name: "Second Template"
+    exercises:
+      - name: "Exercise 2"
+        modality: strength
+        target_sets: 3
+        target_reps: 10
+cycle:
+  days:
+    - exercises:
+        - name: "Test"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+"#;
+
+    let result = plan::validate(yaml);
+    assert!(!result.is_valid());
+    assert!(result
+        .errors
+        .iter()
+        .any(|e| e.code == Some("PWF-P051".to_string())));
+}
+
+#[test]
+fn test_template_max_limit() {
+    let mut templates = String::new();
+    for i in 0..101 {
+        templates.push_str(&format!(
+            r#"
+  - id: template-{}
+    name: "Template {}"
+    exercises:
+      - name: "Exercise"
+        modality: strength
+        target_sets: 3
+        target_reps: 10
+"#,
+            i, i
+        ));
+    }
+
+    let yaml = format!(
+        r#"
+plan_version: 2
+meta:
+  title: "Too Many Templates"
+workout_templates:{}
+cycle:
+  days:
+    - exercises:
+        - name: "Test"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+"#,
+        templates
+    );
+
+    let result = plan::validate(&yaml);
+    assert!(!result.is_valid());
+    assert!(result
+        .errors
+        .iter()
+        .any(|e| e.code == Some("PWF-P050".to_string())));
+}
+
+#[test]
+fn test_day_with_template_ref_and_exercises_warning() {
+    let yaml = r#"
+plan_version: 2
+meta:
+  title: "Template Ref With Exercises"
+workout_templates:
+  - id: my-template
+    name: "My Template"
+    exercises:
+      - name: "Template Exercise"
+        modality: strength
+        target_sets: 3
+        target_reps: 10
+cycle:
+  days:
+    - template_ref: my-template
+      exercises:
+        - name: "Additional Exercise"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+"#;
+
+    let result = plan::validate(yaml);
+    assert!(result.is_valid());
+    assert!(result
+        .warnings
+        .iter()
+        .any(|w| w.code == Some("PWF-P039".to_string())));
+}
+
+#[test]
+fn test_template_ref_in_v1_warning() {
+    let yaml = r#"
+plan_version: 1
+meta:
+  title: "Template Ref in V1"
+cycle:
+  days:
+    - template_ref: some-template
+      exercises:
+        - name: "Exercise"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+"#;
+
+    let result = plan::validate(yaml);
+    assert!(result.is_valid());
+    assert!(result.warnings.iter().any(|w| w
+        .message
+        .contains("template_ref is only supported in plan_version 2")));
+}

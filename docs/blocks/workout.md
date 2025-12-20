@@ -159,6 +159,25 @@ The exercises performed in this workout.
 
 ---
 
+### `telemetry`
+
+- **Type:** [WorkoutTelemetry Block](#workout-telemetry-block)
+- **Required:** No
+- **Version:** PWF v2
+
+Workout-level telemetry metrics such as heart rate, power, distance, elevation, and environmental data.
+
+```yaml
+- telemetry:
+    heart_rate_avg: 155
+    heart_rate_max: 182
+    total_distance_km: 45.2
+    total_elevation_gain_m: 250
+    total_calories: 680
+```
+
+---
+
 ## Completed Exercise Block
 
 A completed exercise within a workout.
@@ -203,6 +222,7 @@ A single completed set.
 | `notes` | `string` | No | Set-level notes |
 | `is_pr` | `boolean` | No | Whether this set was a PR |
 | `completed_at` | `string` | No | ISO 8601 datetime |
+| `telemetry` | [SetTelemetry](#set-telemetry-block) | No | Set-level telemetry metrics (v2) |
 
 ### Set Types
 
@@ -308,6 +328,108 @@ sets:
 
 ---
 
+## Set Telemetry Block
+
+Telemetry metrics for individual sets (PWF v2).
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `heart_rate_avg` | `integer` | Average heart rate (bpm) |
+| `heart_rate_max` | `integer` | Maximum heart rate (bpm) |
+| `heart_rate_min` | `integer` | Minimum heart rate (bpm) |
+| `power_avg` | `integer` | Average power (watts) |
+| `power_max` | `integer` | Maximum power (watts) |
+| `power_min` | `integer` | Minimum power (watts) |
+| `elevation_gain_m` | `number` | Elevation gain in meters |
+| `elevation_gain_ft` | `number` | Elevation gain in feet |
+| `elevation_loss_m` | `number` | Elevation loss in meters |
+| `elevation_loss_ft` | `number` | Elevation loss in feet |
+| `speed_avg_mps` | `number` | Average speed in m/s |
+| `speed_avg_kph` | `number` | Average speed in km/h |
+| `speed_avg_mph` | `number` | Average speed in mph |
+| `speed_max_mps` | `number` | Maximum speed in m/s |
+| `speed_max_kph` | `number` | Maximum speed in km/h |
+| `speed_max_mph` | `number` | Maximum speed in mph |
+| `pace_avg_sec_per_km` | `integer` | Average pace (sec/km) |
+| `pace_avg_sec_per_mi` | `integer` | Average pace (sec/mi) |
+| `cadence_avg` | `integer` | Average cadence (steps/min or RPM) |
+| `cadence_max` | `integer` | Maximum cadence |
+| `temperature_c` | `number` | Temperature in Celsius |
+| `temperature_f` | `number` | Temperature in Fahrenheit |
+| `humidity_percent` | `number` | Humidity percentage (0-100) |
+| `calories` | `integer` | Calories burned |
+| `stroke_rate` | `integer` | Stroke rate (swimming/rowing) |
+| `gps_route_id` | `string` | Reference to GPS route data |
+
+### Example
+
+```yaml
+sets:
+  - duration_sec: 1980
+    distance_meters: 5500
+    telemetry:
+      heart_rate_avg: 165
+      heart_rate_max: 185
+      elevation_gain_m: 198
+      speed_avg_kph: 10.1
+      pace_avg_sec_per_km: 355
+      cadence_avg: 168
+      temperature_c: 13.3
+      humidity_percent: 75
+      calories: 425
+```
+
+---
+
+## Workout Telemetry Block
+
+Telemetry metrics for entire workout sessions (PWF v2).
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `heart_rate_avg` | `integer` | Average heart rate (bpm) |
+| `heart_rate_max` | `integer` | Maximum heart rate (bpm) |
+| `heart_rate_min` | `integer` | Minimum heart rate (bpm) |
+| `power_avg` | `integer` | Average power (watts) |
+| `power_max` | `integer` | Maximum power (watts) |
+| `total_distance_m` | `number` | Total distance in meters |
+| `total_distance_km` | `number` | Total distance in kilometers |
+| `total_distance_mi` | `number` | Total distance in miles |
+| `total_elevation_gain_m` | `number` | Total elevation gain in meters |
+| `total_elevation_gain_ft` | `number` | Total elevation gain in feet |
+| `total_elevation_loss_m` | `number` | Total elevation loss in meters |
+| `total_elevation_loss_ft` | `number` | Total elevation loss in feet |
+| `speed_avg_kph` | `number` | Average speed in km/h |
+| `speed_avg_mph` | `number` | Average speed in mph |
+| `speed_max_kph` | `number` | Maximum speed in km/h |
+| `speed_max_mph` | `number` | Maximum speed in mph |
+| `pace_avg_sec_per_km` | `integer` | Average pace (sec/km) |
+| `pace_avg_sec_per_mi` | `integer` | Average pace (sec/mi) |
+| `cadence_avg` | `integer` | Average cadence |
+| `temperature_c` | `number` | Temperature in Celsius |
+| `temperature_f` | `number` | Temperature in Fahrenheit |
+| `humidity_percent` | `number` | Humidity percentage (0-100) |
+| `total_calories` | `integer` | Total calories burned |
+| `gps_route_id` | `string` | Reference to GPS route data |
+
+### Example
+
+```yaml
+telemetry:
+  heart_rate_avg: 158
+  heart_rate_max: 185
+  total_distance_km: 10.94
+  total_elevation_gain_m: 250
+  speed_avg_kph: 11.9
+  pace_avg_sec_per_km: 303
+  cadence_avg: 172
+  temperature_c: 14.4
+  humidity_percent: 72
+  total_calories: 785
+```
+
+---
+
 ## Full Workout Example
 
 ```yaml
@@ -369,4 +491,60 @@ workouts:
           - duration_sec: 55
           - duration_sec: 45
             notes: "Core fatigued"
+```
+
+## Full Workout with Telemetry Example (PWF v2)
+
+```yaml
+workouts:
+  - id: "run-20251220-morning"
+    date: "2025-12-20"
+    started_at: "2025-12-20T06:30:00Z"
+    ended_at: "2025-12-20T07:25:00Z"
+    duration_sec: 3300
+    title: "Morning Trail Run"
+
+    telemetry:
+      heart_rate_avg: 158
+      heart_rate_max: 185
+      total_distance_km: 10.94
+      total_elevation_gain_m: 250
+      speed_avg_kph: 11.9
+      pace_avg_sec_per_km: 303
+      cadence_avg: 172
+      temperature_c: 14.4
+      humidity_percent: 72
+      total_calories: 785
+
+    exercises:
+      - name: "Trail Run"
+        modality: running
+        sets:
+          - duration_sec: 1980
+            distance_meters: 5500
+            notes: "Outbound - uphill section"
+            telemetry:
+              heart_rate_avg: 165
+              heart_rate_max: 185
+              elevation_gain_m: 198
+              speed_avg_kph: 10.1
+              pace_avg_sec_per_km: 355
+              cadence_avg: 168
+              temperature_c: 13.3
+              humidity_percent: 75
+              calories: 425
+
+          - duration_sec: 1320
+            distance_meters: 5440
+            notes: "Return - mostly downhill"
+            telemetry:
+              heart_rate_avg: 150
+              heart_rate_max: 172
+              elevation_loss_m: 213
+              speed_avg_kph: 14.3
+              pace_avg_sec_per_km: 251
+              cadence_avg: 176
+              temperature_c: 15.6
+              humidity_percent: 68
+              calories: 360
 ```
