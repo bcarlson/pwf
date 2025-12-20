@@ -11,6 +11,10 @@ pub enum Modality {
     Countdown,
     Stopwatch,
     Interval,
+    Cycling,
+    Running,
+    Rowing,
+    Swimming,
 }
 
 impl fmt::Display for Modality {
@@ -20,6 +24,10 @@ impl fmt::Display for Modality {
             Modality::Countdown => write!(f, "countdown"),
             Modality::Stopwatch => write!(f, "stopwatch"),
             Modality::Interval => write!(f, "interval"),
+            Modality::Cycling => write!(f, "cycling"),
+            Modality::Running => write!(f, "running"),
+            Modality::Rowing => write!(f, "rowing"),
+            Modality::Swimming => write!(f, "swimming"),
         }
     }
 }
@@ -33,6 +41,10 @@ impl std::str::FromStr for Modality {
             "countdown" => Ok(Modality::Countdown),
             "stopwatch" => Ok(Modality::Stopwatch),
             "interval" => Ok(Modality::Interval),
+            "cycling" => Ok(Modality::Cycling),
+            "running" => Ok(Modality::Running),
+            "rowing" => Ok(Modality::Rowing),
+            "swimming" => Ok(Modality::Swimming),
             _ => Err(format!("Unknown modality: {}", s)),
         }
     }

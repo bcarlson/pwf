@@ -49,11 +49,11 @@ pub fn validate(yaml: &str) -> ValidationResult {
     };
 
     // Validate plan_version
-    if plan.plan_version != 1 {
+    if plan.plan_version != 1 && plan.plan_version != 2 {
         errors.push(ValidationIssue::error(
             "plan_version",
             format!(
-                "Unsupported plan_version: {}. Only version 1 is supported.",
+                "Unsupported plan_version: {}. Only versions 1 and 2 are supported.",
                 plan.plan_version
             ),
         ));
@@ -195,6 +195,16 @@ pub fn validate(yaml: &str) -> ValidationResult {
         }
     }
 
+    // Validate exercise library (v2 only)
+    if plan.plan_version == 2 {
+        validate_exercise_library(&plan.exercise_library, &mut errors, &mut warnings);
+    } else if !plan.exercise_library.is_empty() {
+        warnings.push(ValidationIssue::warning(
+            "exercise_library",
+            "exercise_library is only supported in plan_version 2. This field will be ignored.",
+        ));
+    }
+
     // Validate days
     if plan.cycle.days.is_empty() {
         errors.push(ValidationIssue::error(
@@ -233,11 +243,63 @@ pub fn validate(yaml: &str) -> ValidationResult {
         for (ex_idx, exercise) in day.exercises.iter().enumerate() {
             let ex_path = format!("{}.exercises[{}]", day_path, ex_idx);
 
+            // Validate exercise_ref / modality requirement (v2)
+            if plan.plan_version == 2 {
+                if exercise.exercise_ref.is_none() && exercise.modality.is_none() {
+                    errors.push(ValidationIssue::error_with_code(
+                        &ex_path,
+                        "Either exercise_ref or modality must be specified",
+                        "PWF-P030",
+                    ));
+                }
+
+                if exercise.exercise_ref.is_some() && exercise.modality.is_some() {
+                    warnings.push(ValidationIssue::warning_with_code(
+                        &ex_path,
+                        "Both exercise_ref and modality specified. exercise_ref takes precedence.",
+                        "PWF-P031",
+                    ));
+                }
+
+                // Validate exercise_ref exists in library
+                if let Some(ref exercise_ref) = exercise.exercise_ref {
+                    if !plan
+                        .exercise_library
+                        .iter()
+                        .any(|lib_ex| &lib_ex.id == exercise_ref)
+                    {
+                        errors.push(ValidationIssue::error_with_code(
+                            format!("{}.exercise_ref", ex_path),
+                            format!(
+                                "exercise_ref '{}' not found in exercise_library",
+                                exercise_ref
+                            ),
+                            "PWF-P032",
+                        ));
+                    }
+                }
+            } else {
+                // v1: modality is required
+                if exercise.modality.is_none() {
+                    errors.push(ValidationIssue::error(
+                        &ex_path,
+                        "modality is required in plan_version 1",
+                    ));
+                }
+
+                if exercise.exercise_ref.is_some() {
+                    warnings.push(ValidationIssue::warning(
+                        format!("{}.exercise_ref", ex_path),
+                        "exercise_ref is only supported in plan_version 2. This field will be ignored.",
+                    ));
+                }
+            }
+
             // Check name
-            if exercise.name.is_none() {
+            if exercise.name.is_none() && exercise.exercise_ref.is_none() {
                 warnings.push(ValidationIssue::warning(
                     format!("{}.name", ex_path),
-                    "Missing exercise name",
+                    "Missing exercise name (no name or exercise_ref)",
                 ));
             }
 
@@ -287,34 +349,117 @@ pub fn validate(yaml: &str) -> ValidationResult {
                 }
             }
 
-            // Modality-specific validation
-            match exercise.modality {
-                Modality::Strength => {
-                    if exercise.target_sets.is_none() && exercise.target_reps.is_none() {
-                        warnings.push(ValidationIssue::warning(
-                            &ex_path,
-                            "Strength exercise missing target_sets/target_reps",
-                        ));
+            // Modality-specific validation (only if modality is present)
+            if let Some(modality) = exercise.modality {
+                match modality {
+                    Modality::Strength => {
+                        if exercise.target_sets.is_none() && exercise.target_reps.is_none() {
+                            warnings.push(ValidationIssue::warning(
+                                &ex_path,
+                                "Strength exercise missing target_sets/target_reps",
+                            ));
+                        }
                     }
-                }
-                Modality::Countdown => {
-                    if exercise.target_duration_sec.is_none() {
-                        warnings.push(ValidationIssue::warning(
-                            &ex_path,
-                            "Countdown exercise missing target_duration_sec",
-                        ));
+                    Modality::Countdown => {
+                        if exercise.target_duration_sec.is_none() {
+                            warnings.push(ValidationIssue::warning(
+                                &ex_path,
+                                "Countdown exercise missing target_duration_sec",
+                            ));
+                        }
                     }
-                }
-                Modality::Interval => {
-                    if exercise.target_sets.is_none() {
-                        warnings.push(ValidationIssue::warning(
-                            &ex_path,
-                            "Interval exercise missing target_sets",
-                        ));
+                    Modality::Interval => {
+                        if exercise.target_sets.is_none() {
+                            warnings.push(ValidationIssue::warning(
+                                &ex_path,
+                                "Interval exercise missing target_sets",
+                            ));
+                        }
                     }
-                }
-                Modality::Stopwatch => {
-                    // No required fields
+                    Modality::Stopwatch => {
+                        // No required fields
+                    }
+                    Modality::Cycling
+                    | Modality::Running
+                    | Modality::Rowing
+                    | Modality::Swimming => {
+                        // Endurance modalities - no specific required fields in v2.0
+                        // Future versions may require zones, ramp, or interval_phases
+
+                        // Validate zones if present
+                        if let Some(ref zones) = exercise.zones {
+                            if zones.is_empty() {
+                                errors.push(ValidationIssue::error_with_code(
+                                    format!("{}.zones", ex_path),
+                                    "zones array cannot be empty",
+                                    "PWF-P021",
+                                ));
+                            }
+
+                            for (zone_idx, zone) in zones.iter().enumerate() {
+                                let zone_path = format!("{}.zones[{}]", ex_path, zone_idx);
+
+                                if zone.zone < 1 || zone.zone > 7 {
+                                    errors.push(ValidationIssue::error_with_code(
+                                        format!("{}.zone", zone_path),
+                                        format!("zone must be between 1 and 7 (got {})", zone.zone),
+                                        "PWF-P022",
+                                    ));
+                                }
+                            }
+                        }
+
+                        // Validate ramp if present
+                        if let Some(ref ramp) = exercise.ramp {
+                            if ramp.start_power_watts >= ramp.end_power_watts {
+                                errors.push(ValidationIssue::error_with_code(
+                                    format!("{}.ramp", ex_path),
+                                    "ramp start_power_watts must be less than end_power_watts",
+                                    "PWF-P023",
+                                ));
+                            }
+
+                            if ramp.duration_sec == 0 {
+                                errors.push(ValidationIssue::error_with_code(
+                                    format!("{}.ramp.duration_sec", ex_path),
+                                    "ramp duration_sec must be greater than 0",
+                                    "PWF-P024",
+                                ));
+                            }
+                        }
+
+                        // Validate interval_phases if present
+                        if let Some(ref phases) = exercise.interval_phases {
+                            if phases.is_empty() {
+                                errors.push(ValidationIssue::error_with_code(
+                                    format!("{}.interval_phases", ex_path),
+                                    "interval_phases array cannot be empty",
+                                    "PWF-P025",
+                                ));
+                            }
+
+                            for (phase_idx, phase) in phases.iter().enumerate() {
+                                let phase_path =
+                                    format!("{}.interval_phases[{}]", ex_path, phase_idx);
+
+                                if phase.name.is_empty() {
+                                    errors.push(ValidationIssue::error_with_code(
+                                        format!("{}.name", phase_path),
+                                        "interval phase name cannot be empty",
+                                        "PWF-P026",
+                                    ));
+                                }
+
+                                if phase.duration_sec == 0 {
+                                    errors.push(ValidationIssue::error_with_code(
+                                        format!("{}.duration_sec", phase_path),
+                                        "interval phase duration_sec must be greater than 0",
+                                        "PWF-P027",
+                                    ));
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -453,6 +598,112 @@ pub fn validate(yaml: &str) -> ValidationResult {
     }
 }
 
+fn validate_exercise_library(
+    library: &[super::types::LibraryExercise],
+    errors: &mut Vec<ValidationIssue>,
+    warnings: &mut Vec<ValidationIssue>,
+) {
+    if library.len() > 500 {
+        errors.push(ValidationIssue::error_with_code(
+            "exercise_library",
+            format!(
+                "exercise_library has {} entries but maximum is 500",
+                library.len()
+            ),
+            "PWF-P033",
+        ));
+    }
+
+    let mut seen_ids = HashSet::new();
+
+    for (idx, lib_ex) in library.iter().enumerate() {
+        let lib_path = format!("exercise_library[{}]", idx);
+
+        // Validate unique IDs
+        if seen_ids.contains(&lib_ex.id) {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.id", lib_path),
+                format!("Duplicate exercise library ID: {}", lib_ex.id),
+                "PWF-P034",
+            ));
+        }
+        seen_ids.insert(&lib_ex.id);
+
+        // Validate ID format
+        if lib_ex.id.is_empty() || lib_ex.id.len() > 100 {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.id", lib_path),
+                format!(
+                    "Library exercise ID must be 1-100 characters (got {})",
+                    lib_ex.id.len()
+                ),
+                "PWF-P035",
+            ));
+        }
+
+        if !lib_ex
+            .id
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
+        {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.id", lib_path),
+                "Library exercise ID must contain only alphanumeric characters, hyphens, or underscores",
+                "PWF-P035",
+            ));
+        }
+
+        // Validate name
+        if lib_ex.name.is_empty() || lib_ex.name.len() > 100 {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.name", lib_path),
+                format!(
+                    "Library exercise name must be 1-100 characters (got {})",
+                    lib_ex.name.len()
+                ),
+                "PWF-P036",
+            ));
+        }
+
+        // Validate description length
+        if let Some(ref desc) = lib_ex.description {
+            if desc.len() > 500 {
+                errors.push(ValidationIssue::error_with_code(
+                    format!("{}.description", lib_path),
+                    format!("Description exceeds 500 characters ({} chars)", desc.len()),
+                    "PWF-P037",
+                ));
+            }
+        }
+
+        // Validate URLs
+        if let Some(ref link) = lib_ex.link {
+            if !link.starts_with("https://") {
+                if link.starts_with("http://") {
+                    warnings.push(ValidationIssue::warning(
+                        format!("{}.link", lib_path),
+                        "HTTP URLs not allowed, use HTTPS",
+                    ));
+                } else {
+                    errors.push(ValidationIssue::error(
+                        format!("{}.link", lib_path),
+                        "Invalid URL format",
+                    ));
+                }
+            }
+        }
+
+        if let Some(ref image) = lib_ex.image {
+            if !image.starts_with("https://") {
+                warnings.push(ValidationIssue::warning(
+                    format!("{}.image", lib_path),
+                    "Image URL should use HTTPS",
+                ));
+            }
+        }
+    }
+}
+
 fn calculate_statistics(plan: &WpsPlan) -> PlanStatistics {
     let mut stats = PlanStatistics {
         total_days: plan.cycle.days.len(),
@@ -463,11 +714,17 @@ fn calculate_statistics(plan: &WpsPlan) -> PlanStatistics {
         stats.total_exercises += day.exercises.len();
 
         for exercise in &day.exercises {
-            match exercise.modality {
-                Modality::Strength => stats.strength_count += 1,
-                Modality::Countdown => stats.countdown_count += 1,
-                Modality::Stopwatch => stats.stopwatch_count += 1,
-                Modality::Interval => stats.interval_count += 1,
+            if let Some(modality) = exercise.modality {
+                match modality {
+                    Modality::Strength => stats.strength_count += 1,
+                    Modality::Countdown => stats.countdown_count += 1,
+                    Modality::Stopwatch => stats.stopwatch_count += 1,
+                    Modality::Interval => stats.interval_count += 1,
+                    Modality::Cycling => stats.cycling_count += 1,
+                    Modality::Running => stats.running_count += 1,
+                    Modality::Rowing => stats.rowing_count += 1,
+                    Modality::Swimming => stats.swimming_count += 1,
+                }
             }
         }
     }

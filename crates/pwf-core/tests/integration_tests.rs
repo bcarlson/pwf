@@ -747,3 +747,180 @@ fn test_all_example_files_exist() {
         );
     }
 }
+
+// ============================================================================
+// Endurance Workout Tests (PWF v2.0)
+// ============================================================================
+
+#[test]
+fn test_cycling_ftp_test_valid() {
+    let yaml = read_example("cycling-ftp-test.yaml");
+    let result = plan::validate(&yaml);
+
+    assert!(
+        result.is_valid(),
+        "cycling-ftp-test.yaml should be valid. Errors: {:?}",
+        result.errors
+    );
+
+    let plan = result.plan.unwrap();
+    assert_eq!(plan.cycle.days.len(), 1);
+    assert_eq!(plan.cycle.days[0].exercises.len(), 3);
+
+    // Verify athlete profile
+    let meta = plan.meta.unwrap();
+    let profile = meta.athlete_profile.unwrap();
+    assert_eq!(profile.ftp_watts, Some(250));
+    assert_eq!(profile.threshold_hr_bpm, Some(165));
+    assert_eq!(profile.max_hr_bpm, Some(185));
+}
+
+#[test]
+fn test_running_intervals_valid() {
+    let yaml = read_example("running-intervals.yaml");
+    let result = plan::validate(&yaml);
+
+    assert!(
+        result.is_valid(),
+        "running-intervals.yaml should be valid. Errors: {:?}",
+        result.errors
+    );
+
+    let plan = result.plan.unwrap();
+    assert_eq!(plan.cycle.days.len(), 1);
+    assert_eq!(plan.cycle.days[0].exercises.len(), 3);
+
+    // Verify interval phases exist
+    let interval_exercise = &plan.cycle.days[0].exercises[1];
+    assert!(interval_exercise.interval_phases.is_some());
+    let phases = interval_exercise.interval_phases.as_ref().unwrap();
+    assert_eq!(phases.len(), 2);
+    assert_eq!(phases[0].name, "work");
+    assert_eq!(phases[1].name, "recovery");
+}
+
+#[test]
+fn test_rowing_pyramid_valid() {
+    let yaml = read_example("rowing-pyramid.yaml");
+    let result = plan::validate(&yaml);
+
+    assert!(
+        result.is_valid(),
+        "rowing-pyramid.yaml should be valid. Errors: {:?}",
+        result.errors
+    );
+
+    let plan = result.plan.unwrap();
+    assert_eq!(plan.cycle.days.len(), 1);
+
+    // Verify ramp configuration
+    let ramp_exercise = &plan.cycle.days[0].exercises[1];
+    assert!(ramp_exercise.ramp.is_some());
+    let ramp = ramp_exercise.ramp.as_ref().unwrap();
+    assert_eq!(ramp.start_power_watts, 150);
+    assert_eq!(ramp.end_power_watts, 300);
+    assert_eq!(ramp.duration_sec, 900);
+}
+
+#[test]
+fn test_swimming_technique_valid() {
+    let yaml = read_example("swimming-technique.yaml");
+    let result = plan::validate(&yaml);
+
+    assert!(
+        result.is_valid(),
+        "swimming-technique.yaml should be valid. Errors: {:?}",
+        result.errors
+    );
+
+    let plan = result.plan.unwrap();
+    assert_eq!(plan.cycle.days.len(), 1);
+    assert_eq!(plan.cycle.days[0].exercises.len(), 3);
+}
+
+#[test]
+fn test_endurance_modality_statistics() {
+    let yaml = read_example("cycling-ftp-test.yaml");
+    let result = plan::validate(&yaml);
+
+    assert!(result.is_valid());
+    let stats = result.statistics.unwrap();
+
+    assert_eq!(stats.cycling_count, 3);
+    assert_eq!(stats.running_count, 0);
+    assert_eq!(stats.rowing_count, 0);
+    assert_eq!(stats.swimming_count, 0);
+}
+
+#[test]
+fn test_endurance_zone_validation() {
+    let yaml = r#"
+plan_version: 1
+meta:
+  title: "Invalid Zone Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Test"
+          modality: cycling
+          zones:
+            - zone: 8
+              duration_sec: 300
+"#;
+
+    let result = plan::validate(yaml);
+    assert!(!result.is_valid());
+    assert!(result
+        .errors
+        .iter()
+        .any(|e| e.code == Some("PWF-P022".to_string())));
+}
+
+#[test]
+fn test_endurance_ramp_validation() {
+    let yaml = r#"
+plan_version: 1
+meta:
+  title: "Invalid Ramp Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Test"
+          modality: rowing
+          ramp:
+            start_power_watts: 300
+            end_power_watts: 150
+            duration_sec: 600
+"#;
+
+    let result = plan::validate(yaml);
+    assert!(!result.is_valid());
+    assert!(result
+        .errors
+        .iter()
+        .any(|e| e.code == Some("PWF-P023".to_string())));
+}
+
+#[test]
+fn test_endurance_interval_phases_validation() {
+    let yaml = r#"
+plan_version: 1
+meta:
+  title: "Invalid Interval Phases Test"
+cycle:
+  days:
+    - exercises:
+        - name: "Test"
+          modality: running
+          interval_phases:
+            - name: ""
+              duration_sec: 120
+"#;
+
+    let result = plan::validate(yaml);
+    assert!(!result.is_valid());
+    assert!(result
+        .errors
+        .iter()
+        .any(|e| e.code == Some("PWF-P026".to_string())));
+}
