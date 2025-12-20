@@ -1,0 +1,207 @@
+# PWF v1 - Circuit Training Example
+# Demonstrates circuit-style grouping for metabolic conditioning
+
+plan_version: 1
+
+meta:
+  id: "circuit-example"
+  title: "Full Body Circuit Training"
+  description: "High-intensity circuit workouts combining strength, cardio, and bodyweight movements for maximum calorie burn."
+  author: "PWF Examples"
+  status: active
+  equipment: [dumbbells, kettlebell, jump_rope, box, mat]
+  daysPerWeek: 3
+  tags: [beginner, circuit, conditioning, fat-loss]
+
+glossary:
+  "Circuit": "A series of exercises performed consecutively with minimal rest"
+  "AMRAP": "As Many Reps As Possible - perform reps until form breaks down"
+  "EMOM": "Every Minute On the Minute - start each set at the top of the minute"
+
+cycle:
+  notes: "Complete all exercises in each circuit before resting. Rest 2 minutes between full circuit rounds."
+
+  days:
+    # Day 1 - Full Body Circuit A
+    - id: "circuit-day-1"
+      order: 0
+      focus: "Full Body Circuit - Strength Focus"
+      target_session_length_min: 45
+      notes: "Perform 3 rounds of the entire circuit. Minimal rest between exercises."
+      exercises:
+        # Main Circuit - 6 exercises
+        - id: "goblet-squat"
+          name: "Goblet Squat"
+          modality: strength
+          target_sets: 3
+          target_reps: 12
+          group: "main_circuit"
+          group_type: circuit
+          rest_between_sets_sec: 0
+          target_notes: "Hold kettlebell or dumbbell at chest. Full depth squat."
+
+        - id: "pushups"
+          name: "Push-ups"
+          modality: strength
+          target_sets: 3
+          target_reps: 15
+          group: "main_circuit"
+          group_type: circuit
+          rest_between_sets_sec: 0
+          target_notes: "Chest to floor. Elbows at 45 degrees."
+
+        - id: "kb-swings"
+          name: "Kettlebell Swings"
+          modality: strength
+          target_sets: 3
+          target_reps: 20
+          group: "main_circuit"
+          group_type: circuit
+          rest_between_sets_sec: 0
+          target_notes: "Hip hinge movement. Power from hips, not arms."
+
+        - id: "db-rows"
+          name: "Dumbbell Rows"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+          group: "main_circuit"
+          group_type: circuit
+          rest_between_sets_sec: 0
+          target_notes: "Each arm. Brace on bench or stand bent over."
+
+        - id: "jump-rope"
+          name: "Jump Rope"
+          modality: interval
+          target_sets: 3
+          target_duration_sec: 60
+          group: "main_circuit"
+          group_type: circuit
+          rest_between_sets_sec: 0
+          target_notes: "Steady pace. Stay light on feet."
+
+        - id: "plank"
+          name: "Plank"
+          modality: countdown
+          target_sets: 3
+          target_duration_sec: 45
+          group: "main_circuit"
+          group_type: circuit
+          rest_after_sec: 120
+          target_notes: "Body in straight line. Engage core throughout."
+
+    # Day 2 - HIIT Circuit
+    - id: "circuit-day-2"
+      order: 1
+      focus: "HIIT Circuit - Conditioning"
+      target_session_length_min: 30
+      notes: "4 rounds. Focus on intensity and maintaining good form."
+      exercises:
+        # HIIT Circuit - Short, intense movements
+        - id: "burpees"
+          name: "Burpees"
+          modality: strength
+          target_sets: 4
+          target_reps: 10
+          group: "hiit_circuit"
+          group_type: circuit
+          rest_between_sets_sec: 0
+          target_notes: "Full push-up at bottom. Jump at top."
+
+        - id: "box-jumps"
+          name: "Box Jumps"
+          modality: strength
+          target_sets: 4
+          target_reps: 12
+          group: "hiit_circuit"
+          group_type: circuit
+          rest_between_sets_sec: 0
+          target_notes: "Land softly. Step down between reps."
+
+        - id: "mountain-climbers"
+          name: "Mountain Climbers"
+          modality: interval
+          target_sets: 4
+          target_duration_sec: 30
+          group: "hiit_circuit"
+          group_type: circuit
+          rest_between_sets_sec: 0
+          target_notes: "Fast pace. Drive knees to chest."
+
+        - id: "kb-goblet-squat"
+          name: "Kettlebell Goblet Squat"
+          modality: strength
+          target_sets: 4
+          target_reps: 15
+          group: "hiit_circuit"
+          group_type: circuit
+          rest_after_sec: 90
+          target_notes: "Controlled tempo. Full range of motion."
+
+    # Day 3 - Bodyweight Circuit
+    - id: "circuit-day-3"
+      order: 2
+      focus: "Bodyweight Circuit - Endurance"
+      target_session_length_min: 40
+      notes: "5 rounds. No equipment needed. Perfect for home or travel."
+      exercises:
+        # Bodyweight Circuit
+        - id: "air-squats"
+          name: "Air Squats"
+          modality: strength
+          target_sets: 5
+          target_reps: 20
+          group: "bodyweight_circuit"
+          group_type: circuit
+          rest_between_sets_sec: 0
+          target_notes: "Full depth. Weight in heels."
+
+        - id: "pushups-bw"
+          name: "Push-ups"
+          modality: strength
+          target_sets: 5
+          target_reps: 15
+          group: "bodyweight_circuit"
+          group_type: circuit
+          rest_between_sets_sec: 0
+          target_notes: "Modify on knees if needed."
+
+        - id: "lunges"
+          name: "Alternating Lunges"
+          modality: strength
+          target_sets: 5
+          target_reps: 20
+          group: "bodyweight_circuit"
+          group_type: circuit
+          rest_between_sets_sec: 0
+          target_notes: "10 each leg. Knee touches floor lightly."
+
+        - id: "plank-bw"
+          name: "Plank"
+          modality: countdown
+          target_sets: 5
+          target_duration_sec: 40
+          group: "bodyweight_circuit"
+          group_type: circuit
+          rest_between_sets_sec: 0
+          target_notes: "Hold strong position throughout."
+
+        - id: "jumping-jacks"
+          name: "Jumping Jacks"
+          modality: interval
+          target_sets: 5
+          target_duration_sec: 45
+          group: "bodyweight_circuit"
+          group_type: circuit
+          rest_between_sets_sec: 0
+          target_notes: "Keep breathing steady."
+
+        - id: "bicycle-crunches"
+          name: "Bicycle Crunches"
+          modality: strength
+          target_sets: 5
+          target_reps: 30
+          group: "bodyweight_circuit"
+          group_type: circuit
+          rest_after_sec: 120
+          target_notes: "15 each side. Touch elbow to opposite knee."
