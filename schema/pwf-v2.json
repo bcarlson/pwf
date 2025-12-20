@@ -1,0 +1,312 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pwf.dev/schema/v2/plan.json",
+  "title": "PWF Plan v2",
+  "description": "Portable Workout Format v2 schema with exercise library support",
+  "type": "object",
+  "required": ["plan_version", "cycle"],
+  "additionalProperties": false,
+  "properties": {
+    "plan_version": {
+      "type": "integer",
+      "const": 2,
+      "description": "Specification version (must be 2)"
+    },
+    "meta": {
+      "$ref": "pwf-v1.json#/$defs/Meta"
+    },
+    "glossary": {
+      "type": "object",
+      "description": "Term definitions for exercises and concepts used in this plan",
+      "maxProperties": 100,
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "propertyNames": {
+        "pattern": "^[a-zA-Z0-9\\s\\-']+$",
+        "minLength": 1,
+        "maxLength": 50
+      }
+    },
+    "exercise_library": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "$ref": "#/$defs/LibraryExercise"
+      },
+      "description": "Exercise library for reusable exercise definitions"
+    },
+    "cycle": {
+      "$ref": "#/$defs/Cycle"
+    }
+  },
+  "$defs": {
+    "LibraryExercise": {
+      "type": "object",
+      "description": "Reusable exercise definition in the library",
+      "additionalProperties": false,
+      "required": ["id", "name", "modality"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[a-zA-Z0-9_-]+$",
+          "description": "Unique library exercise identifier (alphanumeric, hyphens, underscores)"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Exercise display name"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Detailed exercise description"
+        },
+        "equipment": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Required equipment"
+        },
+        "muscle_groups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Targeted muscle groups"
+        },
+        "difficulty": {
+          "type": "string",
+          "enum": ["beginner", "intermediate", "advanced"],
+          "description": "Exercise difficulty level"
+        },
+        "modality": {
+          "type": "string",
+          "enum": ["strength", "countdown", "stopwatch", "interval", "cycling", "running", "rowing", "swimming"],
+          "description": "Exercise type"
+        },
+        "default_sets": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Default number of sets"
+        },
+        "default_reps": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Default reps per set"
+        },
+        "default_duration_sec": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Default duration in seconds"
+        },
+        "default_distance_meters": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Default distance in meters"
+        },
+        "cues": {
+          "type": "string",
+          "description": "Form cues and coaching points"
+        },
+        "link": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "Tutorial URL (HTTPS only)"
+        },
+        "image": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "Demo image URL (HTTPS only)"
+        }
+      }
+    },
+    "Cycle": {
+      "type": "object",
+      "description": "Training cycle containing workout days",
+      "additionalProperties": false,
+      "required": ["days"],
+      "properties": {
+        "start_date": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "ISO 8601 date (YYYY-MM-DD)"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Cycle-level coaching notes"
+        },
+        "days": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Day"
+          },
+          "description": "Training days in this cycle"
+        }
+      }
+    },
+    "Day": {
+      "type": "object",
+      "description": "Single training day",
+      "additionalProperties": false,
+      "required": ["exercises"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique day identifier"
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Day sequence (0-indexed)"
+        },
+        "focus": {
+          "type": "string",
+          "description": "Training focus or theme"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Day-level coaching notes"
+        },
+        "scheduled_date": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Planned workout date"
+        },
+        "target_session_length_min": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Expected duration in minutes"
+        },
+        "exercises": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Exercise"
+          },
+          "description": "Exercises in this day"
+        }
+      }
+    },
+    "Exercise": {
+      "type": "object",
+      "description": "Single exercise definition (v2: modality OR exercise_ref required)",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique exercise identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Exercise name (optional if using exercise_ref)"
+        },
+        "exercise_ref": {
+          "type": "string",
+          "description": "Reference to library exercise ID"
+        },
+        "modality": {
+          "type": "string",
+          "enum": ["strength", "countdown", "stopwatch", "interval", "cycling", "running", "rowing", "swimming"],
+          "description": "Exercise type (optional if using exercise_ref)"
+        },
+        "target_sets": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Target number of sets"
+        },
+        "target_reps": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Target reps per set"
+        },
+        "target_duration_sec": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Target duration in seconds"
+        },
+        "target_distance_meters": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Target distance in meters"
+        },
+        "target_load": {
+          "type": "string",
+          "description": "Loading guidance (weight, RPE, %1RM)"
+        },
+        "target_weight_percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 200,
+          "description": "Target weight as percentage of reference max (requires percent_of)"
+        },
+        "percent_of": {
+          "type": "string",
+          "enum": ["1rm", "3rm", "5rm", "10rm"],
+          "description": "Reference max for percentage calculation (requires target_weight_percent)"
+        },
+        "reference_exercise": {
+          "type": "string",
+          "description": "Reference another exercise's max for percentage calculation"
+        },
+        "cues": {
+          "type": "string",
+          "description": "Form cues (overrides library if using exercise_ref)"
+        },
+        "target_notes": {
+          "type": "string",
+          "description": "Coaching notes for this exercise"
+        },
+        "link": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "Tutorial URL (HTTPS only)"
+        },
+        "image": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "Demo image URL (HTTPS only)"
+        },
+        "group": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50,
+          "pattern": "^[a-zA-Z0-9_-]+$",
+          "description": "Group identifier for supersets/circuits"
+        },
+        "group_type": {
+          "type": "string",
+          "enum": ["superset", "circuit"],
+          "description": "Type of exercise grouping"
+        },
+        "rest_between_sets_sec": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Rest period in seconds between sets"
+        },
+        "rest_after_sec": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Rest period in seconds after completing all sets"
+        }
+      },
+      "oneOf": [
+        {"required": ["modality"]},
+        {"required": ["exercise_ref"]}
+      ]
+    }
+  }
+}

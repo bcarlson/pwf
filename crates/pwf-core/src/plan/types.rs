@@ -12,6 +12,8 @@ pub struct WpsPlan {
     pub meta: Option<PlanMeta>,
     #[serde(default)]
     pub glossary: HashMap<String, String>,
+    #[serde(default)]
+    pub exercise_library: Vec<LibraryExercise>,
     pub cycle: PlanCycle,
 }
 
@@ -39,6 +41,8 @@ pub struct PlanMeta {
     pub recommended_first: bool,
     #[serde(default)]
     pub tags: Vec<String>,
+    #[serde(default)]
+    pub athlete_profile: Option<AthleteProfile>,
 }
 
 /// Plan status
@@ -88,6 +92,99 @@ pub enum GroupType {
     Circuit,
 }
 
+/// Difficulty level for exercises
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Difficulty {
+    Beginner,
+    Intermediate,
+    Advanced,
+}
+
+/// Exercise library entry (PWF v2.0)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LibraryExercise {
+    pub id: String,
+    pub name: String,
+    #[serde(default)]
+    pub description: Option<String>,
+    #[serde(default)]
+    pub equipment: Vec<String>,
+    #[serde(default)]
+    pub muscle_groups: Vec<String>,
+    #[serde(default)]
+    pub difficulty: Option<Difficulty>,
+    pub modality: Modality,
+    #[serde(default)]
+    pub default_sets: Option<u32>,
+    #[serde(default)]
+    pub default_reps: Option<u32>,
+    #[serde(default)]
+    pub default_duration_sec: Option<u32>,
+    #[serde(default)]
+    pub default_distance_meters: Option<f64>,
+    #[serde(default)]
+    pub cues: Option<String>,
+    #[serde(default)]
+    pub link: Option<String>,
+    #[serde(default)]
+    pub image: Option<String>,
+}
+
+/// Training zone for endurance workouts
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TrainingZone {
+    pub zone: u8,
+    #[serde(default)]
+    pub duration_sec: Option<u32>,
+    #[serde(default)]
+    pub target_power_watts: Option<u32>,
+    #[serde(default)]
+    pub target_hr_bpm: Option<u32>,
+    #[serde(default)]
+    pub target_pace_sec_per_km: Option<u32>,
+}
+
+/// Ramp configuration for gradual intensity changes
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RampConfig {
+    pub start_power_watts: u32,
+    pub end_power_watts: u32,
+    pub duration_sec: u32,
+    #[serde(default)]
+    pub step_duration_sec: Option<u32>,
+}
+
+/// Interval phase for complex structured workouts
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IntervalPhase {
+    pub name: String,
+    pub duration_sec: u32,
+    #[serde(default)]
+    pub target_power_watts: Option<u32>,
+    #[serde(default)]
+    pub target_hr_bpm: Option<u32>,
+    #[serde(default)]
+    pub target_pace_sec_per_km: Option<u32>,
+    #[serde(default)]
+    pub cadence_rpm: Option<u32>,
+}
+
+/// Athlete profile with FTP, threshold HR, and other metrics
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AthleteProfile {
+    #[serde(default)]
+    pub ftp_watts: Option<u32>,
+    #[serde(default)]
+    pub threshold_hr_bpm: Option<u32>,
+    #[serde(default)]
+    pub max_hr_bpm: Option<u32>,
+    #[serde(default)]
+    pub threshold_pace_sec_per_km: Option<u32>,
+    #[serde(default)]
+    pub weight_kg: Option<f64>,
+}
+
 /// Single exercise in a plan
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlanExercise {
@@ -95,7 +192,10 @@ pub struct PlanExercise {
     pub id: Option<String>,
     #[serde(default)]
     pub name: Option<String>,
-    pub modality: Modality,
+    #[serde(default)]
+    pub exercise_ref: Option<String>,
+    #[serde(default)]
+    pub modality: Option<Modality>,
     #[serde(default)]
     pub target_sets: Option<u32>,
     #[serde(default)]
@@ -128,6 +228,12 @@ pub struct PlanExercise {
     pub rest_between_sets_sec: Option<u32>,
     #[serde(default)]
     pub rest_after_sec: Option<u32>,
+    #[serde(default)]
+    pub zones: Option<Vec<TrainingZone>>,
+    #[serde(default)]
+    pub ramp: Option<RampConfig>,
+    #[serde(default)]
+    pub interval_phases: Option<Vec<IntervalPhase>>,
 }
 
 /// Statistics about a parsed plan
@@ -139,6 +245,10 @@ pub struct PlanStatistics {
     pub countdown_count: usize,
     pub stopwatch_count: usize,
     pub interval_count: usize,
+    pub cycling_count: usize,
+    pub running_count: usize,
+    pub rowing_count: usize,
+    pub swimming_count: usize,
     pub equipment: Vec<String>,
 }
 
@@ -153,9 +263,11 @@ mod tests {
             plan_version: 1,
             meta: Some(PlanMeta {
                 title: "Test Plan".to_string(),
+                athlete_profile: None,
                 ..Default::default()
             }),
             glossary: HashMap::new(),
+            exercise_library: vec![],
             cycle: PlanCycle {
                 start_date: None,
                 notes: None,
@@ -184,6 +296,7 @@ mod tests {
             plan_version: 1,
             meta: None,
             glossary: glossary.clone(),
+            exercise_library: vec![],
             cycle: PlanCycle {
                 start_date: None,
                 notes: None,
@@ -219,6 +332,7 @@ mod tests {
             days_per_week: Some(4),
             recommended_first: true,
             tags: vec!["strength".to_string(), "hypertrophy".to_string()],
+            athlete_profile: None,
         };
 
         let yaml = serde_yaml::to_string(&meta).unwrap();
@@ -241,6 +355,7 @@ mod tests {
     fn test_plan_meta_optional_fields_omitted() {
         let meta = PlanMeta {
             title: "Minimal Plan".to_string(),
+            athlete_profile: None,
             ..Default::default()
         };
 
@@ -425,7 +540,8 @@ title: "Basic Plan"
         let exercise = PlanExercise {
             id: Some("ex-1".to_string()),
             name: Some("Bench Press".to_string()),
-            modality: Modality::Strength,
+            exercise_ref: None,
+            modality: Some(Modality::Strength),
             target_sets: Some(4),
             target_reps: Some(8),
             target_duration_sec: None,
@@ -442,6 +558,9 @@ title: "Basic Plan"
             group_type: None,
             rest_between_sets_sec: None,
             rest_after_sec: None,
+            zones: None,
+            ramp: None,
+            interval_phases: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -471,7 +590,9 @@ title: "Basic Plan"
             let exercise = PlanExercise {
                 id: None,
                 name: Some(format!("{} exercise", expected_name)),
-                modality,
+                exercise_ref: None,
+
+                modality: Some(modality),
                 target_sets: None,
                 target_reps: None,
                 target_duration_sec: None,
@@ -488,6 +609,9 @@ title: "Basic Plan"
                 group_type: None,
                 rest_between_sets_sec: None,
                 rest_after_sec: None,
+                zones: None,
+                ramp: None,
+                interval_phases: None,
             };
 
             let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -505,7 +629,9 @@ title: "Basic Plan"
         let exercise = PlanExercise {
             id: Some("ex-2".to_string()),
             name: Some("Plank Hold".to_string()),
-            modality: Modality::Countdown,
+            exercise_ref: None,
+
+            modality: Some(Modality::Countdown),
             target_sets: Some(3),
             target_reps: None,
             target_duration_sec: Some(60),
@@ -522,6 +648,9 @@ title: "Basic Plan"
             group_type: None,
             rest_between_sets_sec: None,
             rest_after_sec: None,
+            zones: None,
+            ramp: None,
+            interval_phases: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -539,7 +668,9 @@ title: "Basic Plan"
         let exercise = PlanExercise {
             id: Some("ex-3".to_string()),
             name: Some("Row".to_string()),
-            modality: Modality::Stopwatch,
+            exercise_ref: None,
+
+            modality: Some(Modality::Stopwatch),
             target_sets: None,
             target_reps: None,
             target_duration_sec: None,
@@ -556,6 +687,9 @@ title: "Basic Plan"
             group_type: None,
             rest_between_sets_sec: None,
             rest_after_sec: None,
+            zones: None,
+            ramp: None,
+            interval_phases: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -573,7 +707,9 @@ title: "Basic Plan"
         let exercise = PlanExercise {
             id: Some("ex-4".to_string()),
             name: Some("Sprint Intervals".to_string()),
-            modality: Modality::Interval,
+            exercise_ref: None,
+
+            modality: Some(Modality::Interval),
             target_sets: Some(8),
             target_reps: None,
             target_duration_sec: Some(30),
@@ -590,6 +726,9 @@ title: "Basic Plan"
             group_type: None,
             rest_between_sets_sec: None,
             rest_after_sec: None,
+            zones: None,
+            ramp: None,
+            interval_phases: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -608,6 +747,7 @@ title: "Basic Plan"
             id: Some("".to_string()),
             title: "".to_string(),
             description: Some("".to_string()),
+            athlete_profile: None,
             ..Default::default()
         };
 
@@ -626,6 +766,7 @@ title: "Basic Plan"
             description: Some("Программа тренировок 💪".to_string()),
             author: Some("José García".to_string()),
             tags: vec!["日本語".to_string(), "Русский".to_string()],
+            athlete_profile: None,
             ..Default::default()
         };
 
@@ -647,6 +788,7 @@ title: "Basic Plan"
         let meta = PlanMeta {
             title: long_string.clone(),
             description: Some(long_string.clone()),
+            athlete_profile: None,
             ..Default::default()
         };
 
@@ -662,7 +804,9 @@ title: "Basic Plan"
         let exercise = PlanExercise {
             id: None,
             name: Some("Test".to_string()),
-            modality: Modality::Strength,
+            exercise_ref: None,
+
+            modality: Some(Modality::Strength),
             target_sets: Some(999999),
             target_reps: Some(999999),
             target_duration_sec: Some(999999),
@@ -679,6 +823,9 @@ title: "Basic Plan"
             group_type: None,
             rest_between_sets_sec: None,
             rest_after_sec: None,
+            zones: None,
+            ramp: None,
+            interval_phases: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -709,8 +856,10 @@ title: "Basic Plan"
                 days_per_week: Some(3),
                 recommended_first: false,
                 tags: vec!["strength".to_string()],
+                athlete_profile: None,
             }),
             glossary,
+            exercise_library: vec![],
             cycle: PlanCycle {
                 start_date: Some("2024-01-01".to_string()),
                 notes: Some("Cycle notes".to_string()),
@@ -725,7 +874,9 @@ title: "Basic Plan"
                         PlanExercise {
                             id: Some("ex-1".to_string()),
                             name: Some("Bench Press".to_string()),
-                            modality: Modality::Strength,
+                            exercise_ref: None,
+
+                            modality: Some(Modality::Strength),
                             target_sets: Some(3),
                             target_reps: Some(8),
                             target_duration_sec: None,
@@ -742,11 +893,16 @@ title: "Basic Plan"
                             group_type: None,
                             rest_between_sets_sec: None,
                             rest_after_sec: None,
+                            zones: None,
+                            ramp: None,
+                            interval_phases: None,
                         },
                         PlanExercise {
                             id: Some("ex-2".to_string()),
                             name: Some("Plank".to_string()),
-                            modality: Modality::Countdown,
+                            exercise_ref: None,
+
+                            modality: Some(Modality::Countdown),
                             target_sets: Some(3),
                             target_reps: None,
                             target_duration_sec: Some(60),
@@ -763,6 +919,9 @@ title: "Basic Plan"
                             group_type: None,
                             rest_between_sets_sec: None,
                             rest_after_sec: None,
+                            zones: None,
+                            ramp: None,
+                            interval_phases: None,
                         },
                     ],
                 }],
@@ -799,6 +958,7 @@ title: "Basic Plan"
             title: "Test".to_string(),
             days_per_week: Some(5),
             recommended_first: true,
+            athlete_profile: None,
             ..Default::default()
         };
 
@@ -867,7 +1027,9 @@ recommendedFirst: false
         let exercise = PlanExercise {
             id: Some("ex-1".to_string()),
             name: Some("Bench Press".to_string()),
-            modality: Modality::Strength,
+            exercise_ref: None,
+
+            modality: Some(Modality::Strength),
             target_sets: Some(3),
             target_reps: Some(8),
             target_duration_sec: None,
@@ -884,6 +1046,9 @@ recommendedFirst: false
             group_type: Some(GroupType::Superset),
             rest_between_sets_sec: None,
             rest_after_sec: None,
+            zones: None,
+            ramp: None,
+            interval_phases: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();
@@ -898,7 +1063,9 @@ recommendedFirst: false
         let exercise = PlanExercise {
             id: Some("ex-1".to_string()),
             name: Some("Squat".to_string()),
-            modality: Modality::Strength,
+            exercise_ref: None,
+
+            modality: Some(Modality::Strength),
             target_sets: Some(5),
             target_reps: Some(5),
             target_duration_sec: None,
@@ -915,6 +1082,9 @@ recommendedFirst: false
             group_type: None,
             rest_between_sets_sec: None,
             rest_after_sec: None,
+            zones: None,
+            ramp: None,
+            interval_phases: None,
         };
 
         let yaml = serde_yaml::to_string(&exercise).unwrap();

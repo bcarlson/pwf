@@ -1,0 +1,47 @@
+plan_version: 1
+
+meta:
+  title: "FTP Test - Cycling"
+  description: "20-minute FTP test protocol for cycling"
+  author: "PWF Endurance"
+  tags:
+    - cycling
+    - endurance
+    - testing
+  athlete_profile:
+    ftp_watts: 250
+    threshold_hr_bpm: 165
+    max_hr_bpm: 185
+    weight_kg: 75
+
+cycle:
+  days:
+    - focus: "FTP Test Day"
+      target_session_length_min: 60
+      exercises:
+        - name: "Warm-up"
+          modality: cycling
+          interval_phases:
+            - name: "easy_spin"
+              duration_sec: 600
+              target_power_watts: 100
+              cadence_rpm: 90
+            - name: "tempo_build"
+              duration_sec: 300
+              target_power_watts: 175
+              cadence_rpm: 95
+
+        - name: "FTP Test - 20 min"
+          modality: cycling
+          zones:
+            - zone: 5
+              duration_sec: 1200
+              target_power_watts: 275
+              target_hr_bpm: 170
+
+        - name: "Cool-down"
+          modality: cycling
+          zones:
+            - zone: 1
+              duration_sec: 600
+              target_power_watts: 80
