@@ -218,6 +218,21 @@
           "type": "string",
           "description": "Loading guidance (weight, RPE, %1RM)"
         },
+        "target_weight_percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 200,
+          "description": "Target weight as percentage of reference max (requires percent_of)"
+        },
+        "percent_of": {
+          "type": "string",
+          "enum": ["1rm", "3rm", "5rm", "10rm"],
+          "description": "Reference max for percentage calculation (requires target_weight_percent)"
+        },
+        "reference_exercise": {
+          "type": "string",
+          "description": "Reference another exercise's max for percentage calculation"
+        },
         "cues": {
           "type": "string",
           "description": "Form cues (alias for target_notes)"
@@ -237,6 +252,28 @@
           "format": "uri",
           "pattern": "^https://",
           "description": "Demo image URL (HTTPS only)"
+        },
+        "group": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50,
+          "pattern": "^[a-zA-Z0-9_-]+$",
+          "description": "Group identifier for supersets/circuits (alphanumeric, hyphens, underscores only)"
+        },
+        "group_type": {
+          "type": "string",
+          "enum": ["superset", "circuit"],
+          "description": "Type of exercise grouping"
+        },
+        "rest_between_sets_sec": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Rest period in seconds between sets"
+        },
+        "rest_after_sec": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Rest period in seconds after completing all sets"
         }
       }
     }
