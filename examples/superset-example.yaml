@@ -1,0 +1,233 @@
+# PWF v1 - Superset Example
+# Demonstrates exercise grouping with supersets
+
+plan_version: 1
+
+meta:
+  id: "superset-example"
+  title: "Upper/Lower Split with Supersets"
+  description: "A 4-day upper/lower split featuring antagonistic muscle supersets for time-efficient training."
+  author: "PWF Examples"
+  status: active
+  equipment: [barbell, dumbbells, bench, cable_machine, pullup_bar]
+  daysPerWeek: 4
+  tags: [intermediate, strength, supersets, upper-lower]
+
+glossary:
+  "Superset": "Performing two exercises back-to-back with minimal rest between them"
+  "Antagonistic Superset": "Pairing exercises that work opposing muscle groups (e.g., chest and back)"
+  "RPE": "Rate of Perceived Exertion - scale from 1-10 indicating effort level"
+
+cycle:
+  notes: "Perform exercises in each superset back-to-back. Rest 90-120 seconds between supersets."
+
+  days:
+    # Upper Day 1 - Push/Pull Supersets
+    - id: "upper-1"
+      order: 0
+      focus: "Upper Body - Push/Pull Supersets"
+      target_session_length_min: 60
+      notes: "Alternate between push and pull exercises in each superset. Focus on controlled tempo."
+      exercises:
+        # Superset A: Bench Press + Row
+        - id: "bench-press"
+          name: "Barbell Bench Press"
+          modality: strength
+          target_sets: 4
+          target_reps: 6
+          target_load: "RPE 8"
+          group: "A"
+          group_type: superset
+          rest_between_sets_sec: 0
+          target_notes: "Lower to chest with control. Press explosively."
+
+        - id: "barbell-row"
+          name: "Barbell Row"
+          modality: strength
+          target_sets: 4
+          target_reps: 6
+          target_load: "RPE 8"
+          group: "A"
+          group_type: superset
+          rest_after_sec: 120
+          target_notes: "Pull to lower chest. Keep core braced."
+
+        # Superset B: Overhead Press + Pull-ups
+        - id: "ohp"
+          name: "Overhead Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          group: "B"
+          group_type: superset
+          rest_between_sets_sec: 0
+          target_notes: "Full lockout overhead. Squeeze glutes for stability."
+
+        - id: "pullups"
+          name: "Pull-ups"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          group: "B"
+          group_type: superset
+          rest_after_sec: 90
+          target_notes: "Full dead hang at bottom. Chin over bar at top."
+
+        # Superset C: Dumbbell Flyes + Face Pulls
+        - id: "db-flyes"
+          name: "Dumbbell Flyes"
+          modality: strength
+          target_sets: 3
+          target_reps: 12
+          group: "C"
+          group_type: superset
+          rest_between_sets_sec: 0
+          target_notes: "Slight bend in elbows. Feel stretch at bottom."
+
+        - id: "face-pulls"
+          name: "Cable Face Pulls"
+          modality: strength
+          target_sets: 3
+          target_reps: 15
+          group: "C"
+          group_type: superset
+          rest_after_sec: 60
+          target_notes: "Pull to face level. Squeeze shoulder blades."
+
+    # Lower Day 1
+    - id: "lower-1"
+      order: 1
+      focus: "Lower Body - Quad Emphasis"
+      target_session_length_min: 55
+      exercises:
+        - id: "squat"
+          name: "Barbell Back Squat"
+          modality: strength
+          target_sets: 4
+          target_reps: 6
+          target_load: "80% 1RM"
+          target_notes: "Hip crease below knee. Brace core on descent."
+
+        - id: "bulgarian-split"
+          name: "Bulgarian Split Squat"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+          target_notes: "Rear foot elevated. Front knee tracks over toes."
+
+        - id: "leg-extension"
+          name: "Leg Extension"
+          modality: strength
+          target_sets: 3
+          target_reps: 12
+          target_notes: "Control the negative. Squeeze quads at top."
+
+        - id: "plank"
+          name: "Plank Hold"
+          modality: countdown
+          target_duration_sec: 60
+          target_notes: "Body in straight line. Don't let hips sag."
+
+    # Upper Day 2 - Different superset pairings
+    - id: "upper-2"
+      order: 2
+      focus: "Upper Body - Volume Day"
+      target_session_length_min: 65
+      exercises:
+        # Superset A: Incline Press + Lat Pulldown
+        - id: "incline-press"
+          name: "Incline Dumbbell Press"
+          modality: strength
+          target_sets: 4
+          target_reps: 10
+          group: "A"
+          group_type: superset
+          rest_between_sets_sec: 0
+          target_notes: "30-45 degree angle. Full range of motion."
+
+        - id: "lat-pulldown"
+          name: "Lat Pulldown"
+          modality: strength
+          target_sets: 4
+          target_reps: 10
+          group: "A"
+          group_type: superset
+          rest_after_sec: 90
+          target_notes: "Pull to upper chest. Control on the way up."
+
+        # Superset B: Dips + Dumbbell Rows
+        - id: "dips"
+          name: "Dips"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+          group: "B"
+          group_type: superset
+          rest_between_sets_sec: 0
+          target_notes: "Lean forward for chest emphasis. Full depth."
+
+        - id: "db-rows"
+          name: "Dumbbell Rows"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+          group: "B"
+          group_type: superset
+          rest_after_sec: 90
+          target_notes: "One arm at a time. Brace on bench."
+
+        # Superset C: Lateral Raises + Rear Delt Flyes
+        - id: "lateral-raise"
+          name: "Dumbbell Lateral Raise"
+          modality: strength
+          target_sets: 3
+          target_reps: 15
+          group: "C"
+          group_type: superset
+          rest_between_sets_sec: 0
+          target_notes: "Raise to shoulder height. Control descent."
+
+        - id: "rear-delt"
+          name: "Rear Delt Flyes"
+          modality: strength
+          target_sets: 3
+          target_reps: 15
+          group: "C"
+          group_type: superset
+          rest_after_sec: 60
+          target_notes: "Bent over position. Squeeze shoulder blades."
+
+    # Lower Day 2
+    - id: "lower-2"
+      order: 3
+      focus: "Lower Body - Hip Emphasis"
+      target_session_length_min: 60
+      exercises:
+        - id: "deadlift"
+          name: "Conventional Deadlift"
+          modality: strength
+          target_sets: 3
+          target_reps: 5
+          target_load: "85% 1RM"
+          target_notes: "Reset between reps. Tight lats before pulling."
+
+        - id: "rdl"
+          name: "Romanian Deadlift"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          target_notes: "Soft knee bend. Feel hamstring stretch."
+
+        - id: "leg-curl"
+          name: "Leg Curl"
+          modality: strength
+          target_sets: 3
+          target_reps: 12
+          target_notes: "Control the eccentric. Squeeze at top."
+
+        - id: "ab-circuit"
+          name: "Ab Circuit"
+          modality: interval
+          target_sets: 3
+          target_duration_sec: 30
+          target_notes: "Dead bug, bird dog, side plank - 30s each."
