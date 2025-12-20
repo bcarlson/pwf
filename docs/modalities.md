@@ -1,6 +1,6 @@
 # Modalities
 
-PWF supports four exercise modalities, each designed for different training styles.
+PWF supports eight exercise modalities, each designed for different training styles.
 
 ## Overview
 
@@ -10,6 +10,10 @@ PWF supports four exercise modalities, each designed for different training styl
 | [`countdown`](#countdown) | Fixed duration timer | `target_duration_sec` | Isometric holds, timed sets |
 | [`stopwatch`](#stopwatch) | Open-ended timing | `target_duration_sec` (optional) | Stretching, mobility, cardio |
 | [`interval`](#interval) | Repeating work periods | `target_sets`, `target_duration_sec` | HIIT, sprints, circuits |
+| [`cycling`](#cycling) | Structured cycling workouts | `zones`, `ramp`, `interval_phases` | Indoor/outdoor cycling, power-based training |
+| [`running`](#running) | Structured running workouts | `zones`, `ramp`, `interval_phases` | Track, road, trail running |
+| [`rowing`](#rowing) | Structured rowing workouts | `zones`, `ramp`, `interval_phases` | Erg training, power-based rowing |
+| [`swimming`](#swimming) | Structured swimming workouts | `zones`, `interval_phases` | Pool training, technique work |
 
 ---
 
@@ -257,7 +261,208 @@ Repeating work periods, optionally with distance targets.
                 └───────────┘ └───────────┘
 ```
 
-## Future Modalities (v2.0)
+---
+
+## Cycling
+
+Structured cycling workouts with power zones, heart rate targets, and interval phases.
+
+### When to Use
+
+- Indoor trainer sessions
+- Outdoor cycling workouts
+- Power-based training
+- FTP tests and ramp tests
+
+### Fields
+
+| Field | Recommended | Description |
+|-------|-------------|-------------|
+| `zones` | Yes | Training zones with duration and targets |
+| `ramp` | Optional | Gradual power increase configuration |
+| `interval_phases` | Optional | Complex interval structures |
+
+### Examples
+
+```yaml
+# Zone-based endurance ride
+- name: "Zone 2 Base Building"
+  modality: cycling
+  zones:
+    - zone: 2
+      duration_sec: 3600
+      target_power_watts: 200
+      target_hr_bpm: 145
+
+# FTP ramp test
+- name: "20-min FTP Test"
+  modality: cycling
+  zones:
+    - zone: 5
+      duration_sec: 1200
+      target_power_watts: 275
+
+# Interval workout with phases
+- name: "Sweet Spot Intervals"
+  modality: cycling
+  interval_phases:
+    - name: "work"
+      duration_sec: 480
+      target_power_watts: 240
+      cadence_rpm: 90
+    - name: "recovery"
+      duration_sec: 240
+      target_power_watts: 120
+  target_sets: 4
+```
+
+### Validation
+
+| Condition | Severity | Message |
+|-----------|----------|---------|
+| Missing `zones`, `ramp`, AND `interval_phases` | Warning | `Endurance exercise should specify zones, ramp, or interval_phases` |
+
+---
+
+## Running
+
+Structured running workouts with pace zones, heart rate targets, and interval phases.
+
+### When to Use
+
+- Track workouts
+- Road running
+- Trail running
+- Tempo and threshold runs
+
+### Fields
+
+| Field | Recommended | Description |
+|-------|-------------|-------------|
+| `zones` | Yes | Training zones with pace/HR targets |
+| `interval_phases` | Optional | Complex interval structures |
+| `target_distance_meters` | Optional | Total workout distance |
+
+### Examples
+
+```yaml
+# Tempo run
+- name: "Threshold Run"
+  modality: running
+  zones:
+    - zone: 4
+      duration_sec: 1200
+      target_pace_sec_per_km: 240
+      target_hr_bpm: 170
+  target_distance_meters: 5000
+
+# Interval session
+- name: "800m Repeats"
+  modality: running
+  interval_phases:
+    - name: "work"
+      duration_sec: 180
+      target_pace_sec_per_km: 210
+    - name: "recovery"
+      duration_sec: 120
+      target_pace_sec_per_km: 360
+  target_sets: 6
+```
+
+---
+
+## Rowing
+
+Structured rowing workouts for indoor erg training with power and heart rate targets.
+
+### When to Use
+
+- Indoor rowing machine (erg)
+- Power-based training
+- Interval training
+- Ramp tests
+
+### Fields
+
+| Field | Recommended | Description |
+|-------|-------------|-------------|
+| `zones` | Yes | Training zones with power/HR targets |
+| `ramp` | Optional | Power ramp configuration |
+| `interval_phases` | Optional | Complex interval structures |
+| `target_distance_meters` | Optional | Total rowing distance |
+
+### Examples
+
+```yaml
+# Steady-state rowing
+- name: "Zone 2 Steady State"
+  modality: rowing
+  zones:
+    - zone: 2
+      duration_sec: 1800
+      target_power_watts: 180
+  target_distance_meters: 6000
+
+# Ramp test
+- name: "Power Ramp"
+  modality: rowing
+  ramp:
+    start_power_watts: 150
+    end_power_watts: 300
+    duration_sec: 900
+    step_duration_sec: 60
+```
+
+---
+
+## Swimming
+
+Structured swimming workouts with heart rate zones and interval phases.
+
+### When to Use
+
+- Pool training
+- Technique sessions
+- Endurance swims
+- Interval sets
+
+### Fields
+
+| Field | Recommended | Description |
+|-------|-------------|-------------|
+| `zones` | Optional | Heart rate zones |
+| `interval_phases` | Yes | Work/rest intervals |
+| `target_distance_meters` | Yes | Swimming distance |
+
+### Examples
+
+```yaml
+# Interval set
+- name: "200m Repeats"
+  modality: swimming
+  interval_phases:
+    - name: "work"
+      duration_sec: 240
+      target_hr_bpm: 150
+    - name: "recovery"
+      duration_sec: 60
+      target_hr_bpm: 120
+  target_sets: 8
+  target_distance_meters: 1600
+
+# Easy recovery swim
+- name: "Easy Swim"
+  modality: swimming
+  target_distance_meters: 400
+  zones:
+    - zone: 1
+      duration_sec: 480
+      target_hr_bpm: 110
+```
+
+---
+
+## Future Modalities (v3.0)
 
 The following modalities are under consideration:
 

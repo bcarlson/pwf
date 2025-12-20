@@ -102,6 +102,43 @@
             "type": "string"
           },
           "description": "Searchable tags"
+        },
+        "athlete_profile": {
+          "$ref": "#/$defs/AthleteProfile"
+        }
+      }
+    },
+    "AthleteProfile": {
+      "type": "object",
+      "description": "Athlete metrics for endurance training",
+      "additionalProperties": false,
+      "properties": {
+        "ftp_watts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Functional Threshold Power in watts"
+        },
+        "threshold_hr_bpm": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 250,
+          "description": "Threshold heart rate in BPM"
+        },
+        "max_hr_bpm": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 250,
+          "description": "Maximum heart rate in BPM"
+        },
+        "threshold_pace_sec_per_km": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Threshold pace in seconds per kilometer"
+        },
+        "weight_kg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Athlete weight in kilograms"
         }
       }
     },
@@ -191,7 +228,7 @@
         },
         "modality": {
           "type": "string",
-          "enum": ["strength", "countdown", "stopwatch", "interval"],
+          "enum": ["strength", "countdown", "stopwatch", "interval", "cycling", "running", "rowing", "swimming"],
           "description": "Exercise type"
         },
         "target_sets": {
@@ -274,6 +311,127 @@
           "type": "integer",
           "minimum": 0,
           "description": "Rest period in seconds after completing all sets"
+        },
+        "zones": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/TrainingZone"
+          },
+          "description": "Training zones for endurance workouts"
+        },
+        "ramp": {
+          "$ref": "#/$defs/RampConfig"
+        },
+        "interval_phases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/IntervalPhase"
+          },
+          "description": "Structured interval phases for complex endurance workouts"
+        }
+      }
+    },
+    "TrainingZone": {
+      "type": "object",
+      "description": "Training zone specification",
+      "additionalProperties": false,
+      "required": ["zone"],
+      "properties": {
+        "zone": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 7,
+          "description": "Training zone number (1-7)"
+        },
+        "duration_sec": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Duration in this zone (seconds)"
+        },
+        "target_power_watts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Target power in watts"
+        },
+        "target_hr_bpm": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 250,
+          "description": "Target heart rate in BPM"
+        },
+        "target_pace_sec_per_km": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Target pace in seconds per kilometer"
+        }
+      }
+    },
+    "RampConfig": {
+      "type": "object",
+      "description": "Ramp configuration for gradual intensity changes",
+      "additionalProperties": false,
+      "required": ["start_power_watts", "end_power_watts", "duration_sec"],
+      "properties": {
+        "start_power_watts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Starting power in watts"
+        },
+        "end_power_watts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Ending power in watts"
+        },
+        "duration_sec": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Ramp duration in seconds"
+        },
+        "step_duration_sec": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Duration of each step in seconds"
+        }
+      }
+    },
+    "IntervalPhase": {
+      "type": "object",
+      "description": "Phase in a structured interval workout",
+      "additionalProperties": false,
+      "required": ["name", "duration_sec"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Phase name (e.g., 'warmup', 'work', 'recovery')"
+        },
+        "duration_sec": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Phase duration in seconds"
+        },
+        "target_power_watts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Target power in watts"
+        },
+        "target_hr_bpm": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 250,
+          "description": "Target heart rate in BPM"
+        },
+        "target_pace_sec_per_km": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Target pace in seconds per kilometer"
+        },
+        "cadence_rpm": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Target cadence in RPM"
         }
       }
     }
