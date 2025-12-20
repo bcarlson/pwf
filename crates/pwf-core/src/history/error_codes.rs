@@ -36,3 +36,17 @@ pub const NO_BM_VALUES: &str = "PWF-H502";
 pub const PREFERRED_UNITS_MISMATCH: &str = "PWF-H601";
 #[allow(dead_code)]
 pub const NO_WEIGHT_DATA: &str = "PWF-H602"; // Reserved for future use
+
+// Telemetry validation (700-799) - PWF v2
+pub const HEART_RATE_OUT_OF_RANGE: &str = "PWF-H701";
+pub const POWER_NEGATIVE: &str = "PWF-H702";
+pub const ELEVATION_NEGATIVE: &str = "PWF-H703";
+pub const SPEED_NEGATIVE: &str = "PWF-H704";
+pub const CADENCE_OUT_OF_RANGE: &str = "PWF-H705";
+pub const HUMIDITY_OUT_OF_RANGE: &str = "PWF-H706";
+#[allow(dead_code)]
+pub const CALORIES_NEGATIVE: &str = "PWF-H707";
+#[allow(dead_code)]
+pub const STROKE_RATE_NEGATIVE: &str = "PWF-H708";
+pub const TELEMETRY_UNIT_MISMATCH: &str = "PWF-H709";
+pub const PACE_NEGATIVE: &str = "PWF-H710";

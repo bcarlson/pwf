@@ -1,0 +1,716 @@
+# PWF v2.0 - Daily Undulating Periodization (DUP) Example
+# 8-week DUP program with varied rep ranges throughout the week
+
+plan_version: 2
+
+meta:
+  id: "dup-8week"
+  title: "8-Week Daily Undulating Periodization"
+  description: "Daily Undulating Periodization (DUP) varying intensity and volume within each week. Each main lift is trained 3x/week at different rep ranges: Power (1-3 reps), Strength (4-6 reps), and Hypertrophy (8-12 reps)."
+  author: "PWF Examples"
+  status: draft
+  equipment: [barbell, dumbbells, bench, squat_rack, plates]
+  daysPerWeek: 3
+  tags: [intermediate, advanced, dup, periodization, undulating, powerlifting]
+
+glossary:
+  "DUP": "Daily Undulating Periodization - varying intensity and volume across training sessions within the same week"
+  "Power Day": "Low reps (1-3), high intensity (85-95% 1RM), focus on speed and explosiveness"
+  "Strength Day": "Moderate reps (4-6), moderate-high intensity (75-85% 1RM), traditional strength work"
+  "Hypertrophy Day": "High reps (8-12), moderate intensity (65-75% 1RM), muscle building"
+  "Undulating": "Wave-like progression varying training stress within weekly microcycles"
+
+cycle:
+  notes: "8-week DUP program. Each week follows the same pattern: Day 1 (Power), Day 2 (Strength), Day 3 (Hypertrophy). Intensity increases every 2 weeks within each rep range. Week 4 and 8 are deload weeks."
+
+  weeks:
+    # Week 1: Baseline intensities
+    - week_number: 1
+      name: "DUP Week 1"
+      notes: "Baseline week. Power: 85%, Strength: 75%, Hypertrophy: 65%"
+      overrides:
+        # Day 1: Power Day
+        - day_order: 0
+          exercise_id: "squat"
+          target_sets: 6
+          target_reps: 2
+          target_weight_percent: 85
+          percent_of: "1rm"
+          target_notes: "Explosive power - max bar speed"
+
+        - day_order: 0
+          exercise_id: "bench"
+          target_sets: 6
+          target_reps: 2
+          target_weight_percent: 85
+          percent_of: "1rm"
+          target_notes: "Fast concentric - controlled eccentric"
+
+        - day_order: 0
+          exercise_id: "deadlift"
+          target_sets: 5
+          target_reps: 2
+          target_weight_percent: 87
+          percent_of: "1rm"
+          target_notes: "Explosive off floor"
+
+        # Day 2: Strength Day
+        - day_order: 1
+          exercise_id: "squat"
+          target_sets: 4
+          target_reps: 5
+          target_weight_percent: 75
+          percent_of: "1rm"
+          target_notes: "Focus on bar path and technique"
+
+        - day_order: 1
+          exercise_id: "bench"
+          target_sets: 4
+          target_reps: 5
+          target_weight_percent: 75
+          percent_of: "1rm"
+          target_notes: "Competition pause"
+
+        - day_order: 1
+          exercise_id: "deadlift"
+          target_sets: 3
+          target_reps: 5
+          target_weight_percent: 77
+          percent_of: "1rm"
+          target_notes: "Full reset each rep"
+
+        # Day 3: Hypertrophy Day
+        - day_order: 2
+          exercise_id: "squat"
+          target_sets: 4
+          target_reps: 10
+          target_weight_percent: 65
+          percent_of: "1rm"
+          target_notes: "Volume work - time under tension"
+
+        - day_order: 2
+          exercise_id: "bench"
+          target_sets: 4
+          target_reps: 10
+          target_weight_percent: 65
+          percent_of: "1rm"
+          target_notes: "Pump work - control tempo"
+
+        - day_order: 2
+          exercise_id: "deadlift"
+          target_sets: 3
+          target_reps: 8
+          target_weight_percent: 67
+          percent_of: "1rm"
+          target_notes: "Higher volume, shorter rest"
+
+    # Week 2: Increase all intensities by 2%
+    - week_number: 2
+      name: "DUP Week 2"
+      notes: "Intensity progression. Power: 87%, Strength: 77%, Hypertrophy: 67%"
+      overrides:
+        # Day 1: Power Day
+        - day_order: 0
+          exercise_id: "squat"
+          target_sets: 6
+          target_reps: 2
+          target_weight_percent: 87
+          percent_of: "1rm"
+
+        - day_order: 0
+          exercise_id: "bench"
+          target_sets: 6
+          target_reps: 2
+          target_weight_percent: 87
+          percent_of: "1rm"
+
+        - day_order: 0
+          exercise_id: "deadlift"
+          target_sets: 5
+          target_reps: 2
+          target_weight_percent: 89
+          percent_of: "1rm"
+
+        # Day 2: Strength Day
+        - day_order: 1
+          exercise_id: "squat"
+          target_sets: 4
+          target_reps: 5
+          target_weight_percent: 77
+          percent_of: "1rm"
+
+        - day_order: 1
+          exercise_id: "bench"
+          target_sets: 4
+          target_reps: 5
+          target_weight_percent: 77
+          percent_of: "1rm"
+
+        - day_order: 1
+          exercise_id: "deadlift"
+          target_sets: 3
+          target_reps: 5
+          target_weight_percent: 79
+          percent_of: "1rm"
+
+        # Day 3: Hypertrophy Day
+        - day_order: 2
+          exercise_id: "squat"
+          target_sets: 4
+          target_reps: 10
+          target_weight_percent: 67
+          percent_of: "1rm"
+
+        - day_order: 2
+          exercise_id: "bench"
+          target_sets: 4
+          target_reps: 10
+          target_weight_percent: 67
+          percent_of: "1rm"
+
+        - day_order: 2
+          exercise_id: "deadlift"
+          target_sets: 3
+          target_reps: 8
+          target_weight_percent: 69
+          percent_of: "1rm"
+
+    # Week 3: Further increase
+    - week_number: 3
+      name: "DUP Week 3"
+      notes: "Peak week of block 1. Power: 90%, Strength: 80%, Hypertrophy: 70%"
+      overrides:
+        # Day 1: Power Day
+        - day_order: 0
+          exercise_id: "squat"
+          target_sets: 7
+          target_reps: 2
+          target_weight_percent: 90
+          percent_of: "1rm"
+          target_notes: "Heavy doubles - work up"
+
+        - day_order: 0
+          exercise_id: "bench"
+          target_sets: 7
+          target_reps: 2
+          target_weight_percent: 90
+          percent_of: "1rm"
+          target_notes: "Heavy doubles"
+
+        - day_order: 0
+          exercise_id: "deadlift"
+          target_sets: 6
+          target_reps: 2
+          target_weight_percent: 92
+          percent_of: "1rm"
+          target_notes: "Near-max doubles"
+
+        # Day 2: Strength Day
+        - day_order: 1
+          exercise_id: "squat"
+          target_sets: 5
+          target_reps: 5
+          target_weight_percent: 80
+          percent_of: "1rm"
+
+        - day_order: 1
+          exercise_id: "bench"
+          target_sets: 5
+          target_reps: 5
+          target_weight_percent: 80
+          percent_of: "1rm"
+
+        - day_order: 1
+          exercise_id: "deadlift"
+          target_sets: 4
+          target_reps: 5
+          target_weight_percent: 82
+          percent_of: "1rm"
+
+        # Day 3: Hypertrophy Day
+        - day_order: 2
+          exercise_id: "squat"
+          target_sets: 5
+          target_reps: 10
+          target_weight_percent: 70
+          percent_of: "1rm"
+          target_notes: "Volume peak"
+
+        - day_order: 2
+          exercise_id: "bench"
+          target_sets: 5
+          target_reps: 10
+          target_weight_percent: 70
+          percent_of: "1rm"
+          target_notes: "Volume peak"
+
+        - day_order: 2
+          exercise_id: "deadlift"
+          target_sets: 4
+          target_reps: 8
+          target_weight_percent: 72
+          percent_of: "1rm"
+          target_notes: "Volume peak"
+
+    # Week 4: Deload
+    - week_number: 4
+      name: "DUP Week 4 (Deload)"
+      notes: "Recovery week. All intensities reduced by 10-15%."
+      overrides:
+        # Day 1: Power Day (Light)
+        - day_order: 0
+          exercise_id: "squat"
+          target_sets: 4
+          target_reps: 2
+          target_weight_percent: 75
+          percent_of: "1rm"
+          target_notes: "Active recovery - focus on speed"
+
+        - day_order: 0
+          exercise_id: "bench"
+          target_sets: 4
+          target_reps: 2
+          target_weight_percent: 75
+          percent_of: "1rm"
+
+        - day_order: 0
+          exercise_id: "deadlift"
+          target_sets: 3
+          target_reps: 2
+          target_weight_percent: 77
+          percent_of: "1rm"
+
+        # Day 2: Strength Day (Light)
+        - day_order: 1
+          exercise_id: "squat"
+          target_sets: 3
+          target_reps: 5
+          target_weight_percent: 65
+          percent_of: "1rm"
+          target_notes: "Deload - maintain movement pattern"
+
+        - day_order: 1
+          exercise_id: "bench"
+          target_sets: 3
+          target_reps: 5
+          target_weight_percent: 65
+          percent_of: "1rm"
+
+        - day_order: 1
+          exercise_id: "deadlift"
+          target_sets: 2
+          target_reps: 5
+          target_weight_percent: 67
+          percent_of: "1rm"
+
+        # Day 3: Hypertrophy Day (Light)
+        - day_order: 2
+          exercise_id: "squat"
+          target_sets: 3
+          target_reps: 8
+          target_weight_percent: 55
+          percent_of: "1rm"
+          target_notes: "Easy pump work"
+
+        - day_order: 2
+          exercise_id: "bench"
+          target_sets: 3
+          target_reps: 8
+          target_weight_percent: 55
+          percent_of: "1rm"
+
+        - day_order: 2
+          exercise_id: "deadlift"
+          target_sets: 2
+          target_reps: 6
+          target_weight_percent: 57
+          percent_of: "1rm"
+
+    # Week 5: Start second block with singles instead of doubles for power
+    - week_number: 5
+      name: "DUP Week 5"
+      notes: "Block 2 begins. Power day shifts to heavy singles. Power: 92%, Strength: 78%, Hypertrophy: 68%"
+      overrides:
+        # Day 1: Power Day (Singles now)
+        - day_order: 0
+          exercise_id: "squat"
+          target_sets: 8
+          target_reps: 1
+          target_weight_percent: 92
+          percent_of: "1rm"
+          target_notes: "Heavy singles - work up to top set"
+
+        - day_order: 0
+          exercise_id: "bench"
+          target_sets: 8
+          target_reps: 1
+          target_weight_percent: 92
+          percent_of: "1rm"
+          target_notes: "Heavy singles with commands"
+
+        - day_order: 0
+          exercise_id: "deadlift"
+          target_sets: 6
+          target_reps: 1
+          target_weight_percent: 93
+          percent_of: "1rm"
+          target_notes: "Near-max singles"
+
+        # Day 2: Strength Day
+        - day_order: 1
+          exercise_id: "squat"
+          target_sets: 4
+          target_reps: 4
+          target_weight_percent: 78
+          percent_of: "1rm"
+          target_notes: "Shift to 4-rep sets"
+
+        - day_order: 1
+          exercise_id: "bench"
+          target_sets: 4
+          target_reps: 4
+          target_weight_percent: 78
+          percent_of: "1rm"
+
+        - day_order: 1
+          exercise_id: "deadlift"
+          target_sets: 3
+          target_reps: 4
+          target_weight_percent: 80
+          percent_of: "1rm"
+
+        # Day 3: Hypertrophy Day
+        - day_order: 2
+          exercise_id: "squat"
+          target_sets: 4
+          target_reps: 10
+          target_weight_percent: 68
+          percent_of: "1rm"
+
+        - day_order: 2
+          exercise_id: "bench"
+          target_sets: 4
+          target_reps: 10
+          target_weight_percent: 68
+          percent_of: "1rm"
+
+        - day_order: 2
+          exercise_id: "deadlift"
+          target_sets: 3
+          target_reps: 8
+          target_weight_percent: 70
+          percent_of: "1rm"
+
+    # Week 6: Intensity increase
+    - week_number: 6
+      name: "DUP Week 6"
+      notes: "Power: 94%, Strength: 82%, Hypertrophy: 72%"
+      overrides:
+        # Day 1: Power Day
+        - day_order: 0
+          exercise_id: "squat"
+          target_sets: 8
+          target_reps: 1
+          target_weight_percent: 94
+          percent_of: "1rm"
+
+        - day_order: 0
+          exercise_id: "bench"
+          target_sets: 8
+          target_reps: 1
+          target_weight_percent: 94
+          percent_of: "1rm"
+
+        - day_order: 0
+          exercise_id: "deadlift"
+          target_sets: 6
+          target_reps: 1
+          target_weight_percent: 95
+          percent_of: "1rm"
+
+        # Day 2: Strength Day
+        - day_order: 1
+          exercise_id: "squat"
+          target_sets: 5
+          target_reps: 3
+          target_weight_percent: 82
+          percent_of: "1rm"
+          target_notes: "Shift to triples"
+
+        - day_order: 1
+          exercise_id: "bench"
+          target_sets: 5
+          target_reps: 3
+          target_weight_percent: 82
+          percent_of: "1rm"
+
+        - day_order: 1
+          exercise_id: "deadlift"
+          target_sets: 4
+          target_reps: 3
+          target_weight_percent: 84
+          percent_of: "1rm"
+
+        # Day 3: Hypertrophy Day
+        - day_order: 2
+          exercise_id: "squat"
+          target_sets: 5
+          target_reps: 8
+          target_weight_percent: 72
+          percent_of: "1rm"
+          target_notes: "Reduce reps slightly, increase weight"
+
+        - day_order: 2
+          exercise_id: "bench"
+          target_sets: 5
+          target_reps: 8
+          target_weight_percent: 72
+          percent_of: "1rm"
+
+        - day_order: 2
+          exercise_id: "deadlift"
+          target_sets: 4
+          target_reps: 6
+          target_weight_percent: 74
+          percent_of: "1rm"
+
+    # Week 7: Peak week
+    - week_number: 7
+      name: "DUP Week 7"
+      notes: "Peak intensity week. Power: 97%, Strength: 85%, Hypertrophy: 75%"
+      overrides:
+        # Day 1: Power Day
+        - day_order: 0
+          exercise_id: "squat"
+          target_sets: 10
+          target_reps: 1
+          target_weight_percent: 97
+          percent_of: "1rm"
+          target_notes: "Work up to near-max single at 97-100%"
+
+        - day_order: 0
+          exercise_id: "bench"
+          target_sets: 10
+          target_reps: 1
+          target_weight_percent: 97
+          percent_of: "1rm"
+          target_notes: "Max attempt singles"
+
+        - day_order: 0
+          exercise_id: "deadlift"
+          target_sets: 8
+          target_reps: 1
+          target_weight_percent: 98
+          percent_of: "1rm"
+          target_notes: "Peak singles"
+
+        # Day 2: Strength Day
+        - day_order: 1
+          exercise_id: "squat"
+          target_sets: 6
+          target_reps: 2
+          target_weight_percent: 85
+          percent_of: "1rm"
+          target_notes: "Heavy doubles"
+
+        - day_order: 1
+          exercise_id: "bench"
+          target_sets: 6
+          target_reps: 2
+          target_weight_percent: 85
+          percent_of: "1rm"
+
+        - day_order: 1
+          exercise_id: "deadlift"
+          target_sets: 5
+          target_reps: 2
+          target_weight_percent: 87
+          percent_of: "1rm"
+
+        # Day 3: Hypertrophy Day
+        - day_order: 2
+          exercise_id: "squat"
+          target_sets: 5
+          target_reps: 6
+          target_weight_percent: 75
+          percent_of: "1rm"
+          target_notes: "Reduced volume for recovery"
+
+        - day_order: 2
+          exercise_id: "bench"
+          target_sets: 5
+          target_reps: 6
+          target_weight_percent: 75
+          percent_of: "1rm"
+
+        - day_order: 2
+          exercise_id: "deadlift"
+          target_sets: 3
+          target_reps: 5
+          target_weight_percent: 77
+          percent_of: "1rm"
+
+    # Week 8: Final taper/deload
+    - week_number: 8
+      name: "DUP Week 8 (Taper)"
+      notes: "Taper week for competition or max testing. Minimal volume, technique work."
+      overrides:
+        # Day 1: Power Day (Openers)
+        - day_order: 0
+          exercise_id: "squat"
+          target_sets: 2
+          target_reps: 1
+          target_weight_percent: 80
+          percent_of: "1rm"
+          target_notes: "Opener weight - build confidence"
+
+        - day_order: 0
+          exercise_id: "bench"
+          target_sets: 2
+          target_reps: 1
+          target_weight_percent: 80
+          percent_of: "1rm"
+          target_notes: "Opener - smooth and fast"
+
+        - day_order: 0
+          exercise_id: "deadlift"
+          target_sets: 1
+          target_reps: 1
+          target_weight_percent: 82
+          percent_of: "1rm"
+          target_notes: "One opener pull"
+
+        # Day 2: Technique work only
+        - day_order: 1
+          exercise_id: "squat"
+          target_sets: 2
+          target_reps: 3
+          target_weight_percent: 60
+          percent_of: "1rm"
+          target_notes: "Light technique - groove the pattern"
+
+        - day_order: 1
+          exercise_id: "bench"
+          target_sets: 2
+          target_reps: 3
+          target_weight_percent: 60
+          percent_of: "1rm"
+          target_notes: "Light technique with pauses"
+
+        - day_order: 1
+          exercise_id: "deadlift"
+          target_sets: 1
+          target_reps: 2
+          target_weight_percent: 62
+          percent_of: "1rm"
+          target_notes: "Light pulls - positioning practice"
+
+        # Day 3: Skip or very light
+        - day_order: 2
+          exercise_id: "squat"
+          target_sets: 2
+          target_reps: 5
+          target_weight_percent: 50
+          percent_of: "1rm"
+          target_notes: "Optional - very light or skip entirely"
+
+        - day_order: 2
+          exercise_id: "bench"
+          target_sets: 2
+          target_reps: 5
+          target_weight_percent: 50
+          percent_of: "1rm"
+          target_notes: "Optional - pump work or skip"
+
+        - day_order: 2
+          exercise_id: "deadlift"
+          target_sets: 1
+          target_reps: 3
+          target_weight_percent: 52
+          percent_of: "1rm"
+          target_notes: "Optional - skip if meet is near"
+
+  days:
+    # These base values are overridden by week-specific programming
+    - id: "day-1"
+      order: 0
+      focus: "Power Day (Low Reps, High Intensity)"
+      target_session_length_min: 75
+      exercises:
+        - id: "squat"
+          name: "Competition Squat"
+          modality: strength
+          target_sets: 6
+          target_reps: 2
+          target_notes: "Main power work - overridden weekly"
+          rest_between_sets_sec: 300
+
+        - id: "box-squat"
+          name: "Box Squat"
+          modality: strength
+          target_sets: 3
+          target_reps: 3
+          target_notes: "Explosive speed work - stay consistent across weeks"
+
+    - id: "day-2"
+      order: 1
+      focus: "Strength Day (Moderate Reps, Moderate-High Intensity)"
+      target_session_length_min: 80
+      exercises:
+        - id: "squat"
+          name: "Competition Squat"
+          modality: strength
+          target_sets: 4
+          target_reps: 5
+          target_notes: "Main strength work - overridden weekly"
+          rest_between_sets_sec: 240
+
+        - id: "bench"
+          name: "Competition Bench Press"
+          modality: strength
+          target_sets: 4
+          target_reps: 5
+          target_notes: "Main strength work - overridden weekly"
+          rest_between_sets_sec: 240
+
+        - id: "deadlift"
+          name: "Competition Deadlift"
+          modality: strength
+          target_sets: 3
+          target_reps: 5
+          target_notes: "Main strength work - overridden weekly"
+          rest_between_sets_sec: 300
+
+    - id: "day-3"
+      order: 2
+      focus: "Hypertrophy Day (High Reps, Moderate Intensity)"
+      target_session_length_min: 85
+      exercises:
+        - id: "squat"
+          name: "Competition Squat"
+          modality: strength
+          target_sets: 4
+          target_reps: 10
+          target_notes: "Volume work - overridden weekly"
+          rest_between_sets_sec: 150
+
+        - id: "bench"
+          name: "Competition Bench Press"
+          modality: strength
+          target_sets: 4
+          target_reps: 10
+          target_notes: "Volume work - overridden weekly"
+          rest_between_sets_sec: 150
+
+        - id: "deadlift"
+          name: "Competition Deadlift"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          target_notes: "Volume work - overridden weekly"
+          rest_between_sets_sec: 180
+
+        - id: "accessories"
+          name: "Accessory Circuit"
+          modality: circuit
+          target_notes: "Rows, pullups, dips, core work - stay consistent"

@@ -1,0 +1,134 @@
+plan_version: 2
+meta:
+  title: "Linear Progression Strength Program"
+  description: "Beginner strength program with linear progression rules"
+  author: "PWF Team"
+  equipment:
+    - barbell
+    - squat_rack
+    - bench
+  tags:
+    - strength
+    - beginner
+    - linear_progression
+
+glossary:
+  "Linear Progression": "Adding a fixed amount of weight each session after successfully completing all sets"
+  "Deload": "Reducing training weight to allow for recovery and prevent overtraining"
+
+cycle:
+  days:
+    - focus: "Lower Body A"
+      exercises:
+        - name: "Barbell Back Squat"
+          modality: strength
+          target_sets: 3
+          target_reps: 5
+          target_load: "100kg"
+          cues: "Keep chest up, depth below parallel, drive through heels"
+          progression_rules:
+            type: linear
+            success_condition: all_sets_completed
+            weight_increment_kg: 2.5
+            deload_condition: failed_twice_consecutive
+            deload_percent: 90
+            max_weight_kg: 200
+            notes: "Add 2.5kg when all 3x5 completed successfully"
+
+        - name: "Romanian Deadlift"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          target_load: "80kg"
+          progression_rules:
+            type: linear
+            success_condition: all_sets_completed
+            weight_increment_kg: 2.5
+            deload_condition: failed_twice_consecutive
+            deload_percent: 85
+
+    - focus: "Upper Body A"
+      exercises:
+        - name: "Barbell Bench Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 5
+          target_load: "80kg"
+          cues: "Retract scapula, bar touches mid-chest, press in straight line"
+          progression_rules:
+            type: linear
+            success_condition: all_sets_completed
+            weight_increment_kg: 2.5
+            deload_condition: failed_twice_consecutive
+            deload_percent: 90
+            max_weight_kg: 150
+            notes: "Upper body typically progresses slower than lower body"
+
+        - name: "Barbell Row"
+          modality: strength
+          target_sets: 3
+          target_reps: 5
+          target_load: "70kg"
+          progression_rules:
+            type: linear
+            success_condition: all_sets_completed
+            weight_increment_kg: 2.5
+            deload_condition: failed_three_consecutive
+            deload_percent: 90
+
+    - focus: "Lower Body B"
+      exercises:
+        - name: "Front Squat"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          target_load: "70kg"
+          progression_rules:
+            type: linear
+            success_condition: all_sets_completed
+            weight_increment_kg: 2.5
+            deload_condition: failed_twice_consecutive
+            deload_percent: 85
+
+        - name: "Conventional Deadlift"
+          modality: strength
+          target_sets: 1
+          target_reps: 5
+          target_load: "120kg"
+          cues: "Neutral spine, push through heels, hinge at hips"
+          progression_rules:
+            type: linear
+            success_condition: all_sets_completed
+            weight_increment_kg: 5.0
+            deload_condition: failed_once_consecutive
+            deload_percent: 90
+            max_weight_kg: 250
+            notes: "Deadlift can handle larger jumps - 5kg per session"
+
+    - focus: "Upper Body B"
+      exercises:
+        - name: "Overhead Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 5
+          target_load: "50kg"
+          progression_rules:
+            type: linear
+            success_condition: all_sets_completed
+            weight_increment_kg: 1.25
+            deload_condition: failed_twice_consecutive
+            deload_percent: 90
+            max_weight_kg: 100
+            notes: "OHP progresses slowly - use smaller 1.25kg increments"
+
+        - name: "Weighted Chin-up"
+          modality: strength
+          target_sets: 3
+          target_reps: 5
+          target_load: "10kg"
+          progression_rules:
+            type: linear
+            success_condition: all_sets_completed
+            weight_increment_kg: 1.25
+            deload_condition: failed_three_consecutive
+            deload_percent: 85
