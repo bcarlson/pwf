@@ -761,8 +761,16 @@ cycle:
 
 #[test]
 fn test_example_linear_progression_file() {
-    let yaml = std::fs::read_to_string("/home/nitro/Projects/pwf/examples/progression-linear.yaml")
-        .expect("Failed to read example file");
+    let manifest_dir = env!("CARGO_MANIFEST_DIR");
+    let examples_dir = std::path::Path::new(manifest_dir)
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .join("examples");
+    let path = examples_dir.join("progression-linear.yaml");
+    let yaml = std::fs::read_to_string(&path)
+        .unwrap_or_else(|e| panic!("Failed to read example file {}: {}", path.display(), e));
     let result = plan::validate(&yaml);
     assert!(
         result.is_valid(),
@@ -773,8 +781,16 @@ fn test_example_linear_progression_file() {
 
 #[test]
 fn test_example_double_progression_file() {
-    let yaml = std::fs::read_to_string("/home/nitro/Projects/pwf/examples/progression-double.yaml")
-        .expect("Failed to read example file");
+    let manifest_dir = env!("CARGO_MANIFEST_DIR");
+    let examples_dir = std::path::Path::new(manifest_dir)
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .join("examples");
+    let path = examples_dir.join("progression-double.yaml");
+    let yaml = std::fs::read_to_string(&path)
+        .unwrap_or_else(|e| panic!("Failed to read example file {}: {}", path.display(), e));
     let result = plan::validate(&yaml);
     assert!(
         result.is_valid(),
