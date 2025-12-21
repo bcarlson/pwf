@@ -1,0 +1,336 @@
+# PWF History Export v2.1 - Advanced Swimming Features
+# Demonstrates new v2.1 features: pool config, length-by-length tracking,
+# stroke types, SWOLF scores, and sport classification
+
+history_version: 2
+exported_at: "2025-12-20T20:30:00Z"
+
+export_source:
+  app_name: "Garmin Swim 2"
+  app_version: "10.00"
+  platform: "watch"
+  preferred_units:
+    weight: kg
+    distance: meters
+
+units:
+  weight: kg
+  distance: meters
+
+workouts:
+  - id: "swim-technique-20251220"
+    date: "2025-12-20"
+    started_at: "2025-12-20T06:00:00Z"
+    ended_at: "2025-12-20T07:15:00Z"
+    duration_sec: 4500
+    title: "Technique Focus - 4x Stroke Workout"
+    notes: "Short course meters pool - working on all four strokes"
+    sport: swimming  # PWF v2.1: Sport classification
+
+    telemetry:
+      heart_rate_avg: 135
+      heart_rate_max: 165
+      heart_rate_min: 90
+      total_distance_m: 2400
+      total_calories: 480
+
+    exercises:
+      # Freestyle technique set with detailed length tracking
+      - name: "Freestyle Technique - 400m"
+        modality: swimming
+        sport: swimming  # PWF v2.1: Exercise-level sport
+
+        # PWF v2.1: Pool configuration
+        pool_config:
+          pool_length: 25
+          pool_length_unit: meters
+
+        sets:
+          - set_number: 1
+            duration_sec: 420
+            distance_meters: 400
+            rpe: 6
+            notes: "Focus on catch and high elbow"
+
+            # PWF v2.1: Swimming-specific data with length tracking
+            swimming:
+              stroke_type: freestyle
+              total_lengths: 16
+              active_lengths: 16
+              swolf_avg: 45
+              drill_mode: false
+
+              # Length-by-length breakdown with SWOLF
+              lengths:
+                - length_number: 1
+                  stroke_type: freestyle
+                  duration_sec: 26
+                  stroke_count: 18
+                  swolf: 44
+                  started_at: "2025-12-20T06:05:00Z"
+                  active: true
+
+                - length_number: 2
+                  stroke_type: freestyle
+                  duration_sec: 27
+                  stroke_count: 19
+                  swolf: 46
+                  started_at: "2025-12-20T06:05:26Z"
+                  active: true
+
+                - length_number: 3
+                  stroke_type: freestyle
+                  duration_sec: 26
+                  stroke_count: 18
+                  swolf: 44
+                  started_at: "2025-12-20T06:05:53Z"
+                  active: true
+
+                - length_number: 4
+                  stroke_type: freestyle
+                  duration_sec: 25
+                  stroke_count: 19
+                  swolf: 44
+                  started_at: "2025-12-20T06:06:19Z"
+                  active: true
+
+                # ... remaining 12 lengths with similar data
+                # Abbreviated for brevity in example
+
+                - length_number: 16
+                  stroke_type: freestyle
+                  duration_sec: 26
+                  stroke_count: 20
+                  swolf: 46
+                  started_at: "2025-12-20T06:12:34Z"
+                  active: true
+
+            telemetry:
+              heart_rate_avg: 128
+              heart_rate_max: 142
+              stroke_rate: 32
+
+      # Backstroke with drill lengths
+      - name: "Backstroke - 200m with Drill"
+        modality: swimming
+        sport: swimming
+
+        pool_config:
+          pool_length: 25
+          pool_length_unit: meters
+
+        sets:
+          - set_number: 1
+            duration_sec: 280
+            distance_meters: 200
+            rpe: 5
+            notes: "Alternating drill/swim by 25m"
+
+            swimming:
+              stroke_type: backstroke
+              total_lengths: 8
+              active_lengths: 4  # Only counting swim lengths
+              swolf_avg: 48
+              drill_mode: false  # Mixed drill/swim
+
+              lengths:
+                - length_number: 1
+                  stroke_type: backstroke
+                  duration_sec: 35
+                  stroke_count: 22
+                  swolf: 57
+                  active: false  # This is a drill length
+                  notes: "Single arm drill"
+
+                - length_number: 2
+                  stroke_type: backstroke
+                  duration_sec: 32
+                  stroke_count: 20
+                  swolf: 52
+                  active: true
+
+                - length_number: 3
+                  stroke_type: backstroke
+                  duration_sec: 36
+                  stroke_count: 24
+                  swolf: 60
+                  active: false
+                  notes: "Single arm drill"
+
+                - length_number: 4
+                  stroke_type: backstroke
+                  duration_sec: 31
+                  stroke_count: 19
+                  swolf: 50
+                  active: true
+
+      # Breaststroke
+      - name: "Breaststroke - 200m"
+        modality: swimming
+        sport: swimming
+
+        pool_config:
+          pool_length: 25
+          pool_length_unit: meters
+
+        sets:
+          - set_number: 1
+            duration_sec: 240
+            distance_meters: 200
+            rpe: 7
+
+            swimming:
+              stroke_type: breaststroke
+              total_lengths: 8
+              active_lengths: 8
+              swolf_avg: 42  # Lower stroke count for breaststroke
+
+              lengths:
+                - length_number: 1
+                  stroke_type: breaststroke
+                  duration_sec: 29
+                  stroke_count: 12
+                  swolf: 41
+                  active: true
+
+                - length_number: 2
+                  stroke_type: breaststroke
+                  duration_sec: 30
+                  stroke_count: 13
+                  swolf: 43
+                  active: true
+
+      # Butterfly
+      - name: "Butterfly - 100m"
+        modality: swimming
+        sport: swimming
+
+        pool_config:
+          pool_length: 25
+          pool_length_unit: meters
+
+        sets:
+          - set_number: 1
+            duration_sec: 95
+            distance_meters: 100
+            rpe: 8.5
+            notes: "Very challenging - technique breaking down"
+
+            swimming:
+              stroke_type: butterfly
+              total_lengths: 4
+              active_lengths: 4
+              swolf_avg: 38
+
+              lengths:
+                - length_number: 1
+                  stroke_type: butterfly
+                  duration_sec: 22
+                  stroke_count: 15
+                  swolf: 37
+                  active: true
+
+                - length_number: 2
+                  stroke_type: butterfly
+                  duration_sec: 23
+                  stroke_count: 16
+                  swolf: 39
+                  active: true
+
+                - length_number: 3
+                  stroke_type: butterfly
+                  duration_sec: 24
+                  stroke_count: 16
+                  swolf: 40
+                  active: true
+
+                - length_number: 4
+                  stroke_type: butterfly
+                  duration_sec: 26
+                  stroke_count: 18
+                  swolf: 44
+                  active: true
+                  notes: "Form deteriorating"
+
+      # Individual Medley
+      - name: "IM - 200m"
+        modality: swimming
+        sport: swimming
+
+        pool_config:
+          pool_length: 25
+          pool_length_unit: meters
+
+        sets:
+          - set_number: 1
+            duration_sec: 195
+            distance_meters: 200
+            rpe: 8
+            notes: "Fly/Back/Breast/Free - 50m each"
+
+            swimming:
+              stroke_type: im  # Individual Medley
+              total_lengths: 8
+              active_lengths: 8
+
+              lengths:
+                # Butterfly leg
+                - length_number: 1
+                  stroke_type: butterfly
+                  duration_sec: 28
+                  stroke_count: 17
+                  active: true
+
+                - length_number: 2
+                  stroke_type: butterfly
+                  duration_sec: 29
+                  stroke_count: 18
+                  active: true
+
+                # Backstroke leg
+                - length_number: 3
+                  stroke_type: backstroke
+                  duration_sec: 25
+                  stroke_count: 19
+                  active: true
+
+                - length_number: 4
+                  stroke_type: backstroke
+                  duration_sec: 24
+                  stroke_count: 18
+                  active: true
+
+                # Breaststroke leg
+                - length_number: 5
+                  stroke_type: breaststroke
+                  duration_sec: 22
+                  stroke_count: 11
+                  active: true
+
+                - length_number: 6
+                  stroke_type: breaststroke
+                  duration_sec: 23
+                  stroke_count: 12
+                  active: true
+
+                # Freestyle leg
+                - length_number: 7
+                  stroke_type: freestyle
+                  duration_sec: 21
+                  stroke_count: 16
+                  active: true
+
+                - length_number: 8
+                  stroke_type: freestyle
+                  duration_sec: 23
+                  stroke_count: 17
+                  active: true
+
+personal_records:
+  - exercise_name: "50m Butterfly"
+    record_type: fastest_time
+    value: 22
+    unit: seconds
+    achieved_at: "2025-12-20T06:25:00Z"
+    workout_id: "swim-technique-20251220"
+    notes: "First sub-23 second 50m fly!"

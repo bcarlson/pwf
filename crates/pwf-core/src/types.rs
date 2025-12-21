@@ -105,6 +105,50 @@ impl fmt::Display for DistanceUnit {
     }
 }
 
+/// Sport type for multi-sport activities (PWF v2)
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Sport {
+    Swimming,
+    Cycling,
+    Running,
+    Rowing,
+    Transition,
+    Strength,
+    Other,
+}
+
+impl fmt::Display for Sport {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Sport::Swimming => write!(f, "swimming"),
+            Sport::Cycling => write!(f, "cycling"),
+            Sport::Running => write!(f, "running"),
+            Sport::Rowing => write!(f, "rowing"),
+            Sport::Transition => write!(f, "transition"),
+            Sport::Strength => write!(f, "strength"),
+            Sport::Other => write!(f, "other"),
+        }
+    }
+}
+
+impl std::str::FromStr for Sport {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "swimming" => Ok(Sport::Swimming),
+            "cycling" => Ok(Sport::Cycling),
+            "running" => Ok(Sport::Running),
+            "rowing" => Ok(Sport::Rowing),
+            "transition" => Ok(Sport::Transition),
+            "strength" => Ok(Sport::Strength),
+            "other" => Ok(Sport::Other),
+            _ => Err(format!("Unknown sport: {}", s)),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -639,5 +683,125 @@ mod tests {
         for tag in EQUIPMENT_TAGS {
             assert!(!tag.contains(' '));
         }
+    }
+
+    // ===== Sport Tests =====
+
+    #[test]
+    fn test_sport_display() {
+        assert_eq!(Sport::Swimming.to_string(), "swimming");
+        assert_eq!(Sport::Cycling.to_string(), "cycling");
+        assert_eq!(Sport::Running.to_string(), "running");
+        assert_eq!(Sport::Rowing.to_string(), "rowing");
+        assert_eq!(Sport::Transition.to_string(), "transition");
+        assert_eq!(Sport::Strength.to_string(), "strength");
+        assert_eq!(Sport::Other.to_string(), "other");
+    }
+
+    #[test]
+    fn test_sport_from_str() {
+        assert_eq!(Sport::from_str("swimming").unwrap(), Sport::Swimming);
+        assert_eq!(Sport::from_str("cycling").unwrap(), Sport::Cycling);
+        assert_eq!(Sport::from_str("running").unwrap(), Sport::Running);
+        assert_eq!(Sport::from_str("rowing").unwrap(), Sport::Rowing);
+        assert_eq!(Sport::from_str("transition").unwrap(), Sport::Transition);
+        assert_eq!(Sport::from_str("strength").unwrap(), Sport::Strength);
+        assert_eq!(Sport::from_str("other").unwrap(), Sport::Other);
+    }
+
+    #[test]
+    fn test_sport_from_str_case_insensitive() {
+        assert_eq!(Sport::from_str("SWIMMING").unwrap(), Sport::Swimming);
+        assert_eq!(Sport::from_str("CyCLiNg").unwrap(), Sport::Cycling);
+        assert_eq!(Sport::from_str("Running").unwrap(), Sport::Running);
+    }
+
+    #[test]
+    fn test_sport_from_str_invalid() {
+        let result = Sport::from_str("invalid");
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err(), "Unknown sport: invalid");
+    }
+
+    #[test]
+    fn test_sport_serde_serialize() {
+        assert_eq!(
+            serde_json::to_string(&Sport::Swimming).unwrap(),
+            "\"swimming\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Sport::Cycling).unwrap(),
+            "\"cycling\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Sport::Running).unwrap(),
+            "\"running\""
+        );
+        assert_eq!(serde_json::to_string(&Sport::Rowing).unwrap(), "\"rowing\"");
+        assert_eq!(
+            serde_json::to_string(&Sport::Transition).unwrap(),
+            "\"transition\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Sport::Strength).unwrap(),
+            "\"strength\""
+        );
+        assert_eq!(serde_json::to_string(&Sport::Other).unwrap(), "\"other\"");
+    }
+
+    #[test]
+    fn test_sport_serde_deserialize() {
+        assert_eq!(
+            serde_json::from_str::<Sport>("\"swimming\"").unwrap(),
+            Sport::Swimming
+        );
+        assert_eq!(
+            serde_json::from_str::<Sport>("\"cycling\"").unwrap(),
+            Sport::Cycling
+        );
+        assert_eq!(
+            serde_json::from_str::<Sport>("\"running\"").unwrap(),
+            Sport::Running
+        );
+    }
+
+    #[test]
+    fn test_sport_serde_roundtrip() {
+        let variants = vec![
+            Sport::Swimming,
+            Sport::Cycling,
+            Sport::Running,
+            Sport::Rowing,
+            Sport::Transition,
+            Sport::Strength,
+            Sport::Other,
+        ];
+
+        for variant in variants {
+            let json = serde_json::to_string(&variant).unwrap();
+            let deserialized: Sport = serde_json::from_str(&json).unwrap();
+            assert_eq!(variant, deserialized);
+        }
+    }
+
+    #[test]
+    fn test_sport_debug() {
+        assert_eq!(format!("{:?}", Sport::Swimming), "Swimming");
+        assert_eq!(format!("{:?}", Sport::Cycling), "Cycling");
+        assert_eq!(format!("{:?}", Sport::Running), "Running");
+    }
+
+    #[test]
+    fn test_sport_equality() {
+        assert_eq!(Sport::Swimming, Sport::Swimming);
+        assert_ne!(Sport::Swimming, Sport::Cycling);
+        assert_ne!(Sport::Cycling, Sport::Running);
+    }
+
+    #[test]
+    fn test_sport_clone() {
+        let sport = Sport::Swimming;
+        let cloned = sport;
+        assert_eq!(sport, cloned);
     }
 }
