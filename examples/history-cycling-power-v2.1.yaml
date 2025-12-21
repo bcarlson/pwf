@@ -205,9 +205,9 @@ workouts:
 
           # Recovery 1
           - set_number: 2
-            set_type: rest
             duration_sec: 300
             distance_meters: 2100
+            notes: "Easy recovery spin"
 
             telemetry:
               heart_rate_avg: 142
@@ -232,7 +232,6 @@ workouts:
 
           # Recovery 2
           - set_number: 4
-            set_type: rest
             duration_sec: 300
             distance_meters: 2050
 
@@ -259,7 +258,6 @@ workouts:
 
           # Recovery 3
           - set_number: 6
-            set_type: rest
             duration_sec: 300
             distance_meters: 2400  # Downhill recovery
 
@@ -342,10 +340,10 @@ workouts:
           status: good
 
 personal_records:
-  - exercise_name: "10min Power"
-    record_type: max_power
-    value: 305
-    unit: watts
+  - exercise_name: "10min Power Interval"
+    record_type: max_duration
+    value: 600
+    unit: seconds
     achieved_at: "2025-12-20T10:45:00Z"
     workout_id: "ride-20251220-interval"
-    notes: "New 10min power PR on interval 3!"
+    notes: "Held 305W for 10min - new power PR!"
