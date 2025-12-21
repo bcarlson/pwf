@@ -2029,13 +2029,22 @@ mod tests {
     #[test]
     fn test_pool_config_presets() {
         assert_eq!(PoolConfig::pool_25m().pool_length, 25.0);
-        assert_eq!(PoolConfig::pool_25m().pool_length_unit, PoolLengthUnit::Meters);
+        assert_eq!(
+            PoolConfig::pool_25m().pool_length_unit,
+            PoolLengthUnit::Meters
+        );
 
         assert_eq!(PoolConfig::pool_50m().pool_length, 50.0);
-        assert_eq!(PoolConfig::pool_50m().pool_length_unit, PoolLengthUnit::Meters);
+        assert_eq!(
+            PoolConfig::pool_50m().pool_length_unit,
+            PoolLengthUnit::Meters
+        );
 
         assert_eq!(PoolConfig::pool_25yd().pool_length, 25.0);
-        assert_eq!(PoolConfig::pool_25yd().pool_length_unit, PoolLengthUnit::Yards);
+        assert_eq!(
+            PoolConfig::pool_25yd().pool_length_unit,
+            PoolLengthUnit::Yards
+        );
     }
 
     #[test]
@@ -2244,10 +2253,7 @@ mod tests {
 
     #[test]
     fn test_gps_fix_serde() {
-        assert_eq!(
-            serde_json::to_string(&GpsFix::Fix3D).unwrap(),
-            "\"fix_3d\""
-        );
+        assert_eq!(serde_json::to_string(&GpsFix::Fix3D).unwrap(), "\"fix_3d\"");
         assert_eq!(
             serde_json::from_str::<GpsFix>("\"dgps\"").unwrap(),
             GpsFix::Dgps
