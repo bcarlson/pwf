@@ -1,6 +1,6 @@
 //! History export type definitions
 
-use crate::{DistanceUnit, Modality, WeightUnit};
+use crate::{DistanceUnit, Modality, Sport, WeightUnit};
 use serde::{Deserialize, Serialize};
 
 /// Root history export structure
@@ -80,6 +80,18 @@ pub struct Workout {
     pub exercises: Vec<CompletedExercise>,
     #[serde(default)]
     pub telemetry: Option<WorkoutTelemetry>,
+    #[serde(default)]
+    pub devices: Vec<DeviceInfo>,
+
+    // PWF v2.1: Sport tracking and multi-sport support
+    /// Primary sport for this workout
+    #[serde(default)]
+    pub sport: Option<Sport>,
+
+    /// Sport segments for multi-sport workouts (e.g., triathlon)
+    /// If present, this is a multi-sport session with distinct segments
+    #[serde(default)]
+    pub sport_segments: Option<Vec<SportSegment>>,
 }
 
 /// Telemetry metrics for an entire workout session (PWF v2)
@@ -152,6 +164,573 @@ pub struct WorkoutTelemetry {
     // GPS/Route data
     #[serde(default)]
     pub gps_route_id: Option<String>,
+
+    // PWF v2.1: GPS route with full position data
+    #[serde(default)]
+    pub gps_route: Option<GpsRoute>,
+
+    // PWF v2.1: Advanced physiological metrics
+    #[serde(default)]
+    pub advanced_metrics: Option<AdvancedMetrics>,
+
+    // PWF v2.1: Power-based cycling metrics
+    #[serde(default)]
+    pub power_metrics: Option<PowerMetrics>,
+
+    // PWF v2.1: Time in HR/power zones
+    #[serde(default)]
+    pub time_in_zones: Option<TimeInZones>,
+}
+
+// ============================================================================
+// PWF v2.1: Advanced Metrics
+// ============================================================================
+
+/// Advanced physiological and performance metrics
+/// Primarily from Garmin/Firstbeat algorithms
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AdvancedMetrics {
+    /// Training Effect score (0.0 - 5.0)
+    /// Measures aerobic training stimulus
+    #[serde(default)]
+    pub training_effect: Option<f64>,
+
+    /// Anaerobic Training Effect (0.0 - 5.0)
+    /// Measures high-intensity training stimulus
+    #[serde(default)]
+    pub anaerobic_training_effect: Option<f64>,
+
+    /// Recommended recovery time (hours)
+    #[serde(default)]
+    pub recovery_time_hours: Option<u32>,
+
+    /// VO2 Max estimate (ml/kg/min)
+    #[serde(default)]
+    pub vo2_max_estimate: Option<f64>,
+
+    /// Lactate threshold data
+    #[serde(default)]
+    pub lactate_threshold: Option<LactateThreshold>,
+
+    /// Performance Condition (-20 to +20)
+    /// Real-time performance assessment during workout
+    #[serde(default)]
+    pub performance_condition: Option<i8>,
+
+    /// Training Load (0-1000+)
+    /// Cumulative training stress
+    #[serde(default)]
+    pub training_load: Option<u32>,
+
+    /// Training Status assessment
+    #[serde(default)]
+    pub training_status: Option<TrainingStatus>,
+}
+
+/// Lactate threshold tracking
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LactateThreshold {
+    /// Heart rate at lactate threshold (bpm)
+    #[serde(default)]
+    pub heart_rate_bpm: Option<u32>,
+
+    /// Speed/pace at lactate threshold (m/s)
+    #[serde(default)]
+    pub speed_mps: Option<f64>,
+
+    /// Power at lactate threshold (watts, for cycling)
+    #[serde(default)]
+    pub power_watts: Option<u32>,
+
+    /// When threshold was detected/calculated
+    #[serde(default)]
+    pub detected_at: Option<String>,
+}
+
+/// Training status classification
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum TrainingStatus {
+    Detraining,
+    Recovery,
+    Maintaining,
+    Productive,
+    Peaking,
+    Overreaching,
+    Unknown,
+}
+
+/// Power-based cycling metrics (from power meter data)
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct PowerMetrics {
+    /// Normalized Power (NP) - weighted average accounting for variability
+    #[serde(default)]
+    pub normalized_power: Option<u32>,
+
+    /// Training Stress Score (TSS) - quantifies training load
+    #[serde(default)]
+    pub training_stress_score: Option<f64>,
+
+    /// Intensity Factor (IF) - ratio of NP to FTP
+    #[serde(default)]
+    pub intensity_factor: Option<f64>,
+
+    /// Variability Index (VI) - ratio of NP to average power
+    #[serde(default)]
+    pub variability_index: Option<f64>,
+
+    /// Functional Threshold Power used for calculations (watts)
+    #[serde(default)]
+    pub ftp_watts: Option<u32>,
+
+    /// Work in kilojoules (total energy expenditure)
+    #[serde(default)]
+    pub total_work_kj: Option<f64>,
+
+    /// Left/right power balance (percentage left)
+    #[serde(default)]
+    pub left_right_balance: Option<f64>,
+
+    /// Average left pedal smoothness (percentage)
+    #[serde(default)]
+    pub left_pedal_smoothness: Option<f64>,
+
+    /// Average right pedal smoothness (percentage)
+    #[serde(default)]
+    pub right_pedal_smoothness: Option<f64>,
+
+    /// Average left torque effectiveness (percentage)
+    #[serde(default)]
+    pub left_torque_effectiveness: Option<f64>,
+
+    /// Average right torque effectiveness (percentage)
+    #[serde(default)]
+    pub right_torque_effectiveness: Option<f64>,
+}
+
+/// Time spent in heart rate and power zones
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TimeInZones {
+    /// Time in each HR zone (seconds per zone)
+    /// Zones typically: 1=easy, 2=moderate, 3=tempo, 4=threshold, 5=max
+    #[serde(default)]
+    pub hr_zones_sec: Option<Vec<u32>>,
+
+    /// Time in each power zone (seconds per zone)
+    /// Zones typically based on FTP percentages
+    #[serde(default)]
+    pub power_zones_sec: Option<Vec<u32>>,
+
+    /// HR zone configuration (zone boundaries in bpm)
+    #[serde(default)]
+    pub hr_zone_boundaries: Option<Vec<u32>>,
+
+    /// Power zone configuration (zone boundaries in watts)
+    #[serde(default)]
+    pub power_zone_boundaries: Option<Vec<u32>>,
+
+    /// Pace zones (seconds per zone, for running)
+    #[serde(default)]
+    pub pace_zones_sec: Option<Vec<u32>>,
+
+    /// Pace zone boundaries (seconds per km)
+    #[serde(default)]
+    pub pace_zone_boundaries: Option<Vec<u32>>,
+}
+
+// ============================================================================
+// PWF v2.1: Multi-Sport Sessions
+// ============================================================================
+
+/// A segment within a multi-sport workout (e.g., swim/bike/run in triathlon)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SportSegment {
+    /// Segment identifier
+    pub segment_id: String,
+
+    /// Sport for this segment
+    pub sport: Sport,
+
+    /// Segment number in sequence (0-indexed)
+    pub segment_index: u32,
+
+    /// When segment started (ISO 8601)
+    #[serde(default)]
+    pub started_at: Option<String>,
+
+    /// Segment duration (seconds)
+    #[serde(default)]
+    pub duration_sec: Option<u32>,
+
+    /// Distance covered in this segment (meters)
+    #[serde(default)]
+    pub distance_m: Option<f64>,
+
+    /// Exercises/sets completed during this segment
+    #[serde(default)]
+    pub exercise_ids: Vec<String>,
+
+    /// Telemetry specific to this segment
+    #[serde(default)]
+    pub telemetry: Option<WorkoutTelemetry>,
+
+    /// Transition data after this segment (if applicable)
+    #[serde(default)]
+    pub transition: Option<TransitionData>,
+
+    /// Notes specific to this segment
+    #[serde(default)]
+    pub notes: Option<String>,
+}
+
+/// Transition between sports in a multi-sport event
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TransitionData {
+    /// Transition identifier (e.g., "T1", "T2")
+    pub transition_id: String,
+
+    /// From which sport
+    pub from_sport: Sport,
+
+    /// To which sport
+    pub to_sport: Sport,
+
+    /// Transition duration (seconds)
+    #[serde(default)]
+    pub duration_sec: Option<u32>,
+
+    /// When transition started (ISO 8601)
+    #[serde(default)]
+    pub started_at: Option<String>,
+
+    /// Average heart rate during transition
+    #[serde(default)]
+    pub heart_rate_avg: Option<u32>,
+
+    /// Notes about transition (e.g., "Changed shoes", "Equipment issues")
+    #[serde(default)]
+    pub notes: Option<String>,
+}
+
+// ============================================================================
+// PWF v2.1: GPS and Position Data
+// ============================================================================
+
+/// A single GPS position/waypoint with timestamp
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GpsPosition {
+    /// Latitude in decimal degrees (WGS84)
+    pub latitude_deg: f64,
+
+    /// Longitude in decimal degrees (WGS84)
+    pub longitude_deg: f64,
+
+    /// Timestamp when position was recorded (ISO 8601)
+    pub timestamp: String,
+
+    /// Elevation/altitude above sea level (meters)
+    #[serde(default)]
+    pub elevation_m: Option<f64>,
+
+    /// Horizontal accuracy/uncertainty (meters)
+    #[serde(default)]
+    pub accuracy_m: Option<f64>,
+
+    /// Speed at this point (meters per second)
+    #[serde(default)]
+    pub speed_mps: Option<f64>,
+
+    /// Heading/bearing (degrees from north, 0-360)
+    #[serde(default)]
+    pub heading_deg: Option<f64>,
+
+    /// Heart rate at this position (bpm)
+    #[serde(default)]
+    pub heart_rate_bpm: Option<u32>,
+
+    /// Power at this position (watts)
+    #[serde(default)]
+    pub power_watts: Option<u32>,
+
+    /// Cadence at this position (RPM or SPM)
+    #[serde(default)]
+    pub cadence: Option<u32>,
+
+    /// Temperature at this position (Celsius)
+    #[serde(default)]
+    pub temperature_c: Option<f64>,
+}
+
+/// A GPS route/track containing multiple positions
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GpsRoute {
+    /// Unique identifier for this route
+    pub route_id: String,
+
+    /// Human-readable route name
+    #[serde(default)]
+    pub name: Option<String>,
+
+    /// GPS positions in chronological order
+    pub positions: Vec<GpsPosition>,
+
+    /// Total distance calculated from GPS (meters)
+    #[serde(default)]
+    pub total_distance_m: Option<f64>,
+
+    /// Total elevation gain (meters)
+    #[serde(default)]
+    pub total_ascent_m: Option<f64>,
+
+    /// Total elevation loss (meters)
+    #[serde(default)]
+    pub total_descent_m: Option<f64>,
+
+    /// Minimum elevation on route (meters)
+    #[serde(default)]
+    pub min_elevation_m: Option<f64>,
+
+    /// Maximum elevation on route (meters)
+    #[serde(default)]
+    pub max_elevation_m: Option<f64>,
+
+    /// Bounding box - southwest corner latitude
+    #[serde(default)]
+    pub bbox_sw_lat: Option<f64>,
+
+    /// Bounding box - southwest corner longitude
+    #[serde(default)]
+    pub bbox_sw_lng: Option<f64>,
+
+    /// Bounding box - northeast corner latitude
+    #[serde(default)]
+    pub bbox_ne_lat: Option<f64>,
+
+    /// Bounding box - northeast corner longitude
+    #[serde(default)]
+    pub bbox_ne_lng: Option<f64>,
+
+    /// Recording mode (e.g., "auto", "smart", "1s", "gps_only")
+    #[serde(default)]
+    pub recording_mode: Option<String>,
+
+    /// GPS fix quality indicator
+    #[serde(default)]
+    pub gps_fix: Option<GpsFix>,
+}
+
+/// GPS fix quality indicator
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum GpsFix {
+    /// No GPS fix
+    None,
+    /// 2D fix (lat/lon only)
+    Fix2D,
+    /// 3D fix (lat/lon/elevation)
+    Fix3D,
+    /// Differential GPS
+    Dgps,
+    /// Unknown fix quality
+    Unknown,
+}
+
+// ============================================================================
+// PWF v2.1: Time-Series Telemetry Data
+// ============================================================================
+
+/// Columnar time-series data for second-by-second telemetry
+/// Uses columnar storage for better compression and flexibility
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct TimeSeriesData {
+    /// Timestamps for each record (ISO 8601)
+    /// All other arrays must match this length
+    pub timestamps: Vec<String>,
+
+    /// Elapsed time in seconds since start (parallel array)
+    /// Useful for quick lookups without parsing timestamps
+    #[serde(default)]
+    pub elapsed_sec: Option<Vec<u32>>,
+
+    /// Heart rate readings (bpm)
+    #[serde(default)]
+    pub heart_rate: Option<Vec<u32>>,
+
+    /// Power readings (watts)
+    #[serde(default)]
+    pub power: Option<Vec<u32>>,
+
+    /// Cadence readings (RPM for cycling, SPM for running/swimming)
+    #[serde(default)]
+    pub cadence: Option<Vec<u32>>,
+
+    /// Speed readings (meters per second)
+    #[serde(default)]
+    pub speed_mps: Option<Vec<f64>>,
+
+    /// Distance readings (cumulative meters)
+    #[serde(default)]
+    pub distance_m: Option<Vec<f64>>,
+
+    /// Elevation/altitude readings (meters)
+    #[serde(default)]
+    pub elevation_m: Option<Vec<f64>>,
+
+    /// Temperature readings (Celsius)
+    #[serde(default)]
+    pub temperature_c: Option<Vec<f64>>,
+
+    /// Latitude readings (decimal degrees)
+    #[serde(default)]
+    pub latitude: Option<Vec<f64>>,
+
+    /// Longitude readings (decimal degrees)
+    #[serde(default)]
+    pub longitude: Option<Vec<f64>>,
+
+    /// Grade/slope readings (percentage, -100 to +100)
+    #[serde(default)]
+    pub grade_percent: Option<Vec<f64>>,
+
+    /// Respiration rate (breaths per minute)
+    #[serde(default)]
+    pub respiration_rate: Option<Vec<u32>>,
+
+    /// Core body temperature (Celsius)
+    #[serde(default)]
+    pub core_temperature_c: Option<Vec<f64>>,
+
+    /// Muscle oxygen saturation (percentage)
+    #[serde(default)]
+    pub muscle_oxygen_percent: Option<Vec<f64>>,
+
+    /// Left/right power balance (percentage left)
+    #[serde(default)]
+    pub power_balance: Option<Vec<f64>>,
+
+    /// Cycling-specific: Left pedal smoothness (percentage)
+    #[serde(default)]
+    pub left_pedal_smoothness: Option<Vec<f64>>,
+
+    /// Cycling-specific: Right pedal smoothness (percentage)
+    #[serde(default)]
+    pub right_pedal_smoothness: Option<Vec<f64>>,
+
+    /// Cycling-specific: Left torque effectiveness (percentage)
+    #[serde(default)]
+    pub left_torque_effectiveness: Option<Vec<f64>>,
+
+    /// Cycling-specific: Right torque effectiveness (percentage)
+    #[serde(default)]
+    pub right_torque_effectiveness: Option<Vec<f64>>,
+
+    /// Running-specific: Stride length (meters)
+    #[serde(default)]
+    pub stride_length_m: Option<Vec<f64>>,
+
+    /// Running-specific: Vertical oscillation (centimeters)
+    #[serde(default)]
+    pub vertical_oscillation_cm: Option<Vec<f64>>,
+
+    /// Running-specific: Ground contact time (milliseconds)
+    #[serde(default)]
+    pub ground_contact_time_ms: Option<Vec<u32>>,
+
+    /// Running-specific: Ground contact balance (percentage left)
+    #[serde(default)]
+    pub ground_contact_balance: Option<Vec<f64>>,
+
+    /// Swimming-specific: Stroke rate (strokes per minute)
+    #[serde(default)]
+    pub stroke_rate: Option<Vec<u32>>,
+
+    /// Swimming-specific: Stroke count (cumulative)
+    #[serde(default)]
+    pub stroke_count: Option<Vec<u32>>,
+
+    /// Swimming-specific: SWOLF score
+    #[serde(default)]
+    pub swolf: Option<Vec<u32>>,
+
+    /// Swimming-specific: Stroke type at each point
+    #[serde(default)]
+    pub stroke_type: Option<Vec<StrokeType>>,
+}
+
+impl TimeSeriesData {
+    /// Validate that all data arrays match the length of timestamps
+    pub fn validate_lengths(&self) -> Result<(), String> {
+        let expected_len = self.timestamps.len();
+
+        macro_rules! check_length {
+            ($field:expr, $name:expr) => {
+                if let Some(ref data) = $field {
+                    if data.len() != expected_len {
+                        return Err(format!(
+                            "{} length ({}) doesn't match timestamps length ({})",
+                            $name,
+                            data.len(),
+                            expected_len
+                        ));
+                    }
+                }
+            };
+        }
+
+        check_length!(self.elapsed_sec, "elapsed_sec");
+        check_length!(self.heart_rate, "heart_rate");
+        check_length!(self.power, "power");
+        check_length!(self.cadence, "cadence");
+        check_length!(self.speed_mps, "speed_mps");
+        check_length!(self.distance_m, "distance_m");
+        check_length!(self.elevation_m, "elevation_m");
+        check_length!(self.temperature_c, "temperature_c");
+        check_length!(self.latitude, "latitude");
+        check_length!(self.longitude, "longitude");
+        check_length!(self.grade_percent, "grade_percent");
+        check_length!(self.respiration_rate, "respiration_rate");
+        check_length!(self.core_temperature_c, "core_temperature_c");
+        check_length!(self.muscle_oxygen_percent, "muscle_oxygen_percent");
+        check_length!(self.power_balance, "power_balance");
+        check_length!(self.left_pedal_smoothness, "left_pedal_smoothness");
+        check_length!(self.right_pedal_smoothness, "right_pedal_smoothness");
+        check_length!(self.left_torque_effectiveness, "left_torque_effectiveness");
+        check_length!(
+            self.right_torque_effectiveness,
+            "right_torque_effectiveness"
+        );
+        check_length!(self.stride_length_m, "stride_length_m");
+        check_length!(self.vertical_oscillation_cm, "vertical_oscillation_cm");
+        check_length!(self.ground_contact_time_ms, "ground_contact_time_ms");
+        check_length!(self.ground_contact_balance, "ground_contact_balance");
+        check_length!(self.stroke_rate, "stroke_rate");
+        check_length!(self.stroke_count, "stroke_count");
+        check_length!(self.swolf, "swolf");
+        check_length!(self.stroke_type, "stroke_type");
+
+        Ok(())
+    }
+
+    /// Get the number of data points
+    pub fn len(&self) -> usize {
+        self.timestamps.len()
+    }
+
+    /// Check if the time series is empty
+    pub fn is_empty(&self) -> bool {
+        self.timestamps.is_empty()
+    }
+
+    /// Get the duration of the time series (first to last timestamp)
+    /// Returns None if there are fewer than 2 timestamps
+    pub fn duration_sec(&self) -> Option<u32> {
+        if let Some(elapsed) = &self.elapsed_sec {
+            if let Some(&last) = elapsed.last() {
+                return Some(last);
+            }
+        }
+        None
+    }
 }
 
 /// A completed exercise with recorded sets
@@ -165,6 +744,14 @@ pub struct CompletedExercise {
     #[serde(default)]
     pub notes: Option<String>,
     pub sets: Vec<CompletedSet>,
+
+    // PWF v2.1: Pool configuration (for swimming exercises)
+    #[serde(default)]
+    pub pool_config: Option<PoolConfig>,
+
+    // PWF v2.1: Sport classification (for multi-sport workouts)
+    #[serde(default)]
+    pub sport: Option<Sport>,
 }
 
 /// A single completed set
@@ -196,6 +783,10 @@ pub struct CompletedSet {
     pub completed_at: Option<String>,
     #[serde(default)]
     pub telemetry: Option<SetTelemetry>,
+
+    // PWF v2.1: Swimming-specific data
+    #[serde(default)]
+    pub swimming: Option<SwimmingSetData>,
 }
 
 /// Telemetry metrics for a completed set (PWF v2)
@@ -272,6 +863,10 @@ pub struct SetTelemetry {
     // GPS/Route data
     #[serde(default)]
     pub gps_route_id: Option<String>,
+
+    // PWF v2.1: Second-by-second time-series data
+    #[serde(default)]
+    pub time_series: Option<TimeSeriesData>,
 }
 
 /// Type of set (working, warmup, etc.)
@@ -284,6 +879,190 @@ pub enum SetType {
     Dropset,
     Failure,
     Amrap,
+}
+
+// ============================================================================
+// Swimming-specific types (PWF v2.1)
+// ============================================================================
+
+/// Swimming stroke type for pool and open water swimming
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum StrokeType {
+    /// Freestyle/front crawl
+    Freestyle,
+    /// Backstroke
+    Backstroke,
+    /// Breaststroke
+    Breaststroke,
+    /// Butterfly
+    Butterfly,
+    /// Drill (technique work, not racing stroke)
+    Drill,
+    /// Mixed strokes within the same length
+    Mixed,
+    /// Individual Medley (all four strokes in sequence)
+    #[serde(rename = "im")]
+    IndividualMedley,
+}
+
+/// Unit for pool length measurement
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum PoolLengthUnit {
+    #[default]
+    Meters,
+    Yards,
+}
+
+/// Pool configuration for swimming workouts
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PoolConfig {
+    /// Length of the pool in the specified units
+    pub pool_length: f64,
+
+    /// Unit for pool length (meters or yards)
+    #[serde(default)]
+    pub pool_length_unit: PoolLengthUnit,
+}
+
+impl PoolConfig {
+    /// Get pool length in meters (standard conversion)
+    pub fn length_in_meters(&self) -> f64 {
+        match self.pool_length_unit {
+            PoolLengthUnit::Meters => self.pool_length,
+            PoolLengthUnit::Yards => self.pool_length * 0.9144, // 1 yard = 0.9144 meters
+        }
+    }
+
+    /// Common 25m pool configuration
+    pub fn pool_25m() -> Self {
+        Self {
+            pool_length: 25.0,
+            pool_length_unit: PoolLengthUnit::Meters,
+        }
+    }
+
+    /// Common 50m pool configuration
+    pub fn pool_50m() -> Self {
+        Self {
+            pool_length: 50.0,
+            pool_length_unit: PoolLengthUnit::Meters,
+        }
+    }
+
+    /// Common 25yd pool configuration
+    pub fn pool_25yd() -> Self {
+        Self {
+            pool_length: 25.0,
+            pool_length_unit: PoolLengthUnit::Yards,
+        }
+    }
+}
+
+/// A single length (one pool length) within a swimming set/lap
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SwimmingLength {
+    /// Length number within the set (1-indexed)
+    pub length_number: u32,
+
+    /// Stroke type used for this length
+    pub stroke_type: StrokeType,
+
+    /// Duration of this length in seconds
+    pub duration_sec: u32,
+
+    /// Number of strokes taken during this length
+    #[serde(default)]
+    pub stroke_count: Option<u32>,
+
+    /// SWOLF score (duration + stroke_count) - efficiency metric
+    /// Lower is better. Calculated as: duration_sec + stroke_count
+    #[serde(default)]
+    pub swolf: Option<u32>,
+
+    /// Timestamp when this length started (ISO 8601)
+    #[serde(default)]
+    pub started_at: Option<String>,
+
+    /// Whether this was an active length (vs. rest at wall)
+    /// FIT files distinguish between active and rest lengths
+    #[serde(default)]
+    pub active: Option<bool>,
+}
+
+impl SwimmingLength {
+    /// Calculate SWOLF score from duration and stroke count
+    /// Returns None if stroke_count is not available
+    pub fn calculate_swolf(&self) -> Option<u32> {
+        self.stroke_count.map(|count| self.duration_sec + count)
+    }
+
+    /// Validate that SWOLF matches calculated value (if both present)
+    pub fn validate_swolf(&self) -> bool {
+        match (self.swolf, self.calculate_swolf()) {
+            (Some(recorded), Some(calculated)) => recorded == calculated,
+            _ => true, // If either is missing, no validation error
+        }
+    }
+}
+
+/// Swimming-specific data for a completed set
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct SwimmingSetData {
+    /// Individual lengths within this set/lap
+    #[serde(default)]
+    pub lengths: Vec<SwimmingLength>,
+
+    /// Primary stroke type for the set (if all lengths same stroke)
+    #[serde(default)]
+    pub stroke_type: Option<StrokeType>,
+
+    /// Total number of lengths in this set
+    #[serde(default)]
+    pub total_lengths: Option<u32>,
+
+    /// Number of active lengths (excludes rest at wall)
+    #[serde(default)]
+    pub active_lengths: Option<u32>,
+
+    /// Average SWOLF across all lengths in this set
+    #[serde(default)]
+    pub swolf_avg: Option<u32>,
+
+    /// Whether this set was drill work (technique focus)
+    #[serde(default)]
+    pub drill_mode: Option<bool>,
+}
+
+impl SwimmingSetData {
+    /// Calculate average SWOLF from lengths
+    pub fn calculate_avg_swolf(&self) -> Option<u32> {
+        if self.lengths.is_empty() {
+            return None;
+        }
+
+        let swolf_values: Vec<u32> = self
+            .lengths
+            .iter()
+            .filter_map(|l| l.swolf.or_else(|| l.calculate_swolf()))
+            .collect();
+
+        if swolf_values.is_empty() {
+            return None;
+        }
+
+        let sum: u32 = swolf_values.iter().sum();
+        Some(sum / swolf_values.len() as u32)
+    }
+
+    /// Count active lengths from length data
+    pub fn count_active_lengths(&self) -> u32 {
+        self.lengths
+            .iter()
+            .filter(|l| l.active.unwrap_or(true)) // Default to active if not specified
+            .count() as u32
+    }
 }
 
 /// A personal record
@@ -383,6 +1162,186 @@ pub struct HistoryStatistics {
     pub date_range_end: Option<String>,
     pub personal_records_count: usize,
     pub body_measurements_count: usize,
+}
+
+/// Information about a device used during the workout
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeviceInfo {
+    /// Device index for multi-device workouts (e.g., 0=watch, 1=HRM, 2=power meter)
+    #[serde(default)]
+    pub device_index: Option<u8>,
+    /// Type of device
+    pub device_type: DeviceType,
+    /// Device manufacturer
+    pub manufacturer: Manufacturer,
+    /// Specific product/model name
+    #[serde(default)]
+    pub product: Option<String>,
+    /// Unique device serial number
+    #[serde(default)]
+    pub serial_number: Option<String>,
+    /// Software/firmware version
+    #[serde(default)]
+    pub software_version: Option<String>,
+    /// Hardware version
+    #[serde(default)]
+    pub hardware_version: Option<String>,
+    /// Battery information
+    #[serde(default)]
+    pub battery: Option<BatteryInfo>,
+    /// Cumulative operating time in hours
+    #[serde(default)]
+    pub cumulative_operating_time_hours: Option<f64>,
+    /// Connection information for sensors
+    #[serde(default)]
+    pub connection: Option<ConnectionInfo>,
+    /// Calibration information for sensors
+    #[serde(default)]
+    pub calibration: Option<CalibrationInfo>,
+}
+
+/// Type of device
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DeviceType {
+    /// GPS sports watch
+    Watch,
+    /// Bike computer (head unit)
+    BikeComputer,
+    /// Heart rate monitor
+    HeartRateMonitor,
+    /// Power meter (cycling)
+    PowerMeter,
+    /// Speed sensor
+    SpeedSensor,
+    /// Cadence sensor
+    CadenceSensor,
+    /// Speed and cadence combo sensor
+    SpeedCadenceSensor,
+    /// Foot pod (running dynamics)
+    FootPod,
+    /// Smart trainer (indoor cycling)
+    SmartTrainer,
+    /// Action camera
+    Camera,
+    /// Smartphone app
+    Phone,
+    /// Unknown or other device type
+    Other,
+}
+
+/// Device manufacturer - supports both known manufacturers and custom strings
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Manufacturer {
+    /// Known manufacturer from standard list
+    Known(KnownManufacturer),
+    /// Custom manufacturer name for non-standard devices
+    Custom(String),
+}
+
+/// Well-known device manufacturers
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum KnownManufacturer {
+    Garmin,
+    Wahoo,
+    Polar,
+    Suunto,
+    Coros,
+    Hammerhead,
+    Stages,
+    Sram,
+    Shimano,
+    Quarq,
+    PowerTap,
+    Stryd,
+    Whoop,
+    Apple,
+    Samsung,
+    Fitbit,
+    /// Other known manufacturer
+    Other,
+}
+
+/// Battery information for a device
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BatteryInfo {
+    /// Battery level at start of workout (percentage)
+    #[serde(default)]
+    pub start_percent: Option<u8>,
+    /// Battery level at end of workout (percentage)
+    #[serde(default)]
+    pub end_percent: Option<u8>,
+    /// Battery voltage
+    #[serde(default)]
+    pub voltage: Option<f64>,
+    /// Battery status indicator
+    #[serde(default)]
+    pub status: Option<BatteryStatus>,
+}
+
+/// Battery status indicator
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum BatteryStatus {
+    /// Battery level is good
+    Good,
+    /// Battery is low and needs charging
+    Low,
+    /// Battery is critically low
+    Critical,
+    /// Battery is charging
+    Charging,
+    /// Unknown battery status
+    Unknown,
+}
+
+/// Connection information for wireless sensors
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ConnectionInfo {
+    /// Type of connection
+    pub connection_type: ConnectionType,
+    /// ANT+ device number (for ANT+ sensors)
+    #[serde(default)]
+    pub ant_device_number: Option<u32>,
+    /// Bluetooth MAC address or identifier
+    #[serde(default)]
+    pub bluetooth_id: Option<String>,
+}
+
+/// Type of device connection
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ConnectionType {
+    /// Local device (watch/bike computer itself)
+    Local,
+    /// ANT+ wireless protocol
+    AntPlus,
+    /// Bluetooth Low Energy
+    BluetoothLe,
+    /// Standard Bluetooth
+    Bluetooth,
+    /// WiFi connection
+    Wifi,
+    /// USB wired connection
+    Usb,
+    /// Unknown connection type
+    Unknown,
+}
+
+/// Calibration information for sensors (e.g., power meters)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CalibrationInfo {
+    /// Calibration factor or zero offset
+    #[serde(default)]
+    pub calibration_factor: Option<f64>,
+    /// Timestamp of last calibration
+    #[serde(default)]
+    pub last_calibrated: Option<String>,
+    /// Auto-zero setting (for power meters)
+    #[serde(default)]
+    pub auto_zero_enabled: Option<bool>,
 }
 
 #[cfg(test)]
@@ -525,6 +1484,9 @@ mod tests {
             plan_day_id: Some("day-789".to_string()),
             exercises: vec![],
             telemetry: None,
+            devices: vec![],
+            sport: None,
+            sport_segments: None,
         };
 
         let json = serde_json::to_string(&workout).unwrap();
@@ -550,6 +1512,9 @@ mod tests {
             plan_day_id: None,
             exercises: vec![],
             telemetry: None,
+            devices: vec![],
+            sport: None,
+            sport_segments: None,
         };
 
         let json = serde_json::to_string(&workout).unwrap();
@@ -582,6 +1547,7 @@ mod tests {
                     is_pr: Some(false),
                     completed_at: None,
                     telemetry: None,
+                    swimming: None,
                 },
                 CompletedSet {
                     set_number: Some(2),
@@ -597,8 +1563,11 @@ mod tests {
                     is_pr: Some(true),
                     completed_at: Some("2025-01-15T10:30:00Z".to_string()),
                     telemetry: None,
+                    swimming: None,
                 },
             ],
+            pool_config: None,
+            sport: None,
         };
 
         let json = serde_json::to_string(&exercise).unwrap();
@@ -628,6 +1597,7 @@ mod tests {
             is_pr: Some(true),
             completed_at: Some("2025-01-15T10:30:00Z".to_string()),
             telemetry: None,
+            swimming: None,
         };
 
         let json = serde_json::to_string(&set).unwrap();
@@ -661,6 +1631,7 @@ mod tests {
             is_pr: None,
             completed_at: None,
             telemetry: None,
+            swimming: None,
         };
 
         let json = serde_json::to_string(&set).unwrap();
@@ -906,9 +1877,15 @@ mod tests {
                         is_pr: Some(true),
                         completed_at: None,
                         telemetry: None,
+                        swimming: None,
                     }],
+                    pool_config: None,
+                    sport: None,
                 }],
                 telemetry: None,
+                devices: vec![],
+                sport: None,
+                sport_segments: None,
             }],
             personal_records: vec![PersonalRecord {
                 exercise_name: "Bench Press".to_string(),
