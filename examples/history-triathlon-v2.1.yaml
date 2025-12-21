@@ -239,7 +239,7 @@ workouts:
               cadence_avg: 182
 
     devices:
-      - device_type: multisport_watch
+      - device_type: watch
         manufacturer: garmin
         product_name: "Forerunner 965"
         serial_number: "4028571930"
