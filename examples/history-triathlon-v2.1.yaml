@@ -1,0 +1,291 @@
+# PWF History Export v2.1 - Triathlon Multi-Sport Session
+# Demonstrates new v2.1 features: sport segments, transitions,
+# per-segment telemetry, and cross-sport tracking
+
+history_version: 2
+exported_at: "2025-12-20T15:45:00Z"
+
+export_source:
+  app_name: "Garmin Forerunner 965"
+  app_version: "18.26"
+  platform: "multisport watch"
+  preferred_units:
+    weight: kg
+    distance: kilometers
+
+units:
+  weight: kg
+  distance: kilometers
+
+workouts:
+  - id: "tri-sprint-20251220"
+    date: "2025-12-20"
+    started_at: "2025-12-20T07:00:00Z"
+    ended_at: "2025-12-20T08:42:18Z"
+    duration_sec: 6138
+    title: "Sprint Triathlon"
+    notes: "750m swim, 20km bike, 5km run - local race"
+
+    # Overall workout telemetry aggregates
+    telemetry:
+      heart_rate_avg: 162
+      heart_rate_max: 189
+      total_distance_km: 25.75
+      total_calories: 892
+
+      advanced_metrics:
+        training_effect: 4.2
+        anaerobic_training_effect: 3.1
+        recovery_time_hours: 48
+        vo2_max_estimate: 54.1
+
+    # PWF v2.1: Multi-sport session with segments and transitions
+    sport_segments:
+      # Segment 0: Swim
+      - segment_id: "swim"
+        sport: swimming
+        segment_index: 0
+        started_at: "2025-12-20T07:00:00Z"
+        duration_sec: 980
+        distance_m: 750
+        notes: "Open water swim - wetsuit legal"
+
+        # Swim-specific exercises tracked during this segment
+        exercise_ids: ["swim-1"]
+
+        # Telemetry specific to swim segment
+        telemetry:
+          heart_rate_avg: 145
+          heart_rate_max: 162
+          pace_avg_sec_per_km: 1307  # 21:47/km pace
+          cadence_avg: 34  # Stroke rate
+          total_calories: 142
+
+        # Transition after swim (T1)
+        transition:
+          transition_id: "T1"
+          from_sport: swimming
+          to_sport: cycling
+          duration_sec: 95
+          started_at: "2025-12-20T07:16:20Z"
+          heart_rate_avg: 138
+          notes: "Wetsuit removal, helmet/shoes on"
+
+      # Segment 1: Bike
+      - segment_id: "bike"
+        sport: cycling
+        segment_index: 1
+        started_at: "2025-12-20T07:17:55Z"
+        duration_sec: 2640
+        distance_m: 20000
+
+        exercise_ids: ["bike-1"]
+
+        telemetry:
+          heart_rate_avg: 168
+          heart_rate_max: 182
+          power_avg: 215
+          power_max: 358
+          speed_avg_kph: 27.3
+          cadence_avg: 88
+          total_calories: 485
+
+          # Power metrics for bike segment
+          power_metrics:
+            normalized_power: 228
+            intensity_factor: 0.82
+            ftp_watts: 280
+
+        # Transition after bike (T2)
+        transition:
+          transition_id: "T2"
+          from_sport: cycling
+          to_sport: running
+          duration_sec: 42
+          started_at: "2025-12-20T08:01:55Z"
+          heart_rate_avg: 155
+          notes: "Quick shoe change"
+
+      # Segment 2: Run
+      - segment_id: "run"
+        sport: running
+        segment_index: 2
+        started_at: "2025-12-20T08:02:37Z"
+        duration_sec: 1380
+        distance_m: 5000
+        notes: "Pushed hard despite heavy legs"
+
+        exercise_ids: ["run-1"]
+
+        telemetry:
+          heart_rate_avg: 178
+          heart_rate_max: 189
+          pace_avg_sec_per_km: 276  # 4:36/km pace
+          cadence_avg: 178  # Steps per minute
+          total_calories: 265
+
+          # Time in HR zones for run
+          time_in_zones:
+            hr_zones_sec: [0, 0, 120, 480, 720, 60]
+            hr_zone_boundaries: [120, 140, 155, 165, 175, 185]
+
+    # Exercises broken down by sport segment
+    exercises:
+      # Swim exercises
+      - id: "swim-1"
+        name: "Open Water Swim"
+        modality: swimming
+        sport: swimming
+        notes: "Mass start, choppy conditions"
+
+        sets:
+          - set_number: 1
+            duration_sec: 980
+            distance_meters: 750
+            rpe: 8
+            notes: "Sighting every 6 strokes"
+
+            swimming:
+              stroke_type: freestyle
+              swolf_avg: 52  # Higher in open water vs pool
+
+            telemetry:
+              heart_rate_avg: 145
+              heart_rate_max: 162
+
+      # Bike exercises
+      - id: "bike-1"
+        name: "Sprint Bike Leg"
+        modality: stopwatch
+        sport: cycling
+        notes: "Mostly flat course with one hill"
+
+        sets:
+          # Out section
+          - set_number: 1
+            duration_sec: 1320
+            distance_meters: 10000
+            rpe: 8
+            notes: "Slight tailwind"
+
+            telemetry:
+              heart_rate_avg: 165
+              heart_rate_max: 178
+              power_avg: 220
+              power_max: 285
+              speed_avg_kph: 27.3
+              cadence_avg: 90
+
+          # Back section with hill
+          - set_number: 2
+            duration_sec: 1320
+            distance_meters: 10000
+            rpe: 8.5
+            notes: "Headwind and one significant climb"
+
+            telemetry:
+              heart_rate_avg: 171
+              heart_rate_max: 182
+              power_avg: 210
+              power_max: 358  # Hill surge
+              speed_avg_kph: 27.3
+              cadence_avg: 86
+
+      # Run exercises
+      - id: "run-1"
+        name: "Sprint Run Leg"
+        modality: running
+        sport: running
+        notes: "Brick run - legs very heavy at start"
+
+        sets:
+          # First km - settling in
+          - set_number: 1
+            duration_sec: 288
+            distance_meters: 1000
+            rpe: 7
+            notes: "Finding rhythm off the bike"
+
+            telemetry:
+              heart_rate_avg: 172
+              heart_rate_max: 178
+              pace_avg_sec_per_km: 288
+              cadence_avg: 172
+
+          # Km 2-4 - race pace
+          - set_number: 2
+            duration_sec: 810
+            distance_meters: 3000
+            rpe: 8.5
+
+            telemetry:
+              heart_rate_avg: 178
+              heart_rate_max: 184
+              pace_avg_sec_per_km: 270
+              cadence_avg: 180
+
+          # Final km - sprint finish
+          - set_number: 3
+            duration_sec: 282
+            distance_meters: 1000
+            rpe: 9.5
+            is_pr: true
+            notes: "All-out sprint to finish line"
+
+            telemetry:
+              heart_rate_avg: 185
+              heart_rate_max: 189
+              pace_avg_sec_per_km: 282
+              cadence_avg: 182
+
+    devices:
+      - device_type: multisport_watch
+        manufacturer: garmin
+        product_name: "Forerunner 965"
+        serial_number: "4028571930"
+        software_version: "18.26"
+
+        battery:
+          start_percent: 92
+          end_percent: 84
+          status: good
+
+      - device_type: heart_rate_monitor
+        manufacturer: garmin
+        product_name: "HRM-Pro Plus"
+
+        connection:
+          connection_type: ant_plus
+
+      - device_type: power_meter
+        manufacturer: garmin
+        product_name: "Rally RK200"
+        notes: "Bike segment only"
+
+        connection:
+          connection_type: ant_plus
+
+personal_records:
+  - exercise_name: "Sprint Triathlon"
+    record_type: fastest_time
+    value: 6138
+    unit: seconds
+    achieved_at: "2025-12-20T08:42:18Z"
+    workout_id: "tri-sprint-20251220"
+    notes: "1:42:18 - New sprint PR by 3 minutes!"
+
+  - exercise_name: "Sprint Tri Run Split"
+    record_type: fastest_time
+    value: 1380
+    unit: seconds
+    achieved_at: "2025-12-20T08:25:17Z"
+    workout_id: "tri-sprint-20251220"
+    notes: "23:00 5K off the bike - best brick run!"
+
+body_measurements:
+  - date: "2025-12-20"
+    recorded_at: "2025-12-20T06:30:00Z"
+    weight_kg: 72.5
+    body_fat_percent: 12.3
+    resting_heart_rate: 48
+    notes: "Pre-race measurement"

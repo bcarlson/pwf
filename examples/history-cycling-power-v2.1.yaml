@@ -1,0 +1,351 @@
+# PWF History Export v2.1 - Advanced Cycling Power Metrics
+# Demonstrates new v2.1 features: power metrics (NP, TSS, IF, VI),
+# advanced metrics (Training Effect, VO2 Max), time in zones, and GPS route
+
+history_version: 2
+exported_at: "2025-12-20T14:30:00Z"
+
+export_source:
+  app_name: "Garmin Edge 1040"
+  app_version: "15.20"
+  platform: "cycling computer"
+  preferred_units:
+    weight: kg
+    distance: kilometers
+
+units:
+  weight: kg
+  distance: kilometers
+
+workouts:
+  - id: "ride-20251220-interval"
+    date: "2025-12-20"
+    started_at: "2025-12-20T09:00:00Z"
+    ended_at: "2025-12-20T11:15:00Z"
+    duration_sec: 8100
+    title: "Threshold Intervals - 4x10min @ FTP"
+    notes: "Outdoor ride with power meter, perfect weather"
+    sport: cycling  # PWF v2.1: Sport classification
+
+    telemetry:
+      heart_rate_avg: 158
+      heart_rate_max: 178
+      heart_rate_min: 95
+
+      power_avg: 245
+      power_max: 412
+
+      total_distance_km: 62.5
+      total_elevation_gain_m: 420
+      total_elevation_gain_ft: 1378
+
+      speed_avg_kph: 27.8
+      speed_max_kph: 54.2
+
+      cadence_avg: 88
+
+      temperature_c: 18
+      total_calories: 1250
+
+      # PWF v2.1: Advanced physiological metrics from Garmin/Firstbeat
+      advanced_metrics:
+        training_effect: 3.8  # Highly improving
+        anaerobic_training_effect: 2.1  # Maintaining
+        recovery_time_hours: 36
+        vo2_max_estimate: 52.3
+        performance_condition: 5  # Positive - feeling strong
+        training_load: 285
+        training_status: productive
+
+        lactate_threshold:
+          heart_rate_bpm: 168
+          power_watts: 265
+          detected_at: "2025-12-20T10:15:00Z"
+
+      # PWF v2.1: Power-based cycling metrics
+      power_metrics:
+        normalized_power: 268  # Higher than avg due to intervals
+        training_stress_score: 142.5  # Intense workout
+        intensity_factor: 0.89  # 89% of FTP
+        variability_index: 1.09  # Moderately variable
+        ftp_watts: 300  # Functional Threshold Power
+        total_work_kj: 1985
+
+        # Pedal dynamics from dual-sided power meter
+        left_right_balance: 51.2  # Slightly left-leg dominant
+        left_pedal_smoothness: 28.5
+        right_pedal_smoothness: 26.8
+        left_torque_effectiveness: 92.3
+        right_torque_effectiveness: 90.7
+
+      # PWF v2.1: Time in heart rate and power zones
+      time_in_zones:
+        # Time in each zone (seconds)
+        hr_zones_sec: [180, 420, 1200, 2400, 3600, 300]  # Z1-Z6
+        power_zones_sec: [240, 600, 1500, 2700, 2400, 660]
+
+        # Zone boundaries
+        hr_zone_boundaries: [120, 140, 155, 165, 175, 185]  # bpm
+        power_zone_boundaries: [150, 210, 240, 270, 315, 360]  # watts (based on FTP)
+
+      # PWF v2.1: GPS route reference (full route data shown below)
+      gps_route_id: "route-20251220-intervals"
+
+    # PWF v2.1: GPS route with full position data
+    # Abbreviated for example - real route would have ~8100 points (1Hz recording)
+    gps_route:
+      route_id: "route-20251220-intervals"
+      name: "River Road Intervals"
+
+      # Aggregate route metrics
+      total_distance_m: 62543
+      total_ascent_m: 422
+      total_descent_m: 418
+      min_elevation_m: 125
+      max_elevation_m: 312
+
+      # Bounding box for map display
+      bbox_sw_lat: 45.4982
+      bbox_sw_lng: -122.7215
+      bbox_ne_lat: 45.5892
+      bbox_ne_lng: -122.6105
+
+      recording_mode: "1s"  # 1 Hz GPS recording
+      gps_fix: fix_3d
+
+      # Sample of GPS positions (real file would have full track)
+      positions:
+        - latitude_deg: 45.5230
+          longitude_deg: -122.6765
+          timestamp: "2025-12-20T09:00:00Z"
+          elevation_m: 125
+          accuracy_m: 3.2
+          speed_mps: 0.0
+          heart_rate_bpm: 95
+          power_watts: 0
+          cadence: 0
+          temperature_c: 18.2
+
+        # Start of warmup
+        - latitude_deg: 45.5235
+          longitude_deg: -122.6768
+          timestamp: "2025-12-20T09:05:00Z"
+          elevation_m: 128
+          speed_mps: 6.5
+          heading_deg: 92
+          heart_rate_bpm: 125
+          power_watts: 180
+          cadence: 85
+          temperature_c: 18.5
+
+        # First interval start
+        - latitude_deg: 45.5312
+          longitude_deg: -122.6892
+          timestamp: "2025-12-20T09:15:00Z"
+          elevation_m: 145
+          speed_mps: 8.8
+          heading_deg: 15
+          heart_rate_bpm: 165
+          power_watts: 302
+          cadence: 92
+          temperature_c: 19.0
+
+        # Peak power during interval
+        - latitude_deg: 45.5348
+          longitude_deg: -122.6915
+          timestamp: "2025-12-20T09:18:30Z"
+          elevation_m: 182
+          speed_mps: 7.2
+          heading_deg: 358
+          heart_rate_bpm: 176
+          power_watts: 412  # Max power on climb
+          cadence: 78
+          temperature_c: 19.2
+
+    exercises:
+      - name: "Warmup"
+        modality: stopwatch
+        sport: cycling
+
+        sets:
+          - set_number: 1
+            duration_sec: 900
+            distance_meters: 6200
+            notes: "Easy spin"
+
+            telemetry:
+              heart_rate_avg: 118
+              heart_rate_max: 132
+              power_avg: 145
+              power_max: 215
+              cadence_avg: 82
+              speed_avg_kph: 24.8
+
+      - name: "Interval Set - 4x10min @ FTP"
+        modality: interval
+        sport: cycling
+        notes: "Target 295-305W, 5min recovery between"
+
+        sets:
+          # Interval 1
+          - set_number: 1
+            set_type: working
+            duration_sec: 600
+            distance_meters: 4850
+            rpe: 8
+            notes: "Slight tailwind"
+
+            telemetry:
+              heart_rate_avg: 168
+              heart_rate_max: 174
+              power_avg: 301
+              power_max: 325
+              cadence_avg: 91
+              speed_avg_kph: 29.1
+
+          # Recovery 1
+          - set_number: 2
+            set_type: rest
+            duration_sec: 300
+            distance_meters: 2100
+
+            telemetry:
+              heart_rate_avg: 142
+              power_avg: 125
+              cadence_avg: 75
+
+          # Interval 2
+          - set_number: 3
+            set_type: working
+            duration_sec: 600
+            distance_meters: 4920
+            rpe: 8.5
+            notes: "Slight headwind, working harder"
+
+            telemetry:
+              heart_rate_avg: 172
+              heart_rate_max: 176
+              power_avg: 298
+              power_max: 345
+              cadence_avg: 89
+              speed_avg_kph: 29.5
+
+          # Recovery 2
+          - set_number: 4
+            set_type: rest
+            duration_sec: 300
+            distance_meters: 2050
+
+            telemetry:
+              heart_rate_avg: 145
+              power_avg: 120
+              cadence_avg: 72
+
+          # Interval 3
+          - set_number: 5
+            set_type: working
+            duration_sec: 600
+            distance_meters: 5100
+            rpe: 9
+            notes: "Climbing section, maintained power"
+
+            telemetry:
+              heart_rate_avg: 175
+              heart_rate_max: 178
+              power_avg: 305
+              power_max: 412  # Peak on steepest section
+              cadence_avg: 82  # Lower cadence on climb
+              speed_avg_kph: 30.6
+
+          # Recovery 3
+          - set_number: 6
+            set_type: rest
+            duration_sec: 300
+            distance_meters: 2400  # Downhill recovery
+
+            telemetry:
+              heart_rate_avg: 150
+              power_avg: 100
+              cadence_avg: 68
+
+          # Interval 4
+          - set_number: 7
+            set_type: working
+            duration_sec: 600
+            distance_meters: 4780
+            rpe: 9.5
+            is_pr: true
+            notes: "Final push - fatigued but held watts"
+
+            telemetry:
+              heart_rate_avg: 176
+              heart_rate_max: 178
+              power_avg: 297
+              power_max: 338
+              cadence_avg: 90
+              speed_avg_kph: 28.7
+
+      - name: "Cooldown"
+        modality: stopwatch
+        sport: cycling
+
+        sets:
+          - set_number: 1
+            duration_sec: 1200
+            distance_meters: 7800
+            notes: "Easy spin home"
+
+            telemetry:
+              heart_rate_avg: 112
+              heart_rate_max: 128
+              power_avg: 125
+              power_max: 185
+              cadence_avg: 80
+              speed_avg_kph: 23.4
+
+    # PWF v2.1: Device tracking
+    devices:
+      - device_type: bike_computer
+        manufacturer: garmin
+        product_name: "Edge 1040"
+        serial_number: "3985624781"
+        software_version: "15.20"
+
+        battery:
+          start_percent: 87
+          end_percent: 62
+          status: good
+
+      - device_type: power_meter
+        manufacturer: garmin
+        product_name: "Rally XC200"
+        serial_number: "2847365911"
+
+        connection:
+          connection_type: ant_plus
+          ant_device_number: 58392
+
+        calibration:
+          calibration_factor: 1.02
+          last_calibrated: "2025-12-15T18:30:00Z"
+          auto_zero_enabled: true
+
+      - device_type: heart_rate_monitor
+        manufacturer: garmin
+        product_name: "HRM-Pro Plus"
+
+        connection:
+          connection_type: ant_plus
+          ant_device_number: 3928475
+
+        battery:
+          status: good
+
+personal_records:
+  - exercise_name: "10min Power"
+    record_type: max_power
+    value: 305
+    unit: watts
+    achieved_at: "2025-12-20T10:45:00Z"
+    workout_id: "ride-20251220-interval"
+    notes: "New 10min power PR on interval 3!"
