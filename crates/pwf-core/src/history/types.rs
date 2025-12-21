@@ -526,8 +526,10 @@ pub enum GpsFix {
     /// No GPS fix
     None,
     /// 2D fix (lat/lon only)
+    #[serde(rename = "fix_2d")]
     Fix2D,
     /// 3D fix (lat/lon/elevation)
+    #[serde(rename = "fix_3d")]
     Fix3D,
     /// Differential GPS
     Dgps,
@@ -1925,5 +1927,477 @@ mod tests {
             RecordType::OneRepMax
         );
         assert_eq!(deserialized.workouts[0].exercises[0].sets[0].rir, Some(2));
+    }
+
+    // ===== PWF v2.1 Swimming Tests =====
+
+    #[test]
+    fn test_swimming_length_calculate_swolf() {
+        let length = SwimmingLength {
+            length_number: 1,
+            stroke_type: StrokeType::Freestyle,
+            duration_sec: 30,
+            stroke_count: Some(15),
+            swolf: None,
+            started_at: None,
+            active: Some(true),
+        };
+
+        assert_eq!(length.calculate_swolf(), Some(45)); // 30 + 15
+    }
+
+    #[test]
+    fn test_swimming_length_calculate_swolf_missing_count() {
+        let length = SwimmingLength {
+            length_number: 1,
+            stroke_type: StrokeType::Freestyle,
+            duration_sec: 30,
+            stroke_count: None,
+            swolf: None,
+            started_at: None,
+            active: Some(true),
+        };
+
+        assert_eq!(length.calculate_swolf(), None);
+    }
+
+    #[test]
+    fn test_swimming_length_validate_swolf_correct() {
+        let length = SwimmingLength {
+            length_number: 1,
+            stroke_type: StrokeType::Freestyle,
+            duration_sec: 30,
+            stroke_count: Some(15),
+            swolf: Some(45),
+            started_at: None,
+            active: Some(true),
+        };
+
+        assert!(length.validate_swolf());
+    }
+
+    #[test]
+    fn test_swimming_length_validate_swolf_incorrect() {
+        let length = SwimmingLength {
+            length_number: 1,
+            stroke_type: StrokeType::Freestyle,
+            duration_sec: 30,
+            stroke_count: Some(15),
+            swolf: Some(50), // Wrong! Should be 45
+            started_at: None,
+            active: Some(true),
+        };
+
+        assert!(!length.validate_swolf());
+    }
+
+    #[test]
+    fn test_swimming_length_validate_swolf_missing() {
+        let length = SwimmingLength {
+            length_number: 1,
+            stroke_type: StrokeType::Freestyle,
+            duration_sec: 30,
+            stroke_count: Some(15),
+            swolf: None,
+            started_at: None,
+            active: Some(true),
+        };
+
+        assert!(length.validate_swolf()); // No validation error if SWOLF missing
+    }
+
+    #[test]
+    fn test_pool_config_length_in_meters_yards() {
+        let pool = PoolConfig {
+            pool_length: 25.0,
+            pool_length_unit: PoolLengthUnit::Yards,
+        };
+
+        assert!((pool.length_in_meters() - 22.86).abs() < 0.01); // 25 yards = 22.86m
+    }
+
+    #[test]
+    fn test_pool_config_length_in_meters_meters() {
+        let pool = PoolConfig {
+            pool_length: 50.0,
+            pool_length_unit: PoolLengthUnit::Meters,
+        };
+
+        assert_eq!(pool.length_in_meters(), 50.0);
+    }
+
+    #[test]
+    fn test_pool_config_presets() {
+        assert_eq!(PoolConfig::pool_25m().pool_length, 25.0);
+        assert_eq!(PoolConfig::pool_25m().pool_length_unit, PoolLengthUnit::Meters);
+
+        assert_eq!(PoolConfig::pool_50m().pool_length, 50.0);
+        assert_eq!(PoolConfig::pool_50m().pool_length_unit, PoolLengthUnit::Meters);
+
+        assert_eq!(PoolConfig::pool_25yd().pool_length, 25.0);
+        assert_eq!(PoolConfig::pool_25yd().pool_length_unit, PoolLengthUnit::Yards);
+    }
+
+    #[test]
+    fn test_swimming_set_data_calculate_avg_swolf() {
+        let set_data = SwimmingSetData {
+            lengths: vec![
+                SwimmingLength {
+                    length_number: 1,
+                    stroke_type: StrokeType::Freestyle,
+                    duration_sec: 30,
+                    stroke_count: Some(15),
+                    swolf: Some(45),
+                    started_at: None,
+                    active: Some(true),
+                },
+                SwimmingLength {
+                    length_number: 2,
+                    stroke_type: StrokeType::Freestyle,
+                    duration_sec: 32,
+                    stroke_count: Some(16),
+                    swolf: Some(48),
+                    started_at: None,
+                    active: Some(true),
+                },
+            ],
+            stroke_type: Some(StrokeType::Freestyle),
+            total_lengths: Some(2),
+            active_lengths: Some(2),
+            swolf_avg: None,
+            drill_mode: Some(false),
+        };
+
+        assert_eq!(set_data.calculate_avg_swolf(), Some(46)); // (45 + 48) / 2 = 46
+    }
+
+    #[test]
+    fn test_swimming_set_data_calculate_avg_swolf_empty() {
+        let set_data = SwimmingSetData {
+            lengths: vec![],
+            stroke_type: None,
+            total_lengths: None,
+            active_lengths: None,
+            swolf_avg: None,
+            drill_mode: None,
+        };
+
+        assert_eq!(set_data.calculate_avg_swolf(), None);
+    }
+
+    #[test]
+    fn test_swimming_set_data_count_active_lengths() {
+        let set_data = SwimmingSetData {
+            lengths: vec![
+                SwimmingLength {
+                    length_number: 1,
+                    stroke_type: StrokeType::Freestyle,
+                    duration_sec: 30,
+                    stroke_count: Some(15),
+                    swolf: Some(45),
+                    started_at: None,
+                    active: Some(true),
+                },
+                SwimmingLength {
+                    length_number: 2,
+                    stroke_type: StrokeType::Freestyle,
+                    duration_sec: 40,
+                    stroke_count: Some(20),
+                    swolf: Some(60),
+                    started_at: None,
+                    active: Some(false), // Drill/rest length
+                },
+                SwimmingLength {
+                    length_number: 3,
+                    stroke_type: StrokeType::Freestyle,
+                    duration_sec: 32,
+                    stroke_count: Some(16),
+                    swolf: Some(48),
+                    started_at: None,
+                    active: Some(true),
+                },
+            ],
+            stroke_type: Some(StrokeType::Freestyle),
+            total_lengths: Some(3),
+            active_lengths: None,
+            swolf_avg: None,
+            drill_mode: Some(false),
+        };
+
+        assert_eq!(set_data.count_active_lengths(), 2);
+    }
+
+    #[test]
+    fn test_stroke_type_serde() {
+        assert_eq!(
+            serde_json::to_string(&StrokeType::Freestyle).unwrap(),
+            "\"freestyle\""
+        );
+        assert_eq!(
+            serde_json::to_string(&StrokeType::IndividualMedley).unwrap(),
+            "\"im\""
+        );
+        assert_eq!(
+            serde_json::from_str::<StrokeType>("\"butterfly\"").unwrap(),
+            StrokeType::Butterfly
+        );
+    }
+
+    // ===== PWF v2.1 Time-Series Tests =====
+
+    #[test]
+    fn test_time_series_validate_lengths_valid() {
+        let ts = TimeSeriesData {
+            timestamps: vec![
+                "2025-01-01T10:00:00Z".to_string(),
+                "2025-01-01T10:00:01Z".to_string(),
+                "2025-01-01T10:00:02Z".to_string(),
+            ],
+            elapsed_sec: Some(vec![0, 1, 2]),
+            heart_rate: Some(vec![120, 125, 130]),
+            power: Some(vec![200, 210, 220]),
+            ..Default::default()
+        };
+
+        assert!(ts.validate_lengths().is_ok());
+    }
+
+    #[test]
+    fn test_time_series_validate_lengths_mismatch() {
+        let ts = TimeSeriesData {
+            timestamps: vec![
+                "2025-01-01T10:00:00Z".to_string(),
+                "2025-01-01T10:00:01Z".to_string(),
+                "2025-01-01T10:00:02Z".to_string(),
+            ],
+            elapsed_sec: Some(vec![0, 1]), // Wrong length!
+            heart_rate: Some(vec![120, 125, 130]),
+            ..Default::default()
+        };
+
+        assert!(ts.validate_lengths().is_err());
+        let err = ts.validate_lengths().unwrap_err();
+        assert!(err.contains("elapsed_sec"));
+        assert!(err.contains("doesn't match timestamps length"));
+    }
+
+    #[test]
+    fn test_time_series_len_and_is_empty() {
+        let ts = TimeSeriesData {
+            timestamps: vec![
+                "2025-01-01T10:00:00Z".to_string(),
+                "2025-01-01T10:00:01Z".to_string(),
+            ],
+            ..Default::default()
+        };
+
+        assert_eq!(ts.len(), 2);
+        assert!(!ts.is_empty());
+
+        let empty_ts = TimeSeriesData::default();
+        assert_eq!(empty_ts.len(), 0);
+        assert!(empty_ts.is_empty());
+    }
+
+    #[test]
+    fn test_time_series_duration_sec() {
+        let ts = TimeSeriesData {
+            timestamps: vec![
+                "2025-01-01T10:00:00Z".to_string(),
+                "2025-01-01T10:01:00Z".to_string(),
+                "2025-01-01T10:02:00Z".to_string(),
+            ],
+            elapsed_sec: Some(vec![0, 60, 120]),
+            ..Default::default()
+        };
+
+        assert_eq!(ts.duration_sec(), Some(120));
+    }
+
+    #[test]
+    fn test_time_series_duration_sec_no_elapsed() {
+        let ts = TimeSeriesData {
+            timestamps: vec![
+                "2025-01-01T10:00:00Z".to_string(),
+                "2025-01-01T10:01:00Z".to_string(),
+            ],
+            elapsed_sec: None,
+            ..Default::default()
+        };
+
+        assert_eq!(ts.duration_sec(), None);
+    }
+
+    // ===== PWF v2.1 Advanced Metrics Tests =====
+
+    #[test]
+    fn test_training_status_serde() {
+        assert_eq!(
+            serde_json::to_string(&TrainingStatus::Productive).unwrap(),
+            "\"productive\""
+        );
+        assert_eq!(
+            serde_json::from_str::<TrainingStatus>("\"peaking\"").unwrap(),
+            TrainingStatus::Peaking
+        );
+    }
+
+    #[test]
+    fn test_gps_fix_serde() {
+        assert_eq!(
+            serde_json::to_string(&GpsFix::Fix3D).unwrap(),
+            "\"fix_3d\""
+        );
+        assert_eq!(
+            serde_json::from_str::<GpsFix>("\"dgps\"").unwrap(),
+            GpsFix::Dgps
+        );
+    }
+
+    // ===== PWF v2.1 Integration Tests =====
+
+    #[test]
+    fn test_workout_with_swimming_data() {
+        let workout = Workout {
+            id: Some("swim-1".to_string()),
+            date: "2025-01-15".to_string(),
+            started_at: Some("2025-01-15T10:00:00Z".to_string()),
+            ended_at: Some("2025-01-15T11:00:00Z".to_string()),
+            duration_sec: Some(3600),
+            title: Some("Pool Swim".to_string()),
+            notes: None,
+            plan_id: None,
+            plan_day_id: None,
+            exercises: vec![CompletedExercise {
+                id: Some("ex-1".to_string()),
+                name: "Freestyle".to_string(),
+                modality: Some(Modality::Swimming),
+                notes: None,
+                sets: vec![CompletedSet {
+                    set_number: Some(1),
+                    set_type: None,
+                    reps: None,
+                    weight_kg: None,
+                    weight_lb: None,
+                    duration_sec: Some(120),
+                    distance_meters: Some(100.0),
+                    rpe: None,
+                    rir: None,
+                    notes: None,
+                    is_pr: None,
+                    completed_at: None,
+                    telemetry: None,
+                    swimming: Some(SwimmingSetData {
+                        lengths: vec![SwimmingLength {
+                            length_number: 1,
+                            stroke_type: StrokeType::Freestyle,
+                            duration_sec: 30,
+                            stroke_count: Some(15),
+                            swolf: Some(45),
+                            started_at: None,
+                            active: Some(true),
+                        }],
+                        stroke_type: Some(StrokeType::Freestyle),
+                        total_lengths: Some(4),
+                        active_lengths: Some(4),
+                        swolf_avg: Some(45),
+                        drill_mode: Some(false),
+                    }),
+                }],
+                pool_config: Some(PoolConfig::pool_25m()),
+                sport: Some(Sport::Swimming),
+            }],
+            telemetry: None,
+            devices: vec![],
+            sport: Some(Sport::Swimming),
+            sport_segments: None,
+        };
+
+        let json = serde_json::to_string(&workout).unwrap();
+        let deserialized: Workout = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(deserialized.sport, Some(Sport::Swimming));
+        assert!(deserialized.exercises[0].pool_config.is_some());
+        assert!(deserialized.exercises[0].sets[0].swimming.is_some());
+        assert_eq!(
+            deserialized.exercises[0].sets[0]
+                .swimming
+                .as_ref()
+                .unwrap()
+                .lengths
+                .len(),
+            1
+        );
+    }
+
+    #[test]
+    fn test_workout_with_time_series_data() {
+        let workout = Workout {
+            id: Some("ride-1".to_string()),
+            date: "2025-01-15".to_string(),
+            started_at: Some("2025-01-15T10:00:00Z".to_string()),
+            ended_at: None,
+            duration_sec: Some(3600),
+            title: Some("Bike Ride".to_string()),
+            notes: None,
+            plan_id: None,
+            plan_day_id: None,
+            exercises: vec![CompletedExercise {
+                id: Some("ex-1".to_string()),
+                name: "Interval".to_string(),
+                modality: Some(Modality::Interval),
+                notes: None,
+                sets: vec![CompletedSet {
+                    set_number: Some(1),
+                    set_type: Some(SetType::Working),
+                    reps: None,
+                    weight_kg: None,
+                    weight_lb: None,
+                    duration_sec: Some(600),
+                    distance_meters: Some(5000.0),
+                    rpe: Some(8.0),
+                    rir: None,
+                    notes: None,
+                    is_pr: None,
+                    completed_at: None,
+                    telemetry: Some(SetTelemetry {
+                        heart_rate_avg: Some(165),
+                        power_avg: Some(250),
+                        time_series: Some(TimeSeriesData {
+                            timestamps: vec![
+                                "2025-01-15T10:00:00Z".to_string(),
+                                "2025-01-15T10:00:01Z".to_string(),
+                            ],
+                            elapsed_sec: Some(vec![0, 1]),
+                            heart_rate: Some(vec![160, 165]),
+                            power: Some(vec![245, 255]),
+                            ..Default::default()
+                        }),
+                        ..Default::default()
+                    }),
+                    swimming: None,
+                }],
+                pool_config: None,
+                sport: Some(Sport::Cycling),
+            }],
+            telemetry: None,
+            devices: vec![],
+            sport: Some(Sport::Cycling),
+            sport_segments: None,
+        };
+
+        let json = serde_json::to_string(&workout).unwrap();
+        let deserialized: Workout = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(deserialized.sport, Some(Sport::Cycling));
+        let ts = deserialized.exercises[0].sets[0]
+            .telemetry
+            .as_ref()
+            .unwrap()
+            .time_series
+            .as_ref()
+            .unwrap();
+        assert_eq!(ts.len(), 2);
+        assert!(ts.validate_lengths().is_ok());
     }
 }
