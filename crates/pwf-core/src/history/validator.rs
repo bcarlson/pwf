@@ -165,12 +165,27 @@ pub fn validate(yaml: &str) -> ValidationResult {
                 if let Some(telemetry) = &set.telemetry {
                     validate_set_telemetry(&set_path, telemetry, &mut warnings);
                 }
+
+                // PWF v2.1: Validate swimming data
+                if let Some(swimming) = &set.swimming {
+                    validate_swimming_set(&set_path, swimming, &mut errors, &mut warnings);
+                }
+            }
+
+            // PWF v2.1: Validate pool configuration
+            if let Some(pool_config) = &exercise.pool_config {
+                validate_pool_config(&ex_path, pool_config, &mut errors);
             }
         }
 
         // Validate workout-level telemetry (v2 feature)
         if let Some(telemetry) = &workout.telemetry {
             validate_workout_telemetry(&workout_path, telemetry, &mut warnings);
+        }
+
+        // PWF v2.1: Validate sport segments (multi-sport workouts)
+        if let Some(segments) = &workout.sport_segments {
+            validate_sport_segments(&workout_path, segments, &mut errors, &mut warnings);
         }
     }
 
@@ -481,6 +496,24 @@ fn validate_set_telemetry(
             error_codes::TELEMETRY_UNIT_MISMATCH,
         ));
     }
+
+    // PWF v2.1: Validate time-series data if present
+    if let Some(time_series) = &telemetry.time_series {
+        let mut errors = Vec::new();
+        validate_time_series(
+            &format!("{}.telemetry.time_series", path),
+            time_series,
+            &mut errors,
+        );
+        // Convert errors to warnings for telemetry (non-critical)
+        for error in errors {
+            warnings.push(ValidationIssue::warning_with_code(
+                error.path,
+                error.message,
+                error.code.as_deref().unwrap_or(""),
+            ));
+        }
+    }
 }
 
 fn validate_workout_telemetry(
@@ -554,6 +587,464 @@ fn validate_workout_telemetry(
             "Both metric and imperial distance units provided. Consider using only one unit system.",
             error_codes::TELEMETRY_UNIT_MISMATCH,
         ));
+    }
+
+    // PWF v2.1: Validate GPS route
+    if let Some(gps_route) = &telemetry.gps_route {
+        validate_gps_route(
+            &format!("{}.telemetry.gps_route", path),
+            gps_route,
+            warnings,
+        );
+    }
+
+    // PWF v2.1: Validate advanced metrics
+    if let Some(advanced) = &telemetry.advanced_metrics {
+        validate_advanced_metrics(
+            &format!("{}.telemetry.advanced_metrics", path),
+            advanced,
+            warnings,
+        );
+    }
+
+    // PWF v2.1: Validate power metrics
+    if let Some(power_metrics) = &telemetry.power_metrics {
+        validate_power_metrics(
+            &format!("{}.telemetry.power_metrics", path),
+            power_metrics,
+            telemetry.power_avg,
+            warnings,
+        );
+    }
+
+    // PWF v2.1: Validate time in zones
+    if let Some(zones) = &telemetry.time_in_zones {
+        validate_time_in_zones(
+            &format!("{}.telemetry.time_in_zones", path),
+            zones,
+            warnings,
+        );
+    }
+}
+
+// ============================================================================
+// PWF v2.1 Validation Functions
+// ============================================================================
+
+/// Validate swimming set data
+fn validate_swimming_set(
+    path: &str,
+    swimming: &super::types::SwimmingSetData,
+    errors: &mut Vec<ValidationIssue>,
+    warnings: &mut Vec<ValidationIssue>,
+) {
+    // Validate SWOLF for each length
+    for (idx, length) in swimming.lengths.iter().enumerate() {
+        if !length.validate_swolf() {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.swimming.lengths[{}].swolf", path, idx),
+                format!(
+                    "SWOLF mismatch: recorded {} but should be {} (duration {} + stroke_count {})",
+                    length.swolf.unwrap_or(0),
+                    length.calculate_swolf().unwrap_or(0),
+                    length.duration_sec,
+                    length.stroke_count.unwrap_or(0)
+                ),
+                error_codes::SWOLF_MISMATCH,
+            ));
+        }
+    }
+
+    // Warn if calculated average SWOLF doesn't match recorded
+    if let Some(recorded_avg) = swimming.swolf_avg {
+        if let Some(calculated_avg) = swimming.calculate_avg_swolf() {
+            if recorded_avg != calculated_avg {
+                warnings.push(ValidationIssue::warning_with_code(
+                    format!("{}.swimming.swolf_avg", path),
+                    format!(
+                        "Average SWOLF mismatch: recorded {} but calculated {} from lengths",
+                        recorded_avg, calculated_avg
+                    ),
+                    error_codes::SWOLF_MISMATCH,
+                ));
+            }
+        }
+    }
+
+    // Warn if total_lengths doesn't match actual length count
+    if let Some(total) = swimming.total_lengths {
+        if total != swimming.lengths.len() as u32 {
+            warnings.push(ValidationIssue::warning_with_code(
+                format!("{}.swimming.total_lengths", path),
+                format!(
+                    "total_lengths ({}) doesn't match actual length count ({})",
+                    total,
+                    swimming.lengths.len()
+                ),
+                error_codes::SWOLF_MISMATCH,
+            ));
+        }
+    }
+
+    // Warn if active_lengths doesn't match calculated count
+    if let Some(active) = swimming.active_lengths {
+        let calculated = swimming.count_active_lengths();
+        if active != calculated {
+            warnings.push(ValidationIssue::warning_with_code(
+                format!("{}.swimming.active_lengths", path),
+                format!(
+                    "active_lengths ({}) doesn't match calculated count ({})",
+                    active, calculated
+                ),
+                error_codes::SWOLF_MISMATCH,
+            ));
+        }
+    }
+}
+
+/// Validate pool configuration
+fn validate_pool_config(
+    path: &str,
+    pool_config: &super::types::PoolConfig,
+    errors: &mut Vec<ValidationIssue>,
+) {
+    if pool_config.pool_length <= 0.0 {
+        errors.push(ValidationIssue::error_with_code(
+            format!("{}.pool_config.pool_length", path),
+            format!(
+                "Pool length must be greater than 0, got {}",
+                pool_config.pool_length
+            ),
+            error_codes::POOL_LENGTH_INVALID,
+        ));
+    }
+}
+
+/// Validate time-series telemetry data
+fn validate_time_series(
+    path: &str,
+    time_series: &super::types::TimeSeriesData,
+    errors: &mut Vec<ValidationIssue>,
+) {
+    if let Err(msg) = time_series.validate_lengths() {
+        errors.push(ValidationIssue::error_with_code(
+            path.to_string(),
+            msg,
+            error_codes::TIME_SERIES_LENGTH_MISMATCH,
+        ));
+    }
+
+    // Validate GPS coordinates if present
+    if let Some(latitudes) = &time_series.latitude {
+        for (idx, &lat) in latitudes.iter().enumerate() {
+            if !(-90.0..=90.0).contains(&lat) {
+                errors.push(ValidationIssue::error_with_code(
+                    format!("{}.latitude[{}]", path, idx),
+                    format!("Latitude must be between -90 and 90 degrees, got {}", lat),
+                    error_codes::GPS_LATITUDE_OUT_OF_RANGE,
+                ));
+            }
+        }
+    }
+
+    if let Some(longitudes) = &time_series.longitude {
+        for (idx, &lng) in longitudes.iter().enumerate() {
+            if !(-180.0..=180.0).contains(&lng) {
+                errors.push(ValidationIssue::error_with_code(
+                    format!("{}.longitude[{}]", path, idx),
+                    format!(
+                        "Longitude must be between -180 and 180 degrees, got {}",
+                        lng
+                    ),
+                    error_codes::GPS_LONGITUDE_OUT_OF_RANGE,
+                ));
+            }
+        }
+    }
+}
+
+/// Validate sport segments (multi-sport workouts)
+fn validate_sport_segments(
+    path: &str,
+    segments: &[super::types::SportSegment],
+    errors: &mut Vec<ValidationIssue>,
+    warnings: &mut Vec<ValidationIssue>,
+) {
+    // Check for duplicate indices first
+    let mut seen_indices = std::collections::HashSet::new();
+    for segment in segments {
+        if !seen_indices.insert(segment.segment_index) {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.sport_segments", path),
+                format!("Duplicate segment_index: {}", segment.segment_index),
+                error_codes::SEGMENT_INDEX_DUPLICATE,
+            ));
+        }
+    }
+
+    // Then check for sequential indices (0, 1, 2, ...)
+    let mut indices: Vec<u32> = segments.iter().map(|s| s.segment_index).collect();
+    indices.sort_unstable();
+    indices.dedup(); // Remove duplicates for this check
+
+    for (expected, &actual) in indices.iter().enumerate() {
+        if actual != expected as u32 {
+            errors.push(ValidationIssue::error_with_code(
+                format!("{}.sport_segments", path),
+                format!(
+                    "Segment indices must be sequential starting from 0. Expected {}, found {}",
+                    expected, actual
+                ),
+                error_codes::SEGMENT_INDEX_GAP,
+            ));
+            break;
+        }
+    }
+
+    // Validate transitions match adjacent segments
+    for (idx, segment) in segments.iter().enumerate() {
+        if let Some(transition) = &segment.transition {
+            // Check from_sport matches current segment
+            if transition.from_sport != segment.sport {
+                errors.push(ValidationIssue::error_with_code(
+                    format!("{}.sport_segments[{}].transition", path, idx),
+                    format!(
+                        "Transition from_sport ({:?}) doesn't match segment sport ({:?})",
+                        transition.from_sport, segment.sport
+                    ),
+                    error_codes::TRANSITION_SPORT_MISMATCH,
+                ));
+            }
+
+            // Check to_sport matches next segment (if exists)
+            if let Some(next_segment) = segments.get(idx + 1) {
+                if transition.to_sport != next_segment.sport {
+                    errors.push(ValidationIssue::error_with_code(
+                        format!("{}.sport_segments[{}].transition", path, idx),
+                        format!(
+                            "Transition to_sport ({:?}) doesn't match next segment sport ({:?})",
+                            transition.to_sport, next_segment.sport
+                        ),
+                        error_codes::TRANSITION_SPORT_MISMATCH,
+                    ));
+                }
+            }
+        }
+
+        // Validate segment telemetry if present
+        if let Some(telemetry) = &segment.telemetry {
+            validate_workout_telemetry(
+                &format!("{}.sport_segments[{}]", path, idx),
+                telemetry,
+                warnings,
+            );
+        }
+    }
+}
+
+/// Validate GPS route
+fn validate_gps_route(
+    path: &str,
+    gps_route: &super::types::GpsRoute,
+    warnings: &mut Vec<ValidationIssue>,
+) {
+    for (idx, position) in gps_route.positions.iter().enumerate() {
+        let pos_path = format!("{}.positions[{}]", path, idx);
+
+        // Validate latitude
+        if !(-90.0..=90.0).contains(&position.latitude_deg) {
+            warnings.push(ValidationIssue::warning_with_code(
+                format!("{}.latitude_deg", pos_path),
+                format!(
+                    "Latitude must be between -90 and 90 degrees, got {}",
+                    position.latitude_deg
+                ),
+                error_codes::GPS_LATITUDE_OUT_OF_RANGE,
+            ));
+        }
+
+        // Validate longitude
+        if !(-180.0..=180.0).contains(&position.longitude_deg) {
+            warnings.push(ValidationIssue::warning_with_code(
+                format!("{}.longitude_deg", pos_path),
+                format!(
+                    "Longitude must be between -180 and 180 degrees, got {}",
+                    position.longitude_deg
+                ),
+                error_codes::GPS_LONGITUDE_OUT_OF_RANGE,
+            ));
+        }
+
+        // Validate heading
+        if let Some(heading) = position.heading_deg {
+            if !(0.0..=360.0).contains(&heading) {
+                warnings.push(ValidationIssue::warning_with_code(
+                    format!("{}.heading_deg", pos_path),
+                    format!("Heading must be between 0 and 360 degrees, got {}", heading),
+                    error_codes::GPS_HEADING_OUT_OF_RANGE,
+                ));
+            }
+        }
+    }
+}
+
+/// Validate advanced physiological metrics
+fn validate_advanced_metrics(
+    path: &str,
+    advanced: &super::types::AdvancedMetrics,
+    warnings: &mut Vec<ValidationIssue>,
+) {
+    // Validate training effect (0.0 - 5.0)
+    if let Some(te) = advanced.training_effect {
+        if !(0.0..=5.0).contains(&te) {
+            warnings.push(ValidationIssue::warning_with_code(
+                format!("{}.training_effect", path),
+                format!("Training Effect should be between 0.0 and 5.0, got {}", te),
+                error_codes::TRAINING_EFFECT_OUT_OF_RANGE,
+            ));
+        }
+    }
+
+    // Validate anaerobic training effect (0.0 - 5.0)
+    if let Some(ate) = advanced.anaerobic_training_effect {
+        if !(0.0..=5.0).contains(&ate) {
+            warnings.push(ValidationIssue::warning_with_code(
+                format!("{}.anaerobic_training_effect", path),
+                format!(
+                    "Anaerobic Training Effect should be between 0.0 and 5.0, got {}",
+                    ate
+                ),
+                error_codes::TRAINING_EFFECT_OUT_OF_RANGE,
+            ));
+        }
+    }
+
+    // Validate performance condition (-20 to +20)
+    if let Some(pc) = advanced.performance_condition {
+        if !(-20..=20).contains(&pc) {
+            warnings.push(ValidationIssue::warning_with_code(
+                format!("{}.performance_condition", path),
+                format!(
+                    "Performance Condition should be between -20 and +20, got {}",
+                    pc
+                ),
+                error_codes::PERFORMANCE_CONDITION_OUT_OF_RANGE,
+            ));
+        }
+    }
+}
+
+/// Validate power-based cycling metrics
+fn validate_power_metrics(
+    path: &str,
+    power_metrics: &super::types::PowerMetrics,
+    avg_power: Option<u32>,
+    warnings: &mut Vec<ValidationIssue>,
+) {
+    // Validate Intensity Factor = NP / FTP
+    if let (Some(if_val), Some(np), Some(ftp)) = (
+        power_metrics.intensity_factor,
+        power_metrics.normalized_power,
+        power_metrics.ftp_watts,
+    ) {
+        if ftp > 0 {
+            let calculated_if = np as f64 / ftp as f64;
+            let diff = (if_val - calculated_if).abs();
+            if diff > 0.01 {
+                // Allow small floating point errors
+                warnings.push(ValidationIssue::warning_with_code(
+                    format!("{}.intensity_factor", path),
+                    format!(
+                        "Intensity Factor mismatch: recorded {} but should be {:.3} (NP {} / FTP {})",
+                        if_val, calculated_if, np, ftp
+                    ),
+                    error_codes::INTENSITY_FACTOR_MISMATCH,
+                ));
+            }
+        }
+    }
+
+    // Validate Variability Index = NP / avg_power
+    if let (Some(vi), Some(np), Some(avg)) = (
+        power_metrics.variability_index,
+        power_metrics.normalized_power,
+        avg_power,
+    ) {
+        if avg > 0 {
+            let calculated_vi = np as f64 / avg as f64;
+            let diff = (vi - calculated_vi).abs();
+            if diff > 0.01 {
+                // Allow small floating point errors
+                warnings.push(ValidationIssue::warning_with_code(
+                    format!("{}.variability_index", path),
+                    format!(
+                        "Variability Index mismatch: recorded {} but should be {:.3} (NP {} / avg_power {})",
+                        vi, calculated_vi, np, avg
+                    ),
+                    error_codes::VARIABILITY_INDEX_MISMATCH,
+                ));
+            }
+        }
+    }
+}
+
+/// Validate time in zones
+fn validate_time_in_zones(
+    path: &str,
+    zones: &super::types::TimeInZones,
+    warnings: &mut Vec<ValidationIssue>,
+) {
+    // Validate HR zones array matches boundaries
+    if let (Some(hr_zones), Some(hr_boundaries)) = (&zones.hr_zones_sec, &zones.hr_zone_boundaries)
+    {
+        // Boundaries define N zones, so we expect N+1 boundary values (including min/max)
+        // But typically stored as N-1 boundaries (between zones)
+        // We'll just check that if both are present, they're reasonably related
+        if hr_zones.len() > hr_boundaries.len() + 2 {
+            warnings.push(ValidationIssue::warning_with_code(
+                format!("{}.hr_zones_sec", path),
+                format!(
+                    "HR zones array length ({}) doesn't match boundaries length ({}) + 1",
+                    hr_zones.len(),
+                    hr_boundaries.len()
+                ),
+                error_codes::ZONE_ARRAY_LENGTH_MISMATCH,
+            ));
+        }
+    }
+
+    // Validate power zones array matches boundaries
+    if let (Some(power_zones), Some(power_boundaries)) =
+        (&zones.power_zones_sec, &zones.power_zone_boundaries)
+    {
+        if power_zones.len() > power_boundaries.len() + 2 {
+            warnings.push(ValidationIssue::warning_with_code(
+                format!("{}.power_zones_sec", path),
+                format!(
+                    "Power zones array length ({}) doesn't match boundaries length ({}) + 1",
+                    power_zones.len(),
+                    power_boundaries.len()
+                ),
+                error_codes::ZONE_ARRAY_LENGTH_MISMATCH,
+            ));
+        }
+    }
+
+    // Validate pace zones array matches boundaries
+    if let (Some(pace_zones), Some(pace_boundaries)) =
+        (&zones.pace_zones_sec, &zones.pace_zone_boundaries)
+    {
+        if pace_zones.len() > pace_boundaries.len() + 2 {
+            warnings.push(ValidationIssue::warning_with_code(
+                format!("{}.pace_zones_sec", path),
+                format!(
+                    "Pace zones array length ({}) doesn't match boundaries length ({}) + 1",
+                    pace_zones.len(),
+                    pace_boundaries.len()
+                ),
+                error_codes::ZONE_ARRAY_LENGTH_MISMATCH,
+            ));
+        }
     }
 }
 
@@ -1842,5 +2333,706 @@ workouts:
         let result = validate(yaml);
         assert!(result.is_valid());
         assert!(!result.has_warnings());
+    }
+
+    // ===== PWF v2.1 Swimming Tests =====
+
+    #[test]
+    fn validate_swimming_swolf_correct() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    exercises:
+      - name: "Freestyle"
+        pool_config:
+          pool_length: 25.0
+          pool_length_unit: meters
+        sets:
+          - duration_sec: 120
+            distance_meters: 100
+            swimming:
+              lengths:
+                - length_number: 1
+                  stroke_type: freestyle
+                  duration_sec: 30
+                  stroke_count: 15
+                  swolf: 45
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(!result.has_warnings());
+    }
+
+    #[test]
+    fn validate_swimming_swolf_mismatch() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    exercises:
+      - name: "Freestyle"
+        sets:
+          - duration_sec: 120
+            swimming:
+              lengths:
+                - length_number: 1
+                  stroke_type: freestyle
+                  duration_sec: 30
+                  stroke_count: 15
+                  swolf: 50
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some(error_codes::SWOLF_MISMATCH.to_string())));
+    }
+
+    #[test]
+    fn validate_pool_config_invalid_length() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    exercises:
+      - name: "Swimming"
+        pool_config:
+          pool_length: 0
+          pool_length_unit: meters
+        sets:
+          - duration_sec: 60
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some(error_codes::POOL_LENGTH_INVALID.to_string())));
+    }
+
+    #[test]
+    fn validate_pool_config_negative_length() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    exercises:
+      - name: "Swimming"
+        pool_config:
+          pool_length: -25.0
+          pool_length_unit: meters
+        sets:
+          - duration_sec: 60
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some(error_codes::POOL_LENGTH_INVALID.to_string())));
+    }
+
+    // ===== PWF v2.1 Time-Series Tests =====
+
+    #[test]
+    fn validate_time_series_length_match() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    exercises:
+      - name: "Cycling"
+        sets:
+          - duration_sec: 600
+            telemetry:
+              time_series:
+                timestamps: ["2025-12-21T10:00:00Z", "2025-12-21T10:00:01Z", "2025-12-21T10:00:02Z"]
+                elapsed_sec: [0, 1, 2]
+                heart_rate: [120, 125, 130]
+                power: [200, 210, 220]
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(!result.has_warnings());
+    }
+
+    #[test]
+    fn validate_time_series_length_mismatch() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    exercises:
+      - name: "Cycling"
+        sets:
+          - duration_sec: 600
+            telemetry:
+              time_series:
+                timestamps: ["2025-12-21T10:00:00Z", "2025-12-21T10:00:01Z", "2025-12-21T10:00:02Z"]
+                elapsed_sec: [0, 1]
+                heart_rate: [120, 125, 130]
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid()); // Still valid (warnings only for telemetry)
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::TIME_SERIES_LENGTH_MISMATCH.to_string())));
+    }
+
+    #[test]
+    fn validate_time_series_gps_valid() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    exercises:
+      - name: "Running"
+        sets:
+          - duration_sec: 600
+            telemetry:
+              time_series:
+                timestamps: ["2025-12-21T10:00:00Z", "2025-12-21T10:00:01Z"]
+                latitude: [40.7128, 40.7129]
+                longitude: [-74.0060, -74.0061]
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(!result.has_warnings());
+    }
+
+    #[test]
+    fn validate_time_series_latitude_out_of_range() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    exercises:
+      - name: "Running"
+        sets:
+          - duration_sec: 600
+            telemetry:
+              time_series:
+                timestamps: ["2025-12-21T10:00:00Z"]
+                latitude: [91.0]
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::GPS_LATITUDE_OUT_OF_RANGE.to_string())));
+    }
+
+    #[test]
+    fn validate_time_series_longitude_out_of_range() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    exercises:
+      - name: "Running"
+        sets:
+          - duration_sec: 600
+            telemetry:
+              time_series:
+                timestamps: ["2025-12-21T10:00:00Z"]
+                longitude: [181.0]
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::GPS_LONGITUDE_OUT_OF_RANGE.to_string())));
+    }
+
+    // ===== PWF v2.1 Sport Segments Tests =====
+
+    #[test]
+    fn validate_sport_segments_sequential() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    sport: other
+    sport_segments:
+      - segment_id: "swim"
+        sport: swimming
+        segment_index: 0
+        duration_sec: 1800
+      - segment_id: "bike"
+        sport: cycling
+        segment_index: 1
+        duration_sec: 3600
+      - segment_id: "run"
+        sport: running
+        segment_index: 2
+        duration_sec: 2400
+    exercises:
+      - name: "Triathlon"
+        sets:
+          - duration_sec: 7800
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(!result.has_warnings());
+    }
+
+    #[test]
+    fn validate_sport_segments_gap() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    sport_segments:
+      - segment_id: "swim"
+        sport: swimming
+        segment_index: 0
+        duration_sec: 1800
+      - segment_id: "run"
+        sport: running
+        segment_index: 2
+        duration_sec: 2400
+    exercises:
+      - name: "Test"
+        sets:
+          - duration_sec: 60
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some(error_codes::SEGMENT_INDEX_GAP.to_string())));
+    }
+
+    #[test]
+    fn validate_sport_segments_duplicate() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    sport_segments:
+      - segment_id: "swim1"
+        sport: swimming
+        segment_index: 0
+        duration_sec: 1800
+      - segment_id: "swim2"
+        sport: swimming
+        segment_index: 0
+        duration_sec: 1800
+    exercises:
+      - name: "Test"
+        sets:
+          - duration_sec: 60
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some(error_codes::SEGMENT_INDEX_DUPLICATE.to_string())));
+    }
+
+    // ===== PWF v2.1 Transition Tests =====
+
+    #[test]
+    fn validate_transition_sport_match() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    sport_segments:
+      - segment_id: "swim"
+        sport: swimming
+        segment_index: 0
+        transition:
+          transition_id: "T1"
+          from_sport: swimming
+          to_sport: cycling
+          duration_sec: 120
+      - segment_id: "bike"
+        sport: cycling
+        segment_index: 1
+    exercises:
+      - name: "Test"
+        sets:
+          - duration_sec: 60
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(!result.has_warnings());
+    }
+
+    #[test]
+    fn validate_transition_from_sport_mismatch() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    sport_segments:
+      - segment_id: "swim"
+        sport: swimming
+        segment_index: 0
+        transition:
+          transition_id: "T1"
+          from_sport: running
+          to_sport: cycling
+      - segment_id: "bike"
+        sport: cycling
+        segment_index: 1
+    exercises:
+      - name: "Test"
+        sets:
+          - duration_sec: 60
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some(error_codes::TRANSITION_SPORT_MISMATCH.to_string())));
+    }
+
+    #[test]
+    fn validate_transition_to_sport_mismatch() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    sport_segments:
+      - segment_id: "swim"
+        sport: swimming
+        segment_index: 0
+        transition:
+          transition_id: "T1"
+          from_sport: swimming
+          to_sport: running
+      - segment_id: "bike"
+        sport: cycling
+        segment_index: 1
+    exercises:
+      - name: "Test"
+        sets:
+          - duration_sec: 60
+"#;
+        let result = validate(yaml);
+        assert!(!result.is_valid());
+        assert!(result
+            .errors
+            .iter()
+            .any(|e| e.code == Some(error_codes::TRANSITION_SPORT_MISMATCH.to_string())));
+    }
+
+    // ===== PWF v2.1 GPS Route Tests =====
+
+    #[test]
+    fn validate_gps_route_valid() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    telemetry:
+      gps_route:
+        route_id: "route-123"
+        positions:
+          - latitude_deg: 40.7128
+            longitude_deg: -74.0060
+            timestamp: "2025-12-21T10:00:00Z"
+            heading_deg: 90.0
+          - latitude_deg: 40.7129
+            longitude_deg: -74.0061
+            timestamp: "2025-12-21T10:00:01Z"
+            heading_deg: 180.5
+    exercises:
+      - name: "Run"
+        sets:
+          - duration_sec: 60
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(!result.has_warnings());
+    }
+
+    #[test]
+    fn validate_gps_route_invalid_coordinates() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    telemetry:
+      gps_route:
+        route_id: "route-123"
+        positions:
+          - latitude_deg: 91.0
+            longitude_deg: 181.0
+            timestamp: "2025-12-21T10:00:00Z"
+            heading_deg: 400.0
+    exercises:
+      - name: "Run"
+        sets:
+          - duration_sec: 60
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::GPS_LATITUDE_OUT_OF_RANGE.to_string())));
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::GPS_LONGITUDE_OUT_OF_RANGE.to_string())));
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::GPS_HEADING_OUT_OF_RANGE.to_string())));
+    }
+
+    // ===== PWF v2.1 Advanced Metrics Tests =====
+
+    #[test]
+    fn validate_advanced_metrics_valid() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    telemetry:
+      advanced_metrics:
+        training_effect: 3.5
+        anaerobic_training_effect: 2.1
+        performance_condition: 5
+        vo2_max_estimate: 52.3
+    exercises:
+      - name: "Run"
+        sets:
+          - duration_sec: 3600
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(!result.has_warnings());
+    }
+
+    #[test]
+    fn validate_advanced_metrics_training_effect_out_of_range() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    telemetry:
+      advanced_metrics:
+        training_effect: 6.0
+        anaerobic_training_effect: -1.0
+    exercises:
+      - name: "Run"
+        sets:
+          - duration_sec: 3600
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::TRAINING_EFFECT_OUT_OF_RANGE.to_string())));
+    }
+
+    #[test]
+    fn validate_advanced_metrics_performance_condition_out_of_range() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    telemetry:
+      advanced_metrics:
+        performance_condition: 25
+    exercises:
+      - name: "Run"
+        sets:
+          - duration_sec: 3600
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::PERFORMANCE_CONDITION_OUT_OF_RANGE.to_string())));
+    }
+
+    // ===== PWF v2.1 Power Metrics Tests =====
+
+    #[test]
+    fn validate_power_metrics_intensity_factor_correct() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    telemetry:
+      power_avg: 200
+      power_metrics:
+        normalized_power: 250
+        ftp_watts: 300
+        intensity_factor: 0.833
+    exercises:
+      - name: "Ride"
+        sets:
+          - duration_sec: 3600
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(!result.has_warnings());
+    }
+
+    #[test]
+    fn validate_power_metrics_intensity_factor_mismatch() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    telemetry:
+      power_metrics:
+        normalized_power: 250
+        ftp_watts: 300
+        intensity_factor: 0.9
+    exercises:
+      - name: "Ride"
+        sets:
+          - duration_sec: 3600
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::INTENSITY_FACTOR_MISMATCH.to_string())));
+    }
+
+    #[test]
+    fn validate_power_metrics_variability_index_correct() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    telemetry:
+      power_avg: 200
+      power_metrics:
+        normalized_power: 220
+        variability_index: 1.1
+    exercises:
+      - name: "Ride"
+        sets:
+          - duration_sec: 3600
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(!result.has_warnings());
+    }
+
+    #[test]
+    fn validate_power_metrics_variability_index_mismatch() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    telemetry:
+      power_avg: 200
+      power_metrics:
+        normalized_power: 220
+        variability_index: 1.5
+    exercises:
+      - name: "Ride"
+        sets:
+          - duration_sec: 3600
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::VARIABILITY_INDEX_MISMATCH.to_string())));
+    }
+
+    // ===== PWF v2.1 Zone Validation Tests =====
+
+    #[test]
+    fn validate_time_in_zones_valid() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    telemetry:
+      time_in_zones:
+        hr_zones_sec: [600, 900, 1200, 300, 0]
+        hr_zone_boundaries: [120, 140, 160, 180]
+        power_zones_sec: [300, 600, 900, 600, 300, 100]
+        power_zone_boundaries: [150, 200, 250, 300, 350]
+    exercises:
+      - name: "Ride"
+        sets:
+          - duration_sec: 3000
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(!result.has_warnings());
+    }
+
+    #[test]
+    fn validate_time_in_zones_length_mismatch() {
+        let yaml = r#"
+history_version: 2
+exported_at: "2025-12-21T10:00:00Z"
+workouts:
+  - date: "2025-12-21"
+    telemetry:
+      time_in_zones:
+        hr_zones_sec: [600, 900, 1200, 300, 0, 100, 200, 300]
+        hr_zone_boundaries: [120, 140, 160, 180]
+    exercises:
+      - name: "Ride"
+        sets:
+          - duration_sec: 3000
+"#;
+        let result = validate(yaml);
+        assert!(result.is_valid());
+        assert!(result.has_warnings());
+        assert!(result
+            .warnings
+            .iter()
+            .any(|w| w.code == Some(error_codes::ZONE_ARRAY_LENGTH_MISMATCH.to_string())));
     }
 }

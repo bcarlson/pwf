@@ -50,3 +50,32 @@ pub const CALORIES_NEGATIVE: &str = "PWF-H707";
 pub const STROKE_RATE_NEGATIVE: &str = "PWF-H708";
 pub const TELEMETRY_UNIT_MISMATCH: &str = "PWF-H709";
 pub const PACE_NEGATIVE: &str = "PWF-H710";
+
+// PWF v2.1 validation (800-899)
+// Swimming validation (800-819)
+pub const SWOLF_MISMATCH: &str = "PWF-H801";
+pub const POOL_LENGTH_INVALID: &str = "PWF-H802";
+
+// Time-series validation (820-839)
+pub const TIME_SERIES_LENGTH_MISMATCH: &str = "PWF-H821";
+
+// Sport segment validation (840-859)
+pub const SEGMENT_INDEX_GAP: &str = "PWF-H841";
+pub const SEGMENT_INDEX_DUPLICATE: &str = "PWF-H842";
+
+// Transition validation (860-869)
+pub const TRANSITION_SPORT_MISMATCH: &str = "PWF-H861";
+
+// Zone validation (870-879)
+pub const ZONE_ARRAY_LENGTH_MISMATCH: &str = "PWF-H871";
+
+// GPS validation (880-889)
+pub const GPS_LATITUDE_OUT_OF_RANGE: &str = "PWF-H881";
+pub const GPS_LONGITUDE_OUT_OF_RANGE: &str = "PWF-H882";
+pub const GPS_HEADING_OUT_OF_RANGE: &str = "PWF-H883";
+
+// Advanced metrics validation (890-899)
+pub const TRAINING_EFFECT_OUT_OF_RANGE: &str = "PWF-H891";
+pub const PERFORMANCE_CONDITION_OUT_OF_RANGE: &str = "PWF-H892";
+pub const INTENSITY_FACTOR_MISMATCH: &str = "PWF-H893";
+pub const VARIABILITY_INDEX_MISMATCH: &str = "PWF-H894";
