@@ -91,76 +91,76 @@ workouts:
       # PWF v2.1: GPS route reference (full route data shown below)
       gps_route_id: "route-20251220-intervals"
 
-    # PWF v2.1: GPS route with full position data
-    # Abbreviated for example - real route would have ~8100 points (1Hz recording)
-    gps_route:
-      route_id: "route-20251220-intervals"
-      name: "River Road Intervals"
+      # PWF v2.1: GPS route with full position data
+      # Abbreviated for example - real route would have ~8100 points (1Hz recording)
+      gps_route:
+        route_id: "route-20251220-intervals"
+        name: "River Road Intervals"
 
-      # Aggregate route metrics
-      total_distance_m: 62543
-      total_ascent_m: 422
-      total_descent_m: 418
-      min_elevation_m: 125
-      max_elevation_m: 312
+        # Aggregate route metrics
+        total_distance_m: 62543
+        total_ascent_m: 422
+        total_descent_m: 418
+        min_elevation_m: 125
+        max_elevation_m: 312
 
-      # Bounding box for map display
-      bbox_sw_lat: 45.4982
-      bbox_sw_lng: -122.7215
-      bbox_ne_lat: 45.5892
-      bbox_ne_lng: -122.6105
+        # Bounding box for map display
+        bbox_sw_lat: 45.4982
+        bbox_sw_lng: -122.7215
+        bbox_ne_lat: 45.5892
+        bbox_ne_lng: -122.6105
 
-      recording_mode: "1s"  # 1 Hz GPS recording
-      gps_fix: fix_3d
+        recording_mode: "1s"  # 1 Hz GPS recording
+        gps_fix: fix_3d
 
-      # Sample of GPS positions (real file would have full track)
-      positions:
-        - latitude_deg: 45.5230
-          longitude_deg: -122.6765
-          timestamp: "2025-12-20T09:00:00Z"
-          elevation_m: 125
-          accuracy_m: 3.2
-          speed_mps: 0.0
-          heart_rate_bpm: 95
-          power_watts: 0
-          cadence: 0
-          temperature_c: 18.2
+        # Sample of GPS positions (real file would have full track)
+        positions:
+          - latitude_deg: 45.5230
+            longitude_deg: -122.6765
+            timestamp: "2025-12-20T09:00:00Z"
+            elevation_m: 125
+            accuracy_m: 3.2
+            speed_mps: 0.0
+            heart_rate_bpm: 95
+            power_watts: 0
+            cadence: 0
+            temperature_c: 18.2
 
-        # Start of warmup
-        - latitude_deg: 45.5235
-          longitude_deg: -122.6768
-          timestamp: "2025-12-20T09:05:00Z"
-          elevation_m: 128
-          speed_mps: 6.5
-          heading_deg: 92
-          heart_rate_bpm: 125
-          power_watts: 180
-          cadence: 85
-          temperature_c: 18.5
+          # Start of warmup
+          - latitude_deg: 45.5235
+            longitude_deg: -122.6768
+            timestamp: "2025-12-20T09:05:00Z"
+            elevation_m: 128
+            speed_mps: 6.5
+            heading_deg: 92
+            heart_rate_bpm: 125
+            power_watts: 180
+            cadence: 85
+            temperature_c: 18.5
 
-        # First interval start
-        - latitude_deg: 45.5312
-          longitude_deg: -122.6892
-          timestamp: "2025-12-20T09:15:00Z"
-          elevation_m: 145
-          speed_mps: 8.8
-          heading_deg: 15
-          heart_rate_bpm: 165
-          power_watts: 302
-          cadence: 92
-          temperature_c: 19.0
+          # First interval start
+          - latitude_deg: 45.5312
+            longitude_deg: -122.6892
+            timestamp: "2025-12-20T09:15:00Z"
+            elevation_m: 145
+            speed_mps: 8.8
+            heading_deg: 15
+            heart_rate_bpm: 165
+            power_watts: 302
+            cadence: 92
+            temperature_c: 19.0
 
-        # Peak power during interval
-        - latitude_deg: 45.5348
-          longitude_deg: -122.6915
-          timestamp: "2025-12-20T09:18:30Z"
-          elevation_m: 182
-          speed_mps: 7.2
-          heading_deg: 358
-          heart_rate_bpm: 176
-          power_watts: 412  # Max power on climb
-          cadence: 78
-          temperature_c: 19.2
+          # Peak power during interval
+          - latitude_deg: 45.5348
+            longitude_deg: -122.6915
+            timestamp: "2025-12-20T09:18:30Z"
+            elevation_m: 182
+            speed_mps: 7.2
+            heading_deg: 358
+            heart_rate_bpm: 176
+            power_watts: 412  # Max power on climb
+            cadence: 78
+            temperature_c: 19.2
 
     exercises:
       - name: "Warmup"
