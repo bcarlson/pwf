@@ -827,6 +827,18 @@ fn convert_device_info_records(records: &[FitDataRecord]) -> Vec<DeviceInfo> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use fitparser::profile::MesgNum;
+    use fitparser::{FitDataField, FitDataRecord};
+
+    /// Helper to create a mock FIT record for testing
+    fn create_mock_record(mesg_num: MesgNum, fields: Vec<(&str, Value)>) -> FitDataRecord {
+        let mut record = FitDataRecord::new(mesg_num);
+        for (i, (name, value)) in fields.into_iter().enumerate() {
+            let field = FitDataField::new(name.to_string(), i as u8, value, String::new());
+            record.push(field);
+        }
+        record
+    }
 
     #[test]
     fn test_fit_to_pwf_compiles() {
@@ -841,9 +853,1084 @@ mod tests {
         // Test passes if this compiles (no assertion needed)
     }
 
+    // Tests for get_field_u32
     #[test]
-    fn test_get_field_u32() {
-        // Test helper functions compile correctly
-        // We'll add real tests with FIT data in integration tests
+    fn test_get_field_u32_with_uint32() {
+        let record = create_mock_record(
+            MesgNum::Session,
+            vec![("start_time", Value::UInt32(1234567890))],
+        );
+        assert_eq!(get_field_u32(&record, "start_time"), Some(1234567890));
+    }
+
+    #[test]
+    fn test_get_field_u32_with_uint16() {
+        let record =
+            create_mock_record(MesgNum::Session, vec![("test_field", Value::UInt16(5000))]);
+        assert_eq!(get_field_u32(&record, "test_field"), Some(5000));
+    }
+
+    #[test]
+    fn test_get_field_u32_with_uint8() {
+        let record = create_mock_record(MesgNum::Session, vec![("test_field", Value::UInt8(255))]);
+        assert_eq!(get_field_u32(&record, "test_field"), Some(255));
+    }
+
+    #[test]
+    fn test_get_field_u32_wrong_type() {
+        let record = create_mock_record(
+            MesgNum::Session,
+            vec![("test_field", Value::Float64(123.45))],
+        );
+        assert_eq!(get_field_u32(&record, "test_field"), None);
+    }
+
+    #[test]
+    fn test_get_field_u32_missing_field() {
+        let record = create_mock_record(MesgNum::Session, vec![]);
+        assert_eq!(get_field_u32(&record, "nonexistent"), None);
+    }
+
+    // Tests for get_field_u16
+    #[test]
+    fn test_get_field_u16_with_uint16() {
+        let record = create_mock_record(MesgNum::Session, vec![("avg_power", Value::UInt16(250))]);
+        assert_eq!(get_field_u16(&record, "avg_power"), Some(250));
+    }
+
+    #[test]
+    fn test_get_field_u16_with_uint8() {
+        let record = create_mock_record(MesgNum::Session, vec![("test_field", Value::UInt8(100))]);
+        assert_eq!(get_field_u16(&record, "test_field"), Some(100));
+    }
+
+    #[test]
+    fn test_get_field_u16_wrong_type() {
+        let record =
+            create_mock_record(MesgNum::Session, vec![("test_field", Value::UInt32(70000))]);
+        assert_eq!(get_field_u16(&record, "test_field"), None);
+    }
+
+    #[test]
+    fn test_get_field_u16_missing_field() {
+        let record = create_mock_record(MesgNum::Session, vec![]);
+        assert_eq!(get_field_u16(&record, "nonexistent"), None);
+    }
+
+    // Tests for get_field_u8
+    #[test]
+    fn test_get_field_u8_with_uint8() {
+        let record = create_mock_record(MesgNum::Session, vec![("sport", Value::UInt8(5))]);
+        assert_eq!(get_field_u8(&record, "sport"), Some(5));
+    }
+
+    #[test]
+    fn test_get_field_u8_wrong_type() {
+        let record = create_mock_record(MesgNum::Session, vec![("test_field", Value::UInt16(300))]);
+        assert_eq!(get_field_u8(&record, "test_field"), None);
+    }
+
+    #[test]
+    fn test_get_field_u8_missing_field() {
+        let record = create_mock_record(MesgNum::Session, vec![]);
+        assert_eq!(get_field_u8(&record, "nonexistent"), None);
+    }
+
+    // Tests for get_field_f64
+    #[test]
+    fn test_get_field_f64_with_float64() {
+        let record = create_mock_record(
+            MesgNum::Session,
+            vec![("total_distance", Value::Float64(5432.1))],
+        );
+        assert_eq!(get_field_f64(&record, "total_distance"), Some(5432.1));
+    }
+
+    #[test]
+    fn test_get_field_f64_with_float32() {
+        let record = create_mock_record(
+            MesgNum::Session,
+            vec![("test_field", Value::Float32(123.45))],
+        );
+        // Float32 has precision issues, so we check approximate equality
+        let result = get_field_f64(&record, "test_field");
+        assert!(result.is_some());
+        assert!((result.unwrap() - 123.45).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_get_field_f64_with_uint32() {
+        let record =
+            create_mock_record(MesgNum::Session, vec![("test_field", Value::UInt32(1000))]);
+        assert_eq!(get_field_f64(&record, "test_field"), Some(1000.0));
+    }
+
+    #[test]
+    fn test_get_field_f64_with_uint16() {
+        let record = create_mock_record(MesgNum::Session, vec![("test_field", Value::UInt16(500))]);
+        assert_eq!(get_field_f64(&record, "test_field"), Some(500.0));
+    }
+
+    #[test]
+    fn test_get_field_f64_wrong_type() {
+        let record = create_mock_record(MesgNum::Session, vec![("test_field", Value::UInt8(5))]);
+        assert_eq!(get_field_f64(&record, "test_field"), None);
+    }
+
+    #[test]
+    fn test_get_field_f64_missing_field() {
+        let record = create_mock_record(MesgNum::Session, vec![]);
+        assert_eq!(get_field_f64(&record, "nonexistent"), None);
+    }
+
+    // Tests for get_field_i32
+    #[test]
+    fn test_get_field_i32_with_sint32() {
+        let record = create_mock_record(
+            MesgNum::Record,
+            vec![("position_lat", Value::SInt32(123456789))],
+        );
+        assert_eq!(get_field_i32(&record, "position_lat"), Some(123456789));
+    }
+
+    #[test]
+    fn test_get_field_i32_with_sint16() {
+        let record = create_mock_record(MesgNum::Record, vec![("test_field", Value::SInt16(-500))]);
+        assert_eq!(get_field_i32(&record, "test_field"), Some(-500));
+    }
+
+    #[test]
+    fn test_get_field_i32_with_sint8() {
+        let record = create_mock_record(MesgNum::Record, vec![("test_field", Value::SInt8(-50))]);
+        assert_eq!(get_field_i32(&record, "test_field"), Some(-50));
+    }
+
+    #[test]
+    fn test_get_field_i32_negative_value() {
+        let record = create_mock_record(
+            MesgNum::Record,
+            vec![("position_lat", Value::SInt32(-123456789))],
+        );
+        assert_eq!(get_field_i32(&record, "position_lat"), Some(-123456789));
+    }
+
+    #[test]
+    fn test_get_field_i32_wrong_type() {
+        let record = create_mock_record(MesgNum::Record, vec![("test_field", Value::UInt32(100))]);
+        assert_eq!(get_field_i32(&record, "test_field"), None);
+    }
+
+    #[test]
+    fn test_get_field_i32_missing_field() {
+        let record = create_mock_record(MesgNum::Record, vec![]);
+        assert_eq!(get_field_i32(&record, "nonexistent"), None);
+    }
+
+    // Tests for detect_multisport
+    #[test]
+    fn test_detect_multisport_single_session() {
+        let sessions = vec![create_mock_record(
+            MesgNum::Session,
+            vec![("sport", Value::UInt8(1))],
+        )];
+        assert!(!detect_multisport(&sessions));
+    }
+
+    #[test]
+    fn test_detect_multisport_empty_sessions() {
+        let sessions: Vec<FitDataRecord> = vec![];
+        assert!(!detect_multisport(&sessions));
+    }
+
+    #[test]
+    fn test_detect_multisport_same_sport() {
+        let sessions = vec![
+            create_mock_record(MesgNum::Session, vec![("sport", Value::UInt8(1))]),
+            create_mock_record(MesgNum::Session, vec![("sport", Value::UInt8(1))]),
+        ];
+        assert!(!detect_multisport(&sessions));
+    }
+
+    #[test]
+    fn test_detect_multisport_different_sports() {
+        let sessions = vec![
+            create_mock_record(MesgNum::Session, vec![("sport", Value::UInt8(0))]), // Running
+            create_mock_record(MesgNum::Session, vec![("sport", Value::UInt8(1))]), // Cycling
+        ];
+        assert!(detect_multisport(&sessions));
+    }
+
+    #[test]
+    fn test_detect_multisport_with_transition() {
+        // Transition sport (type 2) should be ignored
+        let sessions = vec![
+            create_mock_record(MesgNum::Session, vec![("sport", Value::UInt8(0))]), // Running
+            create_mock_record(MesgNum::Session, vec![("sport", Value::UInt8(2))]), // Transition
+            create_mock_record(MesgNum::Session, vec![("sport", Value::UInt8(0))]), // Running
+        ];
+        assert!(!detect_multisport(&sessions)); // Same sport (ignoring transition)
+    }
+
+    #[test]
+    fn test_detect_multisport_triathlon() {
+        let sessions = vec![
+            create_mock_record(MesgNum::Session, vec![("sport", Value::UInt8(5))]), // Swimming
+            create_mock_record(MesgNum::Session, vec![("sport", Value::UInt8(2))]), // Transition
+            create_mock_record(MesgNum::Session, vec![("sport", Value::UInt8(1))]), // Cycling
+            create_mock_record(MesgNum::Session, vec![("sport", Value::UInt8(2))]), // Transition
+            create_mock_record(MesgNum::Session, vec![("sport", Value::UInt8(0))]), // Running
+        ];
+        assert!(detect_multisport(&sessions));
+    }
+
+    // Tests for device info conversion
+    #[test]
+    fn test_convert_device_info_garmin_watch() {
+        let records = vec![create_mock_record(
+            MesgNum::DeviceInfo,
+            vec![
+                ("device_type", Value::UInt8(1)),   // GPS watch
+                ("manufacturer", Value::UInt16(1)), // Garmin
+                ("product", Value::UInt16(1234)),   // Product ID
+                ("serial_number", Value::UInt32(987654321)),
+                ("software_version", Value::UInt16(1050)), // Version 10.50
+                ("hardware_version", Value::UInt8(3)),
+            ],
+        )];
+
+        let devices = convert_device_info_records(&records);
+        assert_eq!(devices.len(), 1);
+        assert_eq!(devices[0].device_type, DeviceType::Watch);
+        assert_eq!(
+            devices[0].manufacturer,
+            Manufacturer::Known(KnownManufacturer::Garmin)
+        );
+        assert_eq!(devices[0].product, Some("Product #1234".to_string()));
+        assert_eq!(devices[0].serial_number, Some("987654321".to_string()));
+        assert_eq!(devices[0].software_version, Some("10.50".to_string()));
+        assert_eq!(devices[0].hardware_version, Some("3".to_string()));
+    }
+
+    #[test]
+    fn test_convert_device_info_bike_computer() {
+        let records = vec![create_mock_record(
+            MesgNum::DeviceInfo,
+            vec![
+                ("device_type", Value::UInt8(11)),  // Bike computer
+                ("manufacturer", Value::UInt16(3)), // Wahoo
+                ("device_index", Value::UInt8(0)),
+            ],
+        )];
+
+        let devices = convert_device_info_records(&records);
+        assert_eq!(devices.len(), 1);
+        assert_eq!(devices[0].device_type, DeviceType::BikeComputer);
+        assert_eq!(
+            devices[0].manufacturer,
+            Manufacturer::Known(KnownManufacturer::Wahoo)
+        );
+        assert_eq!(devices[0].device_index, Some(0));
+    }
+
+    #[test]
+    fn test_convert_device_info_heart_rate_monitor() {
+        let records = vec![create_mock_record(
+            MesgNum::DeviceInfo,
+            vec![
+                ("device_type", Value::UInt8(120)), // Heart rate monitor
+                ("manufacturer", Value::UInt16(2)), // Polar
+            ],
+        )];
+
+        let devices = convert_device_info_records(&records);
+        assert_eq!(devices.len(), 1);
+        assert_eq!(devices[0].device_type, DeviceType::HeartRateMonitor);
+        assert_eq!(
+            devices[0].manufacturer,
+            Manufacturer::Known(KnownManufacturer::Polar)
+        );
+    }
+
+    #[test]
+    fn test_convert_device_info_power_meter() {
+        let records = vec![create_mock_record(
+            MesgNum::DeviceInfo,
+            vec![
+                ("device_type", Value::UInt8(12)),   // Power meter
+                ("manufacturer", Value::UInt16(15)), // Suunto
+            ],
+        )];
+
+        let devices = convert_device_info_records(&records);
+        assert_eq!(devices.len(), 1);
+        assert_eq!(devices[0].device_type, DeviceType::PowerMeter);
+        assert_eq!(
+            devices[0].manufacturer,
+            Manufacturer::Known(KnownManufacturer::Suunto)
+        );
+    }
+
+    #[test]
+    fn test_convert_device_info_coros_device() {
+        let records = vec![create_mock_record(
+            MesgNum::DeviceInfo,
+            vec![
+                ("device_type", Value::UInt8(1)),     // Watch
+                ("manufacturer", Value::UInt16(260)), // Coros
+            ],
+        )];
+
+        let devices = convert_device_info_records(&records);
+        assert_eq!(devices.len(), 1);
+        assert_eq!(
+            devices[0].manufacturer,
+            Manufacturer::Known(KnownManufacturer::Coros)
+        );
+    }
+
+    #[test]
+    fn test_convert_device_info_unknown_manufacturer() {
+        let records = vec![create_mock_record(
+            MesgNum::DeviceInfo,
+            vec![
+                ("device_type", Value::UInt8(1)),     // Watch
+                ("manufacturer", Value::UInt16(999)), // Unknown
+            ],
+        )];
+
+        let devices = convert_device_info_records(&records);
+        assert_eq!(devices.len(), 1);
+        assert_eq!(
+            devices[0].manufacturer,
+            Manufacturer::Custom("Unknown".to_string())
+        );
+    }
+
+    #[test]
+    fn test_convert_device_info_unknown_device_type() {
+        let records = vec![create_mock_record(
+            MesgNum::DeviceInfo,
+            vec![
+                ("device_type", Value::UInt8(99)),  // Unknown type
+                ("manufacturer", Value::UInt16(1)), // Garmin
+            ],
+        )];
+
+        let devices = convert_device_info_records(&records);
+        assert_eq!(devices.len(), 0); // Unknown device types are filtered out
+    }
+
+    #[test]
+    fn test_convert_device_info_multiple_devices() {
+        let records = vec![
+            create_mock_record(
+                MesgNum::DeviceInfo,
+                vec![
+                    ("device_type", Value::UInt8(1)),
+                    ("manufacturer", Value::UInt16(1)),
+                ],
+            ),
+            create_mock_record(
+                MesgNum::DeviceInfo,
+                vec![
+                    ("device_type", Value::UInt8(120)),
+                    ("manufacturer", Value::UInt16(2)),
+                ],
+            ),
+        ];
+
+        let devices = convert_device_info_records(&records);
+        assert_eq!(devices.len(), 2);
+    }
+
+    #[test]
+    fn test_convert_device_info_with_operating_time() {
+        let records = vec![create_mock_record(
+            MesgNum::DeviceInfo,
+            vec![
+                ("device_type", Value::UInt8(1)),
+                ("manufacturer", Value::UInt16(1)),
+                ("cum_operating_time", Value::UInt32(7200)), // 2 hours in seconds
+            ],
+        )];
+
+        let devices = convert_device_info_records(&records);
+        assert_eq!(devices.len(), 1);
+        assert_eq!(devices[0].cumulative_operating_time_hours, Some(2.0));
+    }
+
+    // Tests for GPS route extraction
+    #[test]
+    fn test_extract_gps_route_empty_records() {
+        let session = create_mock_record(
+            MesgNum::Session,
+            vec![
+                ("start_time", Value::UInt32(1000000)),
+                ("total_distance", Value::Float64(5000.0)),
+            ],
+        );
+        let records: Vec<FitDataRecord> = vec![];
+        let mut result = ConversionResult::new(String::new());
+
+        let route = extract_gps_route(&session, &records, &mut result);
+        assert!(route.is_none());
+    }
+
+    #[test]
+    fn test_extract_gps_route_invalid_coordinates() {
+        let session = create_mock_record(
+            MesgNum::Session,
+            vec![
+                ("start_time", Value::UInt32(1000000)),
+                ("total_distance", Value::Float64(5000.0)),
+            ],
+        );
+        // GPS coordinates at (0, 0) should be filtered out as invalid
+        let records = vec![create_mock_record(
+            MesgNum::Record,
+            vec![
+                ("position_lat", Value::SInt32(0)),
+                ("position_long", Value::SInt32(0)),
+                ("timestamp", Value::UInt32(1000000)),
+            ],
+        )];
+        let mut result = ConversionResult::new(String::new());
+
+        let route = extract_gps_route(&session, &records, &mut result);
+        assert!(route.is_none()); // Should be filtered out
+    }
+
+    #[test]
+    fn test_extract_gps_route_valid_position() {
+        let session = create_mock_record(
+            MesgNum::Session,
+            vec![
+                ("start_time", Value::UInt32(1000000)),
+                ("total_distance", Value::Float64(5000.0)),
+            ],
+        );
+        // Valid GPS coordinates (San Francisco area: ~37.77°N, 122.42°W)
+        // Using semicircles: degrees = semicircles * (180 / 2^31)
+        let lat_semicircles = 454_000_000; // Should be ~37.95 degrees
+        let lng_semicircles = -1_472_000_000; // Should be ~-123.24 degrees
+        let records = vec![create_mock_record(
+            MesgNum::Record,
+            vec![
+                ("position_lat", Value::SInt32(lat_semicircles)),
+                ("position_long", Value::SInt32(lng_semicircles)),
+                ("timestamp", Value::UInt32(1000000)),
+                ("altitude", Value::Float64(50.0)),
+                ("speed", Value::Float64(3.5)),
+                ("heart_rate", Value::UInt8(150)),
+            ],
+        )];
+        let mut result = ConversionResult::new(String::new());
+
+        let route = extract_gps_route(&session, &records, &mut result);
+        assert!(route.is_some());
+        let route = route.unwrap();
+        assert_eq!(route.positions.len(), 1);
+        assert_eq!(route.total_distance_m, Some(5000.0));
+        // Check that coordinates are in reasonable range (not filtered as invalid)
+        assert!(route.positions[0].latitude_deg.abs() > 1.0); // Not near 0,0
+        assert!(route.positions[0].longitude_deg.abs() > 1.0);
+        assert_eq!(route.positions[0].elevation_m, Some(50.0));
+        assert_eq!(route.positions[0].speed_mps, Some(3.5));
+        assert_eq!(route.positions[0].heart_rate_bpm, Some(150));
+    }
+
+    #[test]
+    fn test_extract_gps_route_elevation_tracking() {
+        let session = create_mock_record(
+            MesgNum::Session,
+            vec![
+                ("start_time", Value::UInt32(1000000)),
+                ("total_distance", Value::Float64(1000.0)),
+            ],
+        );
+        // Create records with varying elevation
+        let records = vec![
+            create_mock_record(
+                MesgNum::Record,
+                vec![
+                    ("position_lat", Value::SInt32(454_000_000)),
+                    ("position_long", Value::SInt32(-1_472_000_000)),
+                    ("timestamp", Value::UInt32(1000000)),
+                    ("altitude", Value::Float64(100.0)),
+                ],
+            ),
+            create_mock_record(
+                MesgNum::Record,
+                vec![
+                    ("position_lat", Value::SInt32(454_000_100)),
+                    ("position_long", Value::SInt32(-1_472_000_100)),
+                    ("timestamp", Value::UInt32(1000010)),
+                    ("altitude", Value::Float64(150.0)), // +50m ascent
+                ],
+            ),
+            create_mock_record(
+                MesgNum::Record,
+                vec![
+                    ("position_lat", Value::SInt32(454_000_200)),
+                    ("position_long", Value::SInt32(-1_472_000_200)),
+                    ("timestamp", Value::UInt32(1000020)),
+                    ("altitude", Value::Float64(120.0)), // -30m descent
+                ],
+            ),
+        ];
+        let mut result = ConversionResult::new(String::new());
+
+        let route = extract_gps_route(&session, &records, &mut result);
+        assert!(route.is_some());
+        let route = route.unwrap();
+        assert_eq!(route.positions.len(), 3);
+        assert_eq!(route.min_elevation_m, Some(100.0));
+        assert_eq!(route.max_elevation_m, Some(150.0));
+        assert_eq!(route.total_ascent_m, Some(50.0));
+        assert_eq!(route.total_descent_m, Some(30.0));
+    }
+
+    #[test]
+    fn test_extract_gps_route_bounding_box() {
+        let session = create_mock_record(
+            MesgNum::Session,
+            vec![
+                ("start_time", Value::UInt32(1000000)),
+                ("total_distance", Value::Float64(1000.0)),
+            ],
+        );
+        let records = vec![
+            create_mock_record(
+                MesgNum::Record,
+                vec![
+                    ("position_lat", Value::SInt32(454_000_000)), // ~37.77°
+                    ("position_long", Value::SInt32(-1_472_000_000)), // ~-122.42°
+                    ("timestamp", Value::UInt32(1000000)),
+                ],
+            ),
+            create_mock_record(
+                MesgNum::Record,
+                vec![
+                    ("position_lat", Value::SInt32(455_000_000)), // ~37.86°
+                    ("position_long", Value::SInt32(-1_471_000_000)), // ~-122.33°
+                    ("timestamp", Value::UInt32(1000010)),
+                ],
+            ),
+        ];
+        let mut result = ConversionResult::new(String::new());
+
+        let route = extract_gps_route(&session, &records, &mut result);
+        assert!(route.is_some());
+        let route = route.unwrap();
+        assert!(route.bbox_sw_lat.is_some());
+        assert!(route.bbox_sw_lng.is_some());
+        assert!(route.bbox_ne_lat.is_some());
+        assert!(route.bbox_ne_lng.is_some());
+        assert!(route.bbox_sw_lat.unwrap() < route.bbox_ne_lat.unwrap());
+        assert!(route.bbox_sw_lng.unwrap() < route.bbox_ne_lng.unwrap());
+    }
+
+    #[test]
+    fn test_extract_gps_route_with_power_and_cadence() {
+        let session = create_mock_record(
+            MesgNum::Session,
+            vec![("start_time", Value::UInt32(1000000))],
+        );
+        let records = vec![create_mock_record(
+            MesgNum::Record,
+            vec![
+                ("position_lat", Value::SInt32(454_000_000)),
+                ("position_long", Value::SInt32(-1_472_000_000)),
+                ("timestamp", Value::UInt32(1000000)),
+                ("power", Value::UInt16(250)),
+                ("cadence", Value::UInt8(90)),
+                ("temperature", Value::Float64(20.5)),
+            ],
+        )];
+        let mut result = ConversionResult::new(String::new());
+
+        let route = extract_gps_route(&session, &records, &mut result);
+        assert!(route.is_some());
+        let route = route.unwrap();
+        assert_eq!(route.positions[0].power_watts, Some(250));
+        assert_eq!(route.positions[0].cadence, Some(90));
+        assert_eq!(route.positions[0].temperature_c, Some(20.5));
+    }
+
+    // Tests for create_sport_segment
+    #[test]
+    fn test_create_sport_segment_basic() {
+        let session = create_mock_record(
+            MesgNum::Session,
+            vec![
+                ("start_time", Value::UInt32(1000000)),
+                ("sport_index", Value::UInt8(0)),
+            ],
+        );
+        let sport = pwf_core::Sport::Running;
+        let started_at = "2024-01-01T10:00:00Z";
+        let duration_sec = Some(3600);
+        let distance_m = Some(10000.0);
+        let exercises = vec![];
+        let telemetry = WorkoutTelemetry::default();
+
+        let segments = create_sport_segment(
+            &session,
+            sport,
+            started_at,
+            duration_sec,
+            distance_m,
+            &exercises,
+            &telemetry,
+        );
+
+        assert_eq!(segments.len(), 1);
+        assert_eq!(segments[0].sport, sport);
+        assert_eq!(segments[0].segment_id, "segment-1000000");
+        assert_eq!(segments[0].segment_index, 0);
+        assert_eq!(segments[0].duration_sec, Some(3600));
+        assert_eq!(segments[0].distance_m, Some(10000.0));
+    }
+
+    #[test]
+    fn test_create_sport_segment_with_exercises() {
+        let session = create_mock_record(
+            MesgNum::Session,
+            vec![("start_time", Value::UInt32(2000000))],
+        );
+        let exercises = vec![
+            CompletedExercise {
+                id: Some("ex1".to_string()),
+                name: "Exercise 1".to_string(),
+                modality: None,
+                sets: vec![],
+                notes: None,
+                sport: None,
+                pool_config: None,
+            },
+            CompletedExercise {
+                id: Some("ex2".to_string()),
+                name: "Exercise 2".to_string(),
+                modality: None,
+                sets: vec![],
+                notes: None,
+                sport: None,
+                pool_config: None,
+            },
+        ];
+
+        let segments = create_sport_segment(
+            &session,
+            pwf_core::Sport::Cycling,
+            "2024-01-01T10:00:00Z",
+            None,
+            None,
+            &exercises,
+            &WorkoutTelemetry::default(),
+        );
+
+        assert_eq!(segments[0].exercise_ids.len(), 2);
+        assert_eq!(segments[0].exercise_ids[0], "ex1");
+        assert_eq!(segments[0].exercise_ids[1], "ex2");
+    }
+
+    // Tests for extract_swimming_data
+    #[test]
+    fn test_extract_swimming_data_empty_lengths() {
+        let lengths: Vec<FitDataRecord> = vec![];
+        let result = extract_swimming_data(&lengths, Some(1000000));
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn test_extract_swimming_data_50m_pool() {
+        let lengths = vec![create_mock_record(
+            MesgNum::Length,
+            vec![
+                ("pool_length", Value::Float64(50.0)),
+                ("total_elapsed_time", Value::Float64(45.0)),
+                ("swim_stroke", Value::UInt8(0)), // Freestyle
+                ("total_strokes", Value::UInt16(30)),
+                ("length_type", Value::UInt8(1)), // Active
+                ("timestamp", Value::UInt32(1000000)),
+            ],
+        )];
+
+        let result = extract_swimming_data(&lengths, Some(1000000));
+        assert!(result.is_some());
+        let (data, config) = result.unwrap();
+        assert_eq!(config.pool_length, 50.0);
+        assert_eq!(config.pool_length_unit, PoolLengthUnit::Meters);
+        assert_eq!(data.lengths.len(), 1);
+        assert_eq!(data.lengths[0].stroke_type, StrokeType::Freestyle);
+        assert_eq!(data.lengths[0].stroke_count, Some(30));
+        assert_eq!(data.lengths[0].swolf, Some(75)); // 30 strokes + 45 seconds
+        assert_eq!(data.lengths[0].active, Some(true));
+    }
+
+    #[test]
+    fn test_extract_swimming_data_25m_pool() {
+        let lengths = vec![create_mock_record(
+            MesgNum::Length,
+            vec![
+                ("pool_length", Value::Float64(25.0)),
+                ("total_elapsed_time", Value::Float64(20.0)),
+                ("swim_stroke", Value::UInt8(1)), // Backstroke
+                ("total_strokes", Value::UInt16(15)),
+                ("timestamp", Value::UInt32(1000000)),
+            ],
+        )];
+
+        let result = extract_swimming_data(&lengths, Some(1000000));
+        assert!(result.is_some());
+        let (data, config) = result.unwrap();
+        assert_eq!(config.pool_length, 25.0);
+        assert_eq!(config.pool_length_unit, PoolLengthUnit::Meters);
+        assert_eq!(data.lengths[0].stroke_type, StrokeType::Backstroke);
+    }
+
+    #[test]
+    fn test_extract_swimming_data_yards_pool() {
+        let lengths = vec![create_mock_record(
+            MesgNum::Length,
+            vec![
+                ("pool_length", Value::Float64(33.0)), // ~33 yards
+                ("total_elapsed_time", Value::Float64(30.0)),
+                ("swim_stroke", Value::UInt8(2)), // Breaststroke
+                ("total_strokes", Value::UInt16(20)),
+            ],
+        )];
+
+        let result = extract_swimming_data(&lengths, Some(1000000));
+        assert!(result.is_some());
+        let (_, config) = result.unwrap();
+        assert_eq!(config.pool_length, 33.0);
+        assert_eq!(config.pool_length_unit, PoolLengthUnit::Yards);
+    }
+
+    #[test]
+    fn test_extract_swimming_data_multiple_lengths() {
+        let lengths = vec![
+            create_mock_record(
+                MesgNum::Length,
+                vec![
+                    ("pool_length", Value::Float64(50.0)),
+                    ("total_elapsed_time", Value::Float64(45.0)),
+                    ("swim_stroke", Value::UInt8(0)), // Freestyle
+                    ("total_strokes", Value::UInt16(30)),
+                    ("length_type", Value::UInt8(1)), // Active
+                ],
+            ),
+            create_mock_record(
+                MesgNum::Length,
+                vec![
+                    ("pool_length", Value::Float64(50.0)),
+                    ("total_elapsed_time", Value::Float64(50.0)),
+                    ("swim_stroke", Value::UInt8(0)), // Freestyle
+                    ("total_strokes", Value::UInt16(32)),
+                    ("length_type", Value::UInt8(1)), // Active
+                ],
+            ),
+            create_mock_record(
+                MesgNum::Length,
+                vec![
+                    ("pool_length", Value::Float64(50.0)),
+                    ("total_elapsed_time", Value::Float64(60.0)),
+                    ("swim_stroke", Value::UInt8(0)), // Freestyle
+                    ("total_strokes", Value::UInt16(35)),
+                    ("length_type", Value::UInt8(0)), // Rest
+                ],
+            ),
+        ];
+
+        let result = extract_swimming_data(&lengths, Some(1000000));
+        assert!(result.is_some());
+        let (data, _) = result.unwrap();
+        assert_eq!(data.lengths.len(), 3);
+        assert_eq!(data.total_lengths, Some(3));
+        assert_eq!(data.active_lengths, Some(2)); // Only 2 are active
+        assert_eq!(data.stroke_type, Some(StrokeType::Freestyle)); // All same stroke
+
+        // Average SWOLF calculation: (75 + 82 + 95) / 3 = 84
+        assert_eq!(data.swolf_avg, Some(84));
+    }
+
+    #[test]
+    fn test_extract_swimming_data_mixed_strokes() {
+        let lengths = vec![
+            create_mock_record(
+                MesgNum::Length,
+                vec![
+                    ("pool_length", Value::Float64(50.0)),
+                    ("total_elapsed_time", Value::Float64(45.0)),
+                    ("swim_stroke", Value::UInt8(0)), // Freestyle
+                    ("total_strokes", Value::UInt16(30)),
+                ],
+            ),
+            create_mock_record(
+                MesgNum::Length,
+                vec![
+                    ("pool_length", Value::Float64(50.0)),
+                    ("total_elapsed_time", Value::Float64(55.0)),
+                    ("swim_stroke", Value::UInt8(1)), // Backstroke
+                    ("total_strokes", Value::UInt16(35)),
+                ],
+            ),
+        ];
+
+        let result = extract_swimming_data(&lengths, Some(1000000));
+        assert!(result.is_some());
+        let (data, _) = result.unwrap();
+        assert_eq!(data.stroke_type, None); // Mixed strokes, so None
+    }
+
+    #[test]
+    fn test_extract_swimming_data_all_stroke_types() {
+        // Test each stroke type mapping
+        let stroke_codes = vec![
+            (0, StrokeType::Freestyle),
+            (1, StrokeType::Backstroke),
+            (2, StrokeType::Breaststroke),
+            (3, StrokeType::Butterfly),
+            (4, StrokeType::Drill),
+            (5, StrokeType::Mixed),
+            (6, StrokeType::IndividualMedley),
+        ];
+
+        for (code, expected_stroke) in stroke_codes {
+            let lengths = vec![create_mock_record(
+                MesgNum::Length,
+                vec![
+                    ("pool_length", Value::Float64(50.0)),
+                    ("total_elapsed_time", Value::Float64(45.0)),
+                    ("swim_stroke", Value::UInt8(code)),
+                    ("total_strokes", Value::UInt16(30)),
+                ],
+            )];
+
+            let result = extract_swimming_data(&lengths, Some(1000000));
+            assert!(result.is_some());
+            let (data, _) = result.unwrap();
+            assert_eq!(data.lengths[0].stroke_type, expected_stroke);
+        }
+    }
+
+    #[test]
+    fn test_extract_swimming_data_missing_pool_length() {
+        // If pool_length is missing, should return None
+        let lengths = vec![create_mock_record(
+            MesgNum::Length,
+            vec![
+                ("total_elapsed_time", Value::Float64(45.0)),
+                ("swim_stroke", Value::UInt8(0)),
+            ],
+        )];
+
+        let result = extract_swimming_data(&lengths, Some(1000000));
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn test_extract_swimming_data_missing_duration() {
+        // If duration is missing, that length is filtered out
+        let lengths = vec![
+            create_mock_record(
+                MesgNum::Length,
+                vec![
+                    ("pool_length", Value::Float64(50.0)),
+                    ("swim_stroke", Value::UInt8(0)),
+                    // Missing total_elapsed_time
+                ],
+            ),
+            create_mock_record(
+                MesgNum::Length,
+                vec![
+                    ("pool_length", Value::Float64(50.0)),
+                    ("total_elapsed_time", Value::Float64(45.0)),
+                    ("swim_stroke", Value::UInt8(0)),
+                    ("total_strokes", Value::UInt16(30)),
+                ],
+            ),
+        ];
+
+        let result = extract_swimming_data(&lengths, Some(1000000));
+        assert!(result.is_some());
+        let (data, _) = result.unwrap();
+        assert_eq!(data.lengths.len(), 1); // Only the valid length
+    }
+
+    #[test]
+    fn test_extract_swimming_data_with_uint32_duration() {
+        // Test that uint32 duration works too
+        let lengths = vec![create_mock_record(
+            MesgNum::Length,
+            vec![
+                ("pool_length", Value::Float64(50.0)),
+                ("total_elapsed_time", Value::UInt32(45)),
+                ("swim_stroke", Value::UInt8(0)),
+            ],
+        )];
+
+        let result = extract_swimming_data(&lengths, Some(1000000));
+        assert!(result.is_some());
+        let (data, _) = result.unwrap();
+        assert_eq!(data.lengths[0].duration_sec, 45);
+    }
+
+    #[test]
+    fn test_extract_swimming_data_swolf_calculation() {
+        // Test SWOLF calculation: strokes + seconds
+        let lengths = vec![create_mock_record(
+            MesgNum::Length,
+            vec![
+                ("pool_length", Value::Float64(50.0)),
+                ("total_elapsed_time", Value::Float64(42.5)),
+                ("swim_stroke", Value::UInt8(0)),
+                ("total_strokes", Value::UInt16(28)),
+            ],
+        )];
+
+        let result = extract_swimming_data(&lengths, Some(1000000));
+        assert!(result.is_some());
+        let (data, _) = result.unwrap();
+        assert_eq!(data.lengths[0].swolf, Some(70)); // 28 + 42 (truncated)
+    }
+
+    #[test]
+    fn test_extract_swimming_data_no_strokes() {
+        // If no stroke count, SWOLF should be None
+        let lengths = vec![create_mock_record(
+            MesgNum::Length,
+            vec![
+                ("pool_length", Value::Float64(50.0)),
+                ("total_elapsed_time", Value::Float64(45.0)),
+                ("swim_stroke", Value::UInt8(0)),
+                // Missing total_strokes
+            ],
+        )];
+
+        let result = extract_swimming_data(&lengths, Some(1000000));
+        assert!(result.is_some());
+        let (data, _) = result.unwrap();
+        assert_eq!(data.lengths[0].stroke_count, None);
+        assert_eq!(data.lengths[0].swolf, None);
+    }
+
+    // Tests for convert_laps_to_exercises
+    #[test]
+    fn test_convert_laps_to_exercises_no_laps() {
+        let session = create_mock_record(
+            MesgNum::Session,
+            vec![
+                ("start_time", Value::UInt32(1000000)),
+                ("total_elapsed_time", Value::UInt32(3600)),
+                ("total_distance", Value::Float64(5000.0)),
+                ("sport", Value::UInt8(0)), // Running
+            ],
+        );
+        let laps: Vec<FitDataRecord> = vec![];
+        let lengths: Vec<FitDataRecord> = vec![];
+        let mut result = ConversionResult::new(String::new());
+
+        let exercises = convert_laps_to_exercises(&session, &laps, &lengths, &mut result);
+        assert!(exercises.is_ok());
+        let exercises = exercises.unwrap();
+        assert_eq!(exercises.len(), 1);
+        assert_eq!(exercises[0].sets.len(), 1);
+        assert_eq!(exercises[0].sets[0].duration_sec, Some(3600));
+        assert_eq!(exercises[0].sets[0].distance_meters, Some(5000.0));
+        assert!(result.has_warnings()); // Should warn about no laps
+    }
+
+    #[test]
+    fn test_convert_laps_to_exercises_multiple_laps() {
+        let session = create_mock_record(
+            MesgNum::Session,
+            vec![
+                ("start_time", Value::UInt32(1000000)),
+                ("sport", Value::UInt8(1)), // Cycling
+            ],
+        );
+        let laps = vec![
+            create_mock_record(
+                MesgNum::Lap,
+                vec![
+                    ("total_elapsed_time", Value::UInt32(1200)),
+                    ("total_distance", Value::Float64(5000.0)),
+                ],
+            ),
+            create_mock_record(
+                MesgNum::Lap,
+                vec![
+                    ("total_timer_time", Value::UInt32(1100)),
+                    ("total_distance", Value::Float64(4800.0)),
+                ],
+            ),
+        ];
+        let lengths: Vec<FitDataRecord> = vec![];
+        let mut result = ConversionResult::new(String::new());
+
+        let exercises = convert_laps_to_exercises(&session, &laps, &lengths, &mut result);
+        assert!(exercises.is_ok());
+        let exercises = exercises.unwrap();
+        assert_eq!(exercises.len(), 1);
+        assert_eq!(exercises[0].sets.len(), 2);
+        assert_eq!(exercises[0].sets[0].set_number, Some(1));
+        assert_eq!(exercises[0].sets[0].duration_sec, Some(1200));
+        assert_eq!(exercises[0].sets[0].distance_meters, Some(5000.0));
+        assert_eq!(exercises[0].sets[1].set_number, Some(2));
+        assert_eq!(exercises[0].sets[1].duration_sec, Some(1100));
+    }
+
+    #[test]
+    fn test_convert_laps_to_exercises_swimming() {
+        let session = create_mock_record(
+            MesgNum::Session,
+            vec![
+                ("start_time", Value::UInt32(1000000)),
+                ("sport", Value::UInt8(5)), // Swimming
+            ],
+        );
+        let laps = vec![create_mock_record(
+            MesgNum::Lap,
+            vec![
+                ("total_elapsed_time", Value::UInt32(600)),
+                ("total_distance", Value::Float64(500.0)),
+            ],
+        )];
+        let lengths = vec![
+            create_mock_record(
+                MesgNum::Length,
+                vec![
+                    ("pool_length", Value::Float64(50.0)),
+                    ("total_elapsed_time", Value::Float64(45.0)),
+                    ("swim_stroke", Value::UInt8(0)),
+                    ("total_strokes", Value::UInt16(30)),
+                ],
+            ),
+            create_mock_record(
+                MesgNum::Length,
+                vec![
+                    ("pool_length", Value::Float64(50.0)),
+                    ("total_elapsed_time", Value::Float64(46.0)),
+                    ("swim_stroke", Value::UInt8(0)),
+                    ("total_strokes", Value::UInt16(31)),
+                ],
+            ),
+        ];
+        let mut result = ConversionResult::new(String::new());
+
+        let exercises = convert_laps_to_exercises(&session, &laps, &lengths, &mut result);
+        assert!(exercises.is_ok());
+        let exercises = exercises.unwrap();
+        assert_eq!(exercises.len(), 1);
+        assert!(exercises[0].pool_config.is_some());
+        let pool_config = exercises[0].pool_config.as_ref().unwrap();
+        assert_eq!(pool_config.pool_length, 50.0);
+
+        // Swimming data should be attached to first set
+        assert!(exercises[0].sets[0].swimming.is_some());
+        let swimming = exercises[0].sets[0].swimming.as_ref().unwrap();
+        assert_eq!(swimming.lengths.len(), 2);
     }
 }

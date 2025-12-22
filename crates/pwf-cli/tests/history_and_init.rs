@@ -475,3 +475,29 @@ fn test_history_json_strict_mode_marks_invalid() {
     let warnings = first["warnings"].as_array().unwrap();
     assert!(!warnings.is_empty());
 }
+
+#[test]
+fn test_history_compact_format_with_invalid_file() {
+    pwf()
+        .arg("history")
+        .arg("--format")
+        .arg("compact")
+        .arg(fixture_path("invalid/missing-version.yaml"))
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("✗"))
+        .stdout(predicate::str::contains("missing-version.yaml"));
+}
+
+#[test]
+fn test_history_pretty_format_with_invalid_file() {
+    pwf()
+        .arg("history")
+        .arg("--format")
+        .arg("pretty")
+        .arg(fixture_path("invalid/missing-version.yaml"))
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("✗"))
+        .stdout(predicate::str::contains("missing-version.yaml"));
+}

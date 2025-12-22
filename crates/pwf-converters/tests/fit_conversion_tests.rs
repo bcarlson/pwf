@@ -2,9 +2,12 @@
 //!
 //! These tests verify the complete conversion pipeline from FIT files to PWF YAML.
 
-use pwf_converters::error::{ConversionError, ConversionWarning};
+use pwf_converters::error::{ConversionError, ConversionResult, ConversionWarning};
 use pwf_converters::fit_to_pwf;
 use std::io::Cursor;
+
+#[allow(dead_code)]
+mod test_helpers;
 
 #[test]
 fn test_empty_fit_file_has_warnings() {
@@ -178,29 +181,6 @@ fn test_conversion_preserves_yaml_structure() {
     assert!(!result.has_warnings());
 }
 
-/// Integration test helpers
-mod test_helpers {
-    /// Generate a minimal valid FIT file header
-    pub fn create_fit_header() -> Vec<u8> {
-        let mut header = Vec::new();
-        header.push(14); // Header size
-        header.push(0x20); // Protocol version 2.0
-        header.extend_from_slice(&[0x00, 0x08]); // Profile version 8.0
-        header.extend_from_slice(&[0x00, 0x00, 0x00, 0x00]); // Data size (placeholder)
-        header.extend_from_slice(b".FIT"); // Data type
-        header.extend_from_slice(&[0x00, 0x00]); // CRC (placeholder)
-        header
-    }
-
-    #[test]
-    fn test_header_creation() {
-        let header = create_fit_header();
-        assert_eq!(header.len(), 14);
-        assert_eq!(header[0], 14);
-        assert_eq!(&header[8..12], b".FIT");
-    }
-}
-
 #[test]
 fn test_fit_sport_mapping() {
     // Test sport type mapping (indirect test via mappings module)
@@ -282,4 +262,346 @@ fn test_gps_coordinate_conversion() {
     // 180 degrees = 2^31 semicircles
     let degrees = semicircles_to_degrees(2_147_483_647);
     assert!((degrees - 180.0).abs() < 0.001);
+}
+
+// ===== New comprehensive integration tests =====
+
+#[test]
+fn test_conversion_result_multiple_warnings() {
+    // Test that ConversionResult can accumulate multiple warnings of different types
+    let mut result = ConversionResult::new("test: yaml".to_string());
+
+    result.add_warning(ConversionWarning::MissingField {
+        source_field: "field1".to_string(),
+        reason: "not supported".to_string(),
+    });
+
+    result.add_warning(ConversionWarning::ValueClamped {
+        field: "field2".to_string(),
+        original: "1000".to_string(),
+        clamped: "255".to_string(),
+    });
+
+    result.add_warning(ConversionWarning::UnsupportedFeature {
+        feature: "feature1".to_string(),
+    });
+
+    assert_eq!(result.warnings.len(), 3);
+    assert!(result.has_warnings());
+
+    // Verify each warning type is preserved
+    let has_missing = result
+        .warnings
+        .iter()
+        .any(|w| matches!(w, ConversionWarning::MissingField { .. }));
+    let has_clamped = result
+        .warnings
+        .iter()
+        .any(|w| matches!(w, ConversionWarning::ValueClamped { .. }));
+    let has_unsupported = result
+        .warnings
+        .iter()
+        .any(|w| matches!(w, ConversionWarning::UnsupportedFeature { .. }));
+
+    assert!(has_missing);
+    assert!(has_clamped);
+    assert!(has_unsupported);
+}
+
+#[test]
+fn test_warning_equality() {
+    // Test ConversionWarning PartialEq implementation
+    let warning1 = ConversionWarning::MissingField {
+        source_field: "test".to_string(),
+        reason: "reason".to_string(),
+    };
+    let warning2 = ConversionWarning::MissingField {
+        source_field: "test".to_string(),
+        reason: "reason".to_string(),
+    };
+    let warning3 = ConversionWarning::MissingField {
+        source_field: "different".to_string(),
+        reason: "reason".to_string(),
+    };
+
+    assert_eq!(warning1, warning2);
+    assert_ne!(warning1, warning3);
+}
+
+#[test]
+fn test_warning_clone() {
+    // Test ConversionWarning Clone implementation
+    let warning = ConversionWarning::DataQualityIssue {
+        issue: "test issue".to_string(),
+    };
+    let cloned = warning.clone();
+
+    assert_eq!(warning, cloned);
+}
+
+#[test]
+fn test_error_from_io_error() {
+    // Test ConversionError From<io::Error> implementation
+    use std::io::{Error, ErrorKind};
+
+    let io_error = Error::new(ErrorKind::PermissionDenied, "access denied");
+    let conv_error: ConversionError = io_error.into();
+
+    match conv_error {
+        ConversionError::IoError(_) => {} // Expected
+        _ => panic!("Expected IoError variant"),
+    }
+}
+
+#[test]
+fn test_error_from_yaml_error() {
+    // Test ConversionError From<serde_yaml::Error> implementation
+    // Create an invalid YAML serialization scenario
+    use serde::Serialize;
+
+    #[derive(Serialize)]
+    struct BadStruct {
+        #[serde(serialize_with = "bad_serialize")]
+        field: String,
+    }
+
+    fn bad_serialize<S>(_: &String, _: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        Err(serde::ser::Error::custom("intentional error"))
+    }
+
+    let bad = BadStruct {
+        field: "test".to_string(),
+    };
+
+    let yaml_err = serde_yaml::to_string(&bad).unwrap_err();
+    let conv_error: ConversionError = yaml_err.into();
+
+    match conv_error {
+        ConversionError::YamlError(_) => {} // Expected
+        _ => panic!("Expected YamlError variant"),
+    }
+}
+
+#[test]
+fn test_conversion_error_display() {
+    // Test all ConversionError variants display correctly
+    let errors = vec![
+        ConversionError::InvalidFitData("test data".to_string()),
+        ConversionError::PwfValidationError("validation failed".to_string()),
+        ConversionError::UnsupportedFormat("TCX".to_string()),
+        ConversionError::MissingRequiredField("required_field".to_string()),
+    ];
+
+    for error in errors {
+        let display = error.to_string();
+        assert!(!display.is_empty(), "Error display should not be empty");
+    }
+}
+
+#[test]
+fn test_invalid_fit_magic_bytes() {
+    // Test FIT file with invalid magic bytes
+    let mut fit_data = Vec::new();
+    fit_data.push(14); // Header size
+    fit_data.push(0x20); // Protocol version
+    fit_data.extend_from_slice(&[0x00, 0x08]); // Profile version
+    fit_data.extend_from_slice(&[0x00, 0x00, 0x00, 0x00]); // Data size
+    fit_data.extend_from_slice(b"NOTF"); // Invalid magic - should be ".FIT"
+    fit_data.extend_from_slice(&[0x00, 0x00]); // CRC
+
+    let cursor = Cursor::new(fit_data);
+    let result = fit_to_pwf(cursor, false);
+
+    assert!(result.is_err(), "Invalid magic bytes should cause error");
+}
+
+#[test]
+fn test_truncated_fit_file() {
+    // Test FIT file that's truncated mid-stream
+    let mut fit_data = Vec::new();
+    fit_data.push(14); // Header size
+    fit_data.push(0x20); // Protocol version
+    fit_data.extend_from_slice(&[0x00, 0x08]); // Profile version
+    fit_data.extend_from_slice(&[0x10, 0x00, 0x00, 0x00]); // Data size = 16 bytes
+    fit_data.extend_from_slice(b".FIT"); // Magic
+    fit_data.extend_from_slice(&[0x00, 0x00]); // CRC
+                                               // But only provide 5 bytes when we promised 16
+    fit_data.extend_from_slice(&[0x01, 0x02, 0x03, 0x04, 0x05]);
+
+    let cursor = Cursor::new(fit_data);
+    let result = fit_to_pwf(cursor, false);
+
+    // Should fail due to truncation
+    match result {
+        Err(ConversionError::FitReadError(_)) => {} // Expected
+        Ok(_) => panic!("Truncated file should fail"),
+        Err(e) => panic!("Unexpected error type: {:?}", e),
+    }
+}
+
+#[test]
+fn test_empty_buffer_read() {
+    // Test reading from an empty buffer
+    let empty: Vec<u8> = Vec::new();
+    let cursor = Cursor::new(empty);
+
+    let result = fit_to_pwf(cursor, false);
+
+    match result {
+        Err(ConversionError::FitReadError(_)) => {} // Expected
+        Ok(res) => {
+            // If it somehow parses, should have warnings
+            assert!(res.has_warnings());
+        }
+        Err(e) => panic!("Unexpected error type: {:?}", e),
+    }
+}
+
+#[test]
+fn test_io_error_handling() {
+    // Test handling of I/O errors during read
+    use std::io::{Error, Read};
+
+    struct FailingReader;
+
+    impl Read for FailingReader {
+        fn read(&mut self, _buf: &mut [u8]) -> std::io::Result<usize> {
+            Err(Error::other("simulated I/O error"))
+        }
+    }
+
+    let failing_reader = FailingReader;
+    let result = fit_to_pwf(failing_reader, false);
+
+    match result {
+        Err(ConversionError::IoError(_)) => {} // Expected
+        _ => panic!("Expected IoError"),
+    }
+}
+
+#[test]
+fn test_summary_only_flag_true() {
+    // Test that summary_only=true is accepted (parameter passing test)
+    let invalid_data = vec![0xFF; 50];
+    let cursor = Cursor::new(invalid_data);
+
+    let result = fit_to_pwf(cursor, true);
+
+    // Should still fail due to invalid data, but tests that the flag is accepted
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_summary_only_flag_false() {
+    // Test that summary_only=false is accepted (parameter passing test)
+    let invalid_data = vec![0xFF; 50];
+    let cursor = Cursor::new(invalid_data);
+
+    let result = fit_to_pwf(cursor, false);
+
+    // Should still fail due to invalid data, but tests that the flag is accepted
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_conversion_result_empty_warnings() {
+    // Test ConversionResult with no warnings
+    let result = ConversionResult::new("test: content".to_string());
+
+    assert!(!result.has_warnings());
+    assert_eq!(result.warnings.len(), 0);
+    assert!(result.warnings.is_empty());
+}
+
+#[test]
+fn test_all_warning_variants_display() {
+    // Test display formatting for all warning variants
+    let warnings = vec![
+        ConversionWarning::MissingField {
+            source_field: "hr_zone".to_string(),
+            reason: "PWF doesn't support zones".to_string(),
+        },
+        ConversionWarning::ValueClamped {
+            field: "power".to_string(),
+            original: "2000".to_string(),
+            clamped: "1999".to_string(),
+        },
+        ConversionWarning::UnsupportedFeature {
+            feature: "virtual_partner".to_string(),
+        },
+        ConversionWarning::TimeSeriesSkipped {
+            reason: "summary_only mode".to_string(),
+        },
+        ConversionWarning::DataQualityIssue {
+            issue: "GPS signal lost".to_string(),
+        },
+    ];
+
+    for warning in warnings {
+        let display = warning.to_string();
+        assert!(!display.is_empty());
+        // Each should contain some identifying text
+        match warning {
+            ConversionWarning::MissingField { .. } => assert!(display.contains("Missing field")),
+            ConversionWarning::ValueClamped { .. } => assert!(display.contains("Value clamped")),
+            ConversionWarning::UnsupportedFeature { .. } => {
+                assert!(display.contains("Unsupported feature"))
+            }
+            ConversionWarning::TimeSeriesSkipped { .. } => {
+                assert!(display.contains("Time-series data skipped"))
+            }
+            ConversionWarning::DataQualityIssue { .. } => {
+                assert!(display.contains("Data quality issue"))
+            }
+        }
+    }
+}
+
+#[test]
+fn test_zero_byte_file() {
+    // Test handling of a truly empty file (0 bytes)
+    let empty: Vec<u8> = vec![];
+    let cursor = Cursor::new(empty);
+
+    let result = fit_to_pwf(cursor, false);
+
+    // Empty file might parse successfully with warnings or return an error
+    match result {
+        Err(ConversionError::FitReadError(_)) => {} // Expected: parse error
+        Ok(res) => {
+            // If it parses, should have warnings about no data
+            assert!(res.has_warnings(), "Empty file should have warnings");
+            assert!(
+                res.pwf_yaml.contains("workouts: []"),
+                "Should have empty workouts"
+            );
+        }
+        Err(e) => panic!("Unexpected error type: {:?}", e),
+    }
+}
+
+#[test]
+fn test_single_byte_file() {
+    // Test handling of a file with only 1 byte
+    let data: Vec<u8> = vec![0x42];
+    let cursor = Cursor::new(data);
+
+    let result = fit_to_pwf(cursor, false);
+
+    // Should return an error (incomplete header)
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_partial_header() {
+    // Test FIT file with incomplete header (only 10 bytes instead of 14)
+    let data: Vec<u8> = vec![14, 0x20, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x2E, 0x46];
+    let cursor = Cursor::new(data);
+
+    let result = fit_to_pwf(cursor, false);
+
+    assert!(result.is_err());
 }
