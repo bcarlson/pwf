@@ -61,6 +61,31 @@ enum Commands {
         #[arg(long)]
         history: bool,
     },
+
+    /// Convert between PWF and other formats (FIT, TCX, GPX)
+    Convert {
+        /// Input format (fit, tcx, gpx, pwf)
+        #[arg(long)]
+        from: String,
+
+        /// Output format (pwf, fit, tcx, gpx, csv)
+        #[arg(long)]
+        to: String,
+
+        /// Input file path
+        input: PathBuf,
+
+        /// Output file path
+        output: PathBuf,
+
+        /// Summary only (skip time-series data for smaller files)
+        #[arg(long)]
+        summary_only: bool,
+
+        /// Verbose output (show conversion warnings)
+        #[arg(short, long)]
+        verbose: bool,
+    },
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, ValueEnum)]
@@ -114,6 +139,14 @@ fn main() -> ExitCode {
                 init_plan(&output)
             }
         }
+        Commands::Convert {
+            from,
+            to,
+            input,
+            output,
+            summary_only,
+            verbose,
+        } => convert_file(&from, &to, &input, &output, summary_only, verbose),
     }
 }
 
@@ -478,6 +511,169 @@ fn write_template(output: &PathBuf, template: &str) -> ExitCode {
         }
         Err(e) => {
             eprintln!("{}: {}", "error".red(), e);
+            ExitCode::FAILURE
+        }
+    }
+}
+
+fn convert_file(
+    from: &str,
+    to: &str,
+    input: &PathBuf,
+    output: &PathBuf,
+    summary_only: bool,
+    verbose: bool,
+) -> ExitCode {
+    // Validate format combinations
+    let from_lower = from.to_lowercase();
+    let to_lower = to.to_lowercase();
+
+    if from_lower == to_lower {
+        eprintln!(
+            "{}: Input and output formats are the same: {}",
+            "error".red(),
+            from
+        );
+        return ExitCode::FAILURE;
+    }
+
+    // Check input file exists
+    if !input.exists() {
+        eprintln!(
+            "{}: Input file not found: {}",
+            "error".red(),
+            input.display()
+        );
+        return ExitCode::FAILURE;
+    }
+
+    // Check output file doesn't exist
+    if output.exists() {
+        eprintln!(
+            "{}: Output file already exists: {}",
+            "error".red(),
+            output.display()
+        );
+        return ExitCode::FAILURE;
+    }
+
+    // Perform conversion based on formats
+    match (from_lower.as_str(), to_lower.as_str()) {
+        ("fit", "pwf") => convert_fit_to_pwf(input, output, summary_only, verbose),
+        (from, to) => {
+            eprintln!(
+                "{}: Conversion from {} to {} is not yet implemented",
+                "error".red(),
+                from,
+                to
+            );
+            eprintln!();
+            eprintln!("Currently supported conversions:");
+            eprintln!("  {} → {}", "fit".green(), "pwf".green());
+            eprintln!();
+            eprintln!("Coming soon:");
+            eprintln!("  tcx → pwf");
+            eprintln!("  gpx → pwf");
+            ExitCode::FAILURE
+        }
+    }
+}
+
+fn convert_fit_to_pwf(
+    input: &PathBuf,
+    output: &PathBuf,
+    summary_only: bool,
+    verbose: bool,
+) -> ExitCode {
+    println!("{} Converting {} to PWF...", "→".cyan(), input.display());
+
+    if verbose {
+        println!("  {} Reading FIT file...", "→".dimmed());
+    }
+
+    // Open input file
+    let file = match fs::File::open(input) {
+        Ok(f) => f,
+        Err(e) => {
+            eprintln!("{}: Failed to open input file: {}", "error".red(), e);
+            return ExitCode::FAILURE;
+        }
+    };
+
+    // Get file size for progress indication
+    let file_size = file.metadata().map(|m| m.len()).unwrap_or(0);
+    if verbose && file_size > 1_000_000 {
+        println!(
+            "  {} Large file detected ({:.1} MB), this may take a moment...",
+            "ℹ".dimmed(),
+            file_size as f64 / 1_000_000.0
+        );
+    }
+
+    if verbose {
+        println!("  {} Parsing FIT records...", "→".dimmed());
+    }
+
+    // Convert using pwf-converters library
+    let result = match pwf_converters::fit_to_pwf(file, summary_only) {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("{}: Conversion failed: {}", "error".red(), e);
+            return ExitCode::FAILURE;
+        }
+    };
+
+    if verbose {
+        println!("  {} Converting to PWF structure...", "→".dimmed());
+    }
+
+    // Show warnings if verbose
+    if verbose && !result.warnings.is_empty() {
+        println!();
+        println!("{} Conversion warnings:", "⚠".yellow());
+        for warning in &result.warnings {
+            println!("  {} {}", "⚠".yellow(), warning.to_string().yellow());
+        }
+        println!();
+    }
+
+    if verbose {
+        // Show conversion statistics
+        let line_count = result.pwf_yaml.lines().count();
+        let size_kb = result.pwf_yaml.len() as f64 / 1024.0;
+        println!(
+            "  {} Generated PWF YAML: {} lines, {:.1} KB",
+            "✓".dimmed(),
+            line_count,
+            size_kb
+        );
+        println!("  {} Writing output file...", "→".dimmed());
+    }
+
+    // Write output file
+    match fs::write(output, &result.pwf_yaml) {
+        Ok(_) => {
+            println!("{} Converted to {}", "✓".green(), output.display());
+
+            if !verbose && result.has_warnings() {
+                println!(
+                    "  {} warnings (use {} to see details)",
+                    result.warnings.len().to_string().yellow(),
+                    "--verbose".cyan()
+                );
+            }
+
+            println!();
+            println!("Next steps:");
+            println!(
+                "  Validate: {}",
+                format!("pwf history {}", output.display()).cyan()
+            );
+
+            ExitCode::SUCCESS
+        }
+        Err(e) => {
+            eprintln!("{}: Failed to write output file: {}", "error".red(), e);
             ExitCode::FAILURE
         }
     }

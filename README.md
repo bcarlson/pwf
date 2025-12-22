@@ -141,6 +141,28 @@ pwf init plan.yaml
 pwf init --history export.yaml
 ```
 
+### Convert Formats
+
+```bash
+# Convert FIT file (Garmin/COROS/Wahoo) to PWF
+pwf convert --from fit --to pwf activity.fit workout.yaml
+
+# Summary only (skip GPS time-series data)
+pwf convert --from fit --to pwf --summary-only activity.fit workout.yaml
+
+# Verbose output (show conversion warnings and progress)
+pwf convert --from fit --to pwf --verbose activity.fit workout.yaml
+
+# Validate the converted file
+pwf history workout.yaml
+```
+
+**Supported conversions:**
+- FIT → PWF (Garmin, COROS, Wahoo, Polar, Suunto devices)
+- Includes: GPS routes, power metrics, swimming data, multi-sport activities
+
+See [`crates/pwf-converters/README.md`](crates/pwf-converters/README.md) for detailed conversion documentation.
+
 ### Example Output
 
 ```
