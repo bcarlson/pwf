@@ -1,0 +1,22 @@
+[package]
+name = "pwf-converters"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Format converters for PWF (Portable Workout Format)"
+keywords = ["fitness", "workout", "fit", "tcx", "converter"]
+categories = ["parser-implementations"]
+authors.workspace = true
+
+[dependencies]
+pwf-core = { path = "../pwf-core" }
+fitparser = { workspace = true }
+chrono = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_yaml = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3.8"
