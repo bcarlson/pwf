@@ -14,6 +14,18 @@ pub enum ConversionError {
     #[error("Invalid FIT data: {0}")]
     InvalidFitData(String),
 
+    /// Failed to read or parse TCX file
+    #[error("Failed to read TCX file: {0}")]
+    TcxReadError(String),
+
+    /// Invalid or inconsistent data in TCX file
+    #[error("Invalid TCX data: {0}")]
+    InvalidTcxData(String),
+
+    /// Failed to write or serialize TCX file
+    #[error("Failed to write TCX file: {0}")]
+    TcxWriteError(String),
+
     /// PWF validation failed after conversion
     #[error("PWF validation failed: {0}")]
     PwfValidationError(String),
@@ -50,6 +62,36 @@ impl ConversionResult {
     pub fn new(pwf_yaml: String) -> Self {
         Self {
             pwf_yaml,
+            warnings: Vec::new(),
+        }
+    }
+
+    /// Add a warning to the result
+    pub fn add_warning(&mut self, warning: ConversionWarning) {
+        self.warnings.push(warning);
+    }
+
+    /// Check if there are any warnings
+    pub fn has_warnings(&self) -> bool {
+        !self.warnings.is_empty()
+    }
+}
+
+/// Result type for TCX export with warnings
+#[derive(Debug)]
+pub struct TcxExportResult {
+    /// The generated TCX XML content
+    pub tcx_xml: String,
+
+    /// List of warnings about data loss or quality issues
+    pub warnings: Vec<ConversionWarning>,
+}
+
+impl TcxExportResult {
+    /// Create a new TCX export result
+    pub fn new(tcx_xml: String) -> Self {
+        Self {
+            tcx_xml,
             warnings: Vec::new(),
         }
     }

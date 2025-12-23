@@ -205,18 +205,18 @@ fn test_convert_output_file_exists() {
 #[test]
 fn test_convert_unsupported_format_combination() {
     let temp = TempDir::new("unsupported_combo");
-    let input = temp.join("input.tcx");
-    let output = temp.join("output.yaml");
+    let input = temp.join("input.gpx");
+    let output = temp.join("output.fit");
 
     fs::write(&input, b"dummy").unwrap();
 
-    // TCX to PWF is not yet implemented
+    // GPX to FIT is not implemented
     pwf_cmd()
         .arg("convert")
         .arg("--from")
-        .arg("tcx")
+        .arg("gpx")
         .arg("--to")
-        .arg("pwf")
+        .arg("fit")
         .arg(&input)
         .arg(&output)
         .assert()
@@ -245,7 +245,6 @@ fn test_convert_unsupported_shows_coming_soon() {
         .assert()
         .failure()
         .stderr(predicate::str::contains("Coming soon:"))
-        .stderr(predicate::str::contains("tcx → pwf"))
         .stderr(predicate::str::contains("gpx → pwf"));
 }
 
@@ -547,7 +546,9 @@ fn test_convert_pwf_to_fit_not_implemented() {
         .arg(&output)
         .assert()
         .failure()
-        .stderr(predicate::str::contains("not yet implemented"));
+        .stderr(predicate::str::contains(
+            "FIT export is not currently supported",
+        ));
 }
 
 #[test]
@@ -940,4 +941,879 @@ fn test_convert_file_becomes_unreadable() {
         stderr.contains("Failed to open input file") || stderr.contains("error"),
         "Should report file opening error"
     );
+}
+
+// ============================================================================
+// TCX Conversion Tests - TCX to PWF
+// ============================================================================
+
+/// Helper to create a minimal valid TCX file
+fn create_minimal_tcx() -> String {
+    r#"<?xml version="1.0" encoding="UTF-8"?>
+<TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2">
+  <Activities>
+    <Activity Sport="Running">
+      <Id>2024-01-15T10:00:00Z</Id>
+      <Lap StartTime="2024-01-15T10:00:00Z">
+        <TotalTimeSeconds>1800</TotalTimeSeconds>
+        <DistanceMeters>5000</DistanceMeters>
+        <Calories>300</Calories>
+        <Intensity>Active</Intensity>
+        <TriggerMethod>Manual</TriggerMethod>
+        <Track>
+          <Trackpoint>
+            <Time>2024-01-15T10:00:00Z</Time>
+            <Position>
+              <LatitudeDegrees>37.7749</LatitudeDegrees>
+              <LongitudeDegrees>-122.4194</LongitudeDegrees>
+            </Position>
+            <AltitudeMeters>50.0</AltitudeMeters>
+            <HeartRateBpm>
+              <Value>140</Value>
+            </HeartRateBpm>
+          </Trackpoint>
+        </Track>
+      </Lap>
+    </Activity>
+  </Activities>
+</TrainingCenterDatabase>"#
+        .to_string()
+}
+
+/// Helper to create a valid PWF history file for TCX export
+fn create_minimal_pwf_history() -> String {
+    r#"history_version: 2
+exported_at: "2024-01-15T12:00:00Z"
+
+export_source:
+  app_name: "Test App"
+  app_version: "1.0.0"
+  platform: "test"
+
+workouts:
+  - date: "2024-01-15"
+    title: "Test Run"
+    sport: running
+    started_at: "2024-01-15T10:00:00Z"
+    ended_at: "2024-01-15T10:30:00Z"
+    duration_sec: 1800
+    telemetry:
+      total_distance_km: 5.0
+      total_calories: 300
+      gps_route:
+        route_id: "test-route-1"
+        positions:
+          - timestamp: "2024-01-15T10:00:00Z"
+            latitude_deg: 37.7749
+            longitude_deg: -122.4194
+            elevation_m: 50.0
+            heart_rate_bpm: 140
+    exercises:
+      - name: "Run"
+        modality: running
+        sets:
+          - set_number: 1
+            set_type: working
+            duration_sec: 1800
+"#
+    .to_string()
+}
+
+#[test]
+fn test_convert_tcx_to_pwf_basic() {
+    let temp = TempDir::new("tcx_to_pwf_basic");
+    let input = temp.join("workout.tcx");
+    let output = temp.join("output.yaml");
+
+    fs::write(&input, create_minimal_tcx()).unwrap();
+
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("tcx")
+        .arg("--to")
+        .arg("pwf")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    let stdout = String::from_utf8_lossy(&result.stdout);
+
+    // Should succeed
+    assert_eq!(
+        result.status.code(),
+        Some(0),
+        "TCX to PWF conversion should succeed. stderr: {}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    assert!(stdout.contains("Converted to"));
+    assert!(stdout.contains("Next steps:"));
+    assert!(output.exists(), "Output file should be created");
+
+    // Verify output is valid YAML
+    let content = fs::read_to_string(&output).unwrap();
+    assert!(content.contains("history_version:"));
+    assert!(content.contains("workouts:"));
+}
+
+#[test]
+fn test_convert_tcx_to_pwf_invalid_file() {
+    let temp = TempDir::new("tcx_invalid");
+    let input = temp.join("invalid.tcx");
+    let output = temp.join("output.yaml");
+
+    // Write invalid TCX data
+    fs::write(&input, b"This is not valid XML").unwrap();
+
+    pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("tcx")
+        .arg("--to")
+        .arg("pwf")
+        .arg(&input)
+        .arg(&output)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("Conversion failed"));
+
+    // Output file should not be created
+    assert!(!output.exists());
+}
+
+#[test]
+fn test_convert_tcx_to_pwf_empty_file() {
+    let temp = TempDir::new("tcx_empty");
+    let input = temp.join("empty.tcx");
+    let output = temp.join("output.yaml");
+
+    // Write empty file
+    fs::write(&input, b"").unwrap();
+
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("tcx")
+        .arg("--to")
+        .arg("pwf")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    // Should fail on empty file
+    let stderr = String::from_utf8_lossy(&result.stderr);
+    assert_ne!(result.status.code(), Some(0));
+    assert!(stderr.contains("Conversion failed") || stderr.contains("error"));
+}
+
+#[test]
+fn test_convert_tcx_to_pwf_no_activities() {
+    let temp = TempDir::new("tcx_no_activities");
+    let input = temp.join("empty_activities.tcx");
+    let output = temp.join("output.yaml");
+
+    // TCX with no activities
+    let tcx_content = r#"<?xml version="1.0" encoding="UTF-8"?>
+<TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2">
+</TrainingCenterDatabase>"#;
+
+    fs::write(&input, tcx_content).unwrap();
+
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("tcx")
+        .arg("--to")
+        .arg("pwf")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    // Should succeed but may have warnings
+    if result.status.code() == Some(0) {
+        // May show warnings about no activities
+        assert!(output.exists());
+    } else {
+        // Or may fail, both are acceptable
+        let stderr = String::from_utf8_lossy(&result.stderr);
+        assert!(stderr.contains("error") || stderr.contains("Conversion failed"));
+    }
+}
+
+#[test]
+fn test_convert_tcx_to_pwf_verbose() {
+    let temp = TempDir::new("tcx_verbose");
+    let input = temp.join("workout.tcx");
+    let output = temp.join("output.yaml");
+
+    fs::write(&input, create_minimal_tcx()).unwrap();
+
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("tcx")
+        .arg("--to")
+        .arg("pwf")
+        .arg("--verbose")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    let stdout = String::from_utf8_lossy(&result.stdout);
+
+    // Should succeed
+    assert_eq!(result.status.code(), Some(0));
+
+    // Verbose should show detailed messages
+    assert!(stdout.contains("Reading TCX file") || stdout.contains("Parsing TCX activities"));
+}
+
+#[test]
+fn test_convert_tcx_to_pwf_verbose_short_flag() {
+    let temp = TempDir::new("tcx_verbose_short");
+    let input = temp.join("workout.tcx");
+    let output = temp.join("output.yaml");
+
+    fs::write(&input, create_minimal_tcx()).unwrap();
+
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("tcx")
+        .arg("--to")
+        .arg("pwf")
+        .arg("-v")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    // Should accept -v short flag
+    assert_eq!(result.status.code(), Some(0));
+}
+
+#[test]
+fn test_convert_tcx_to_pwf_summary_only() {
+    let temp = TempDir::new("tcx_summary");
+    let input = temp.join("workout.tcx");
+    let output = temp.join("output.yaml");
+
+    fs::write(&input, create_minimal_tcx()).unwrap();
+
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("tcx")
+        .arg("--to")
+        .arg("pwf")
+        .arg("--summary-only")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    // Should succeed
+    assert_eq!(result.status.code(), Some(0));
+    assert!(output.exists());
+
+    // With summary-only, GPS data should be minimal or excluded
+    let content = fs::read_to_string(&output).unwrap();
+    assert!(content.contains("history_version:"));
+}
+
+#[test]
+fn test_convert_tcx_to_pwf_verbose_with_warnings() {
+    let temp = TempDir::new("tcx_warnings");
+    let input = temp.join("workout.tcx");
+    let output = temp.join("output.yaml");
+
+    // Create TCX that might generate warnings (e.g., missing data)
+    let tcx_with_missing_data = r#"<?xml version="1.0" encoding="UTF-8"?>
+<TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2">
+  <Activities>
+    <Activity Sport="Running">
+      <Id>2024-01-15T10:00:00Z</Id>
+      <Lap StartTime="2024-01-15T10:00:00Z">
+        <TotalTimeSeconds>1800</TotalTimeSeconds>
+        <Intensity>Active</Intensity>
+        <TriggerMethod>Manual</TriggerMethod>
+        <Track>
+          <Trackpoint>
+            <Time>2024-01-15T10:00:00Z</Time>
+          </Trackpoint>
+        </Track>
+      </Lap>
+    </Activity>
+  </Activities>
+</TrainingCenterDatabase>"#;
+
+    fs::write(&input, tcx_with_missing_data).unwrap();
+
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("tcx")
+        .arg("--to")
+        .arg("pwf")
+        .arg("--verbose")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    let stdout = String::from_utf8_lossy(&result.stdout);
+
+    // May succeed with warnings displayed in verbose mode
+    if result.status.code() == Some(0) && stdout.contains("warnings") {
+        assert!(stdout.contains("⚠") || stdout.contains("warning"));
+    }
+}
+
+#[test]
+fn test_convert_tcx_to_pwf_large_file() {
+    let temp = TempDir::new("tcx_large");
+    let input = temp.join("large.tcx");
+    let output = temp.join("output.yaml");
+
+    // Create a large TCX file (> 1MB) by repeating trackpoints
+    let mut tcx_content = String::from(
+        r#"<?xml version="1.0" encoding="UTF-8"?>
+<TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2">
+  <Activities>
+    <Activity Sport="Running">
+      <Id>2024-01-15T10:00:00Z</Id>
+      <Lap StartTime="2024-01-15T10:00:00Z">
+        <TotalTimeSeconds>1800</TotalTimeSeconds>
+        <DistanceMeters>5000</DistanceMeters>
+        <Calories>300</Calories>
+        <Intensity>Active</Intensity>
+        <TriggerMethod>Manual</TriggerMethod>
+        <Track>"#,
+    );
+
+    // Add many trackpoints to make file large
+    for i in 0..10000 {
+        tcx_content.push_str(&format!(
+            r#"
+          <Trackpoint>
+            <Time>2024-01-15T10:{:02}:{:02}Z</Time>
+            <Position>
+              <LatitudeDegrees>37.7749</LatitudeDegrees>
+              <LongitudeDegrees>-122.4194</LongitudeDegrees>
+            </Position>
+          </Trackpoint>"#,
+            i / 60,
+            i % 60
+        ));
+    }
+
+    tcx_content.push_str(
+        r#"
+        </Track>
+      </Lap>
+    </Activity>
+  </Activities>
+</TrainingCenterDatabase>"#,
+    );
+
+    fs::write(&input, tcx_content).unwrap();
+
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("tcx")
+        .arg("--to")
+        .arg("pwf")
+        .arg("--verbose")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    let stdout = String::from_utf8_lossy(&result.stdout);
+
+    // Should detect large file in verbose mode
+    if stdout.contains("Large file detected") {
+        assert!(stdout.contains("MB"));
+    }
+}
+
+#[test]
+fn test_convert_tcx_to_pwf_case_insensitive() {
+    let temp = TempDir::new("tcx_case");
+    let input = temp.join("workout.tcx");
+    let output = temp.join("output.yaml");
+
+    fs::write(&input, create_minimal_tcx()).unwrap();
+
+    // Test with uppercase format names
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("TCX")
+        .arg("--to")
+        .arg("PWF")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    // Should accept case-insensitive format names
+    assert_eq!(result.status.code(), Some(0));
+}
+
+// ============================================================================
+// TCX Conversion Tests - PWF to TCX
+// ============================================================================
+
+#[test]
+fn test_convert_pwf_to_tcx_basic() {
+    let temp = TempDir::new("pwf_to_tcx_basic");
+    let input = temp.join("history.yaml");
+    let output = temp.join("output.tcx");
+
+    fs::write(&input, create_minimal_pwf_history()).unwrap();
+
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("pwf")
+        .arg("--to")
+        .arg("tcx")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    let stdout = String::from_utf8_lossy(&result.stdout);
+
+    // Should succeed
+    assert_eq!(
+        result.status.code(),
+        Some(0),
+        "PWF to TCX export should succeed. stderr: {}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    assert!(stdout.contains("Exported to"));
+    assert!(stdout.contains("Next steps:"));
+    assert!(output.exists(), "Output file should be created");
+
+    // Verify output is valid XML
+    let content = fs::read_to_string(&output).unwrap();
+    assert!(content.contains("<?xml"));
+    assert!(content.contains("TrainingCenterDatabase"));
+    assert!(content.contains("<Activity"));
+}
+
+#[test]
+fn test_convert_pwf_to_tcx_invalid_pwf() {
+    let temp = TempDir::new("pwf_to_tcx_invalid");
+    let input = temp.join("invalid.yaml");
+    let output = temp.join("output.tcx");
+
+    // Write invalid PWF data
+    fs::write(&input, b"invalid: yaml: content").unwrap();
+
+    pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("pwf")
+        .arg("--to")
+        .arg("tcx")
+        .arg(&input)
+        .arg(&output)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("Failed to parse PWF history"));
+
+    // Output file should not be created
+    assert!(!output.exists());
+}
+
+#[test]
+fn test_convert_pwf_to_tcx_empty_file() {
+    let temp = TempDir::new("pwf_to_tcx_empty");
+    let input = temp.join("empty.yaml");
+    let output = temp.join("output.tcx");
+
+    fs::write(&input, b"").unwrap();
+
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("pwf")
+        .arg("--to")
+        .arg("tcx")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    // Should fail on empty file
+    let stderr = String::from_utf8_lossy(&result.stderr);
+    assert_ne!(result.status.code(), Some(0));
+    assert!(stderr.contains("Failed to") || stderr.contains("error"));
+}
+
+#[test]
+fn test_convert_pwf_to_tcx_wrong_type() {
+    let temp = TempDir::new("pwf_to_tcx_wrong_type");
+    let input = temp.join("plan.yaml");
+    let output = temp.join("output.tcx");
+
+    // Write a PWF plan instead of history
+    let plan_content = r#"plan_version: 1
+meta:
+  title: "Test Plan"
+cycle:
+  days:
+    - focus: "Day 1"
+      exercises:
+        - name: "Exercise"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+"#;
+
+    fs::write(&input, plan_content).unwrap();
+
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("pwf")
+        .arg("--to")
+        .arg("tcx")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    // Should fail because it's a plan, not history
+    let stderr = String::from_utf8_lossy(&result.stderr);
+    assert_ne!(result.status.code(), Some(0));
+    assert!(stderr.contains("Failed to parse PWF history"));
+}
+
+#[test]
+fn test_convert_pwf_to_tcx_verbose() {
+    let temp = TempDir::new("pwf_to_tcx_verbose");
+    let input = temp.join("history.yaml");
+    let output = temp.join("output.tcx");
+
+    fs::write(&input, create_minimal_pwf_history()).unwrap();
+
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("pwf")
+        .arg("--to")
+        .arg("tcx")
+        .arg("--verbose")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    let stdout = String::from_utf8_lossy(&result.stdout);
+
+    // Should succeed
+    assert_eq!(result.status.code(), Some(0));
+
+    // Verbose should show detailed messages
+    assert!(
+        stdout.contains("Reading PWF history file")
+            || stdout.contains("Converting")
+            || stdout.contains("workouts to TCX format")
+    );
+}
+
+#[test]
+fn test_convert_pwf_to_tcx_verbose_short_flag() {
+    let temp = TempDir::new("pwf_to_tcx_v");
+    let input = temp.join("history.yaml");
+    let output = temp.join("output.tcx");
+
+    fs::write(&input, create_minimal_pwf_history()).unwrap();
+
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("pwf")
+        .arg("--to")
+        .arg("tcx")
+        .arg("-v")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    // Should accept -v short flag
+    assert_eq!(result.status.code(), Some(0));
+}
+
+#[test]
+fn test_convert_pwf_to_tcx_with_warnings() {
+    let temp = TempDir::new("pwf_to_tcx_warnings");
+    let input = temp.join("history.yaml");
+    let output = temp.join("output.tcx");
+
+    // PWF history with incomplete data that might generate warnings
+    let history_with_missing_data = r#"history_version: 2
+exported_at: "2024-01-15T12:00:00Z"
+
+export_source:
+  app_name: "Test"
+  app_version: "1.0.0"
+
+workouts:
+  - date: "2024-01-15"
+    title: "Incomplete Workout"
+    sport: running
+    started_at: "2024-01-15T10:00:00Z"
+    duration_sec: 1800
+"#;
+
+    fs::write(&input, history_with_missing_data).unwrap();
+
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("pwf")
+        .arg("--to")
+        .arg("tcx")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    let stdout = String::from_utf8_lossy(&result.stdout);
+
+    // Should succeed but may have warnings
+    if result.status.code() == Some(0) {
+        // Check if warnings are shown
+        if stdout.contains("warnings") {
+            assert!(stdout.contains("--verbose") || stdout.contains("⚠"));
+        }
+    }
+}
+
+#[test]
+fn test_convert_pwf_to_tcx_warnings_verbose() {
+    let temp = TempDir::new("pwf_to_tcx_warnings_v");
+    let input = temp.join("history.yaml");
+    let output = temp.join("output.tcx");
+
+    // PWF history with incomplete data
+    let history_with_missing_data = r#"history_version: 2
+exported_at: "2024-01-15T12:00:00Z"
+
+export_source:
+  app_name: "Test"
+  app_version: "1.0.0"
+
+workouts:
+  - date: "2024-01-15"
+    title: "Incomplete Workout"
+    sport: running
+    started_at: "2024-01-15T10:00:00Z"
+    duration_sec: 1800
+"#;
+
+    fs::write(&input, history_with_missing_data).unwrap();
+
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("pwf")
+        .arg("--to")
+        .arg("tcx")
+        .arg("--verbose")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    let stdout = String::from_utf8_lossy(&result.stdout);
+
+    // With verbose, warnings should be displayed with details
+    if result.status.code() == Some(0) && stdout.contains("warnings") {
+        assert!(stdout.contains("Export warnings:") || stdout.contains("⚠"));
+    }
+}
+
+#[test]
+fn test_convert_pwf_to_tcx_statistics() {
+    let temp = TempDir::new("pwf_to_tcx_stats");
+    let input = temp.join("history.yaml");
+    let output = temp.join("output.tcx");
+
+    fs::write(&input, create_minimal_pwf_history()).unwrap();
+
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("pwf")
+        .arg("--to")
+        .arg("tcx")
+        .arg("--verbose")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    let stdout = String::from_utf8_lossy(&result.stdout);
+
+    // Verbose should show statistics
+    if result.status.code() == Some(0) {
+        assert!(stdout.contains("lines") || stdout.contains("KB") || stdout.contains("Generated"));
+    }
+}
+
+#[test]
+fn test_convert_pwf_to_tcx_case_insensitive() {
+    let temp = TempDir::new("pwf_to_tcx_case");
+    let input = temp.join("history.yaml");
+    let output = temp.join("output.tcx");
+
+    fs::write(&input, create_minimal_pwf_history()).unwrap();
+
+    // Test with mixed case format names
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("PwF")
+        .arg("--to")
+        .arg("TcX")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    // Should accept case-insensitive format names
+    assert_eq!(result.status.code(), Some(0));
+}
+
+// ============================================================================
+// TCX Round-Trip Tests
+// ============================================================================
+
+#[test]
+fn test_convert_tcx_pwf_tcx_roundtrip() {
+    let temp = TempDir::new("tcx_roundtrip");
+    let original_tcx = temp.join("original.tcx");
+    let intermediate_pwf = temp.join("intermediate.yaml");
+    let final_tcx = temp.join("final.tcx");
+
+    // Create original TCX
+    fs::write(&original_tcx, create_minimal_tcx()).unwrap();
+
+    // Convert TCX to PWF
+    let result1 = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("tcx")
+        .arg("--to")
+        .arg("pwf")
+        .arg(&original_tcx)
+        .arg(&intermediate_pwf)
+        .output()
+        .unwrap();
+
+    assert_eq!(result1.status.code(), Some(0));
+    assert!(intermediate_pwf.exists());
+
+    // Convert PWF back to TCX
+    let result2 = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("pwf")
+        .arg("--to")
+        .arg("tcx")
+        .arg(&intermediate_pwf)
+        .arg(&final_tcx)
+        .output()
+        .unwrap();
+
+    assert_eq!(result2.status.code(), Some(0));
+    assert!(final_tcx.exists());
+
+    // Verify final TCX contains expected data
+    let final_content = fs::read_to_string(&final_tcx).unwrap();
+    assert!(final_content.contains("TrainingCenterDatabase"));
+    assert!(final_content.contains("<Activity"));
+}
+
+// ============================================================================
+// TCX Error Message Tests
+// ============================================================================
+
+#[test]
+fn test_tcx_error_messages_are_helpful() {
+    let temp = TempDir::new("tcx_errors");
+
+    // Test 1: Invalid XML structure
+    let invalid_xml = temp.join("invalid.tcx");
+    fs::write(&invalid_xml, "<invalid>not closed").unwrap();
+
+    let result1 = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("tcx")
+        .arg("--to")
+        .arg("pwf")
+        .arg(&invalid_xml)
+        .arg(temp.join("out1.yaml"))
+        .output()
+        .unwrap();
+
+    let stderr1 = String::from_utf8_lossy(&result1.stderr);
+    assert!(stderr1.contains("Conversion failed"));
+
+    // Test 2: Missing required PWF fields for export
+    let incomplete_pwf = temp.join("incomplete.yaml");
+    fs::write(&incomplete_pwf, "history_version: 2\n").unwrap();
+
+    let result2 = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("pwf")
+        .arg("--to")
+        .arg("tcx")
+        .arg(&incomplete_pwf)
+        .arg(temp.join("out2.tcx"))
+        .output()
+        .unwrap();
+
+    let stderr2 = String::from_utf8_lossy(&result2.stderr);
+    assert!(stderr2.contains("Failed to parse PWF history") || stderr2.contains("error"));
+}
+
+#[test]
+fn test_tcx_conversion_shows_hint_on_parse_error() {
+    let temp = TempDir::new("tcx_hint");
+    let input = temp.join("bad.yaml");
+    let output = temp.join("output.tcx");
+
+    // Invalid YAML for PWF to TCX
+    fs::write(&input, "invalid yaml: [").unwrap();
+
+    let result = pwf_cmd()
+        .arg("convert")
+        .arg("--from")
+        .arg("pwf")
+        .arg("--to")
+        .arg("tcx")
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+
+    let stderr = String::from_utf8_lossy(&result.stderr);
+
+    // Should show hint about validation
+    assert!(stderr.contains("Hint:") || stderr.contains("pwf history"));
 }

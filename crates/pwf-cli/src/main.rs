@@ -560,6 +560,42 @@ fn convert_file(
     // Perform conversion based on formats
     match (from_lower.as_str(), to_lower.as_str()) {
         ("fit", "pwf") => convert_fit_to_pwf(input, output, summary_only, verbose),
+        ("tcx", "pwf") => convert_tcx_to_pwf(input, output, summary_only, verbose),
+        ("pwf", "tcx") => convert_pwf_to_tcx(input, output, verbose),
+        ("pwf", "fit") => {
+            // Special error message for FIT export
+            eprintln!("{}: FIT export is not currently supported", "error".red());
+            eprintln!();
+            eprintln!("{}", "Reason:".bold());
+            eprintln!("  No production-ready Rust library for FIT file writing is available.");
+            eprintln!("  Current libraries are either read-only or experimental/undocumented.");
+            eprintln!();
+            eprintln!("{}", "Recommended alternative:".bold());
+            eprintln!("  Export to TCX format instead:");
+            eprintln!(
+                "  {}",
+                "pwf convert --from pwf --to tcx workout.yaml output.tcx".cyan()
+            );
+            eprintln!();
+            eprintln!("  TCX files are accepted by:");
+            eprintln!("  • Garmin Connect");
+            eprintln!("  • Strava");
+            eprintln!("  • TrainingPeaks");
+            eprintln!("  • Most fitness platforms");
+            eprintln!();
+            eprintln!("{}", "Workaround (if FIT is required):".bold());
+            eprintln!(
+                "  1. Export to TCX: pwf convert --from pwf --to tcx workout.yaml output.tcx"
+            );
+            eprintln!("  2. Use Garmin FitCSVTool to convert TCX → FIT:");
+            eprintln!(
+                "     {}",
+                "https://developer.garmin.com/fit/fitcsvtool/".underline()
+            );
+            eprintln!();
+            eprintln!("For more details, see: {}", "FIT_EXPORT_ANALYSIS.md".cyan());
+            ExitCode::FAILURE
+        }
         (from, to) => {
             eprintln!(
                 "{}: Conversion from {} to {} is not yet implemented",
@@ -570,9 +606,10 @@ fn convert_file(
             eprintln!();
             eprintln!("Currently supported conversions:");
             eprintln!("  {} → {}", "fit".green(), "pwf".green());
+            eprintln!("  {} → {}", "tcx".green(), "pwf".green());
+            eprintln!("  {} → {}", "pwf".green(), "tcx".green());
             eprintln!();
             eprintln!("Coming soon:");
-            eprintln!("  tcx → pwf");
             eprintln!("  gpx → pwf");
             ExitCode::FAILURE
         }
@@ -669,6 +706,209 @@ fn convert_fit_to_pwf(
                 "  Validate: {}",
                 format!("pwf history {}", output.display()).cyan()
             );
+
+            ExitCode::SUCCESS
+        }
+        Err(e) => {
+            eprintln!("{}: Failed to write output file: {}", "error".red(), e);
+            ExitCode::FAILURE
+        }
+    }
+}
+
+fn convert_tcx_to_pwf(
+    input: &PathBuf,
+    output: &PathBuf,
+    summary_only: bool,
+    verbose: bool,
+) -> ExitCode {
+    println!("{} Converting {} to PWF...", "→".cyan(), input.display());
+
+    if verbose {
+        println!("  {} Reading TCX file...", "→".dimmed());
+    }
+
+    // Open input file
+    let file = match fs::File::open(input) {
+        Ok(f) => f,
+        Err(e) => {
+            eprintln!("{}: Failed to open input file: {}", "error".red(), e);
+            return ExitCode::FAILURE;
+        }
+    };
+
+    // Get file size for progress indication
+    let file_size = file.metadata().map(|m| m.len()).unwrap_or(0);
+    if verbose && file_size > 1_000_000 {
+        println!(
+            "  {} Large file detected ({:.1} MB), this may take a moment...",
+            "ℹ".dimmed(),
+            file_size as f64 / 1_000_000.0
+        );
+    }
+
+    if verbose {
+        println!("  {} Parsing TCX activities...", "→".dimmed());
+    }
+
+    // Convert using pwf-converters library
+    let result: pwf_converters::ConversionResult =
+        match pwf_converters::tcx_to_pwf(file, summary_only) {
+            Ok(r) => r,
+            Err(e) => {
+                eprintln!("{}: Conversion failed: {}", "error".red(), e);
+                return ExitCode::FAILURE;
+            }
+        };
+
+    if verbose {
+        println!("  {} Converting to PWF structure...", "→".dimmed());
+    }
+
+    // Show warnings if verbose
+    if verbose && !result.warnings.is_empty() {
+        println!();
+        println!("{} Conversion warnings:", "⚠".yellow());
+        for warning in &result.warnings {
+            println!("  {} {}", "⚠".yellow(), warning.to_string().yellow());
+        }
+        println!();
+    }
+
+    if verbose {
+        // Show conversion statistics
+        let line_count = result.pwf_yaml.lines().count();
+        let size_kb = result.pwf_yaml.len() as f64 / 1024.0;
+        println!(
+            "  {} Generated PWF YAML: {} lines, {:.1} KB",
+            "✓".dimmed(),
+            line_count,
+            size_kb
+        );
+        println!("  {} Writing output file...", "→".dimmed());
+    }
+
+    // Write output file
+    match fs::write(output, &result.pwf_yaml) {
+        Ok(_) => {
+            println!("{} Converted to {}", "✓".green(), output.display());
+
+            if !verbose && result.has_warnings() {
+                println!(
+                    "  {} warnings (use {} to see details)",
+                    result.warnings.len().to_string().yellow(),
+                    "--verbose".cyan()
+                );
+            }
+
+            println!();
+            println!("Next steps:");
+            println!(
+                "  Validate: {}",
+                format!("pwf history {}", output.display()).cyan()
+            );
+
+            ExitCode::SUCCESS
+        }
+        Err(e) => {
+            eprintln!("{}: Failed to write output file: {}", "error".red(), e);
+            ExitCode::FAILURE
+        }
+    }
+}
+
+fn convert_pwf_to_tcx(input: &PathBuf, output: &PathBuf, verbose: bool) -> ExitCode {
+    println!("{} Exporting {} to TCX...", "→".cyan(), input.display());
+
+    if verbose {
+        println!("  {} Reading PWF history file...", "→".dimmed());
+    }
+
+    // Read PWF history file
+    let content = match fs::read_to_string(input) {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("{}: Failed to read input file: {}", "error".red(), e);
+            return ExitCode::FAILURE;
+        }
+    };
+
+    if verbose {
+        println!("  {} Parsing PWF history...", "→".dimmed());
+    }
+
+    // Parse PWF history
+    let history: pwf_core::history::WpsHistory = match pwf_core::history::parse(&content) {
+        Ok(h) => h,
+        Err(e) => {
+            eprintln!("{}: Failed to parse PWF history: {}", "error".red(), e);
+            eprintln!();
+            eprintln!("Hint: Validate your PWF file first:");
+            eprintln!("  {}", format!("pwf history {}", input.display()).cyan());
+            return ExitCode::FAILURE;
+        }
+    };
+
+    if verbose {
+        println!(
+            "  {} Converting {} workouts to TCX format...",
+            "→".dimmed(),
+            history.workouts.len()
+        );
+    }
+
+    // Convert to TCX using pwf-converters library
+    let result = match pwf_converters::pwf_to_tcx(&history) {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("{}: Export failed: {}", "error".red(), e);
+            return ExitCode::FAILURE;
+        }
+    };
+
+    // Show warnings if verbose
+    if verbose && !result.warnings.is_empty() {
+        println!();
+        println!("{} Export warnings:", "⚠".yellow());
+        for warning in &result.warnings {
+            println!("  {} {}", "⚠".yellow(), warning.to_string().yellow());
+        }
+        println!();
+    }
+
+    if verbose {
+        // Show export statistics
+        let line_count = result.tcx_xml.lines().count();
+        let size_kb = result.tcx_xml.len() as f64 / 1024.0;
+        println!(
+            "  {} Generated TCX XML: {} lines, {:.1} KB",
+            "✓".dimmed(),
+            line_count,
+            size_kb
+        );
+        println!("  {} Writing output file...", "→".dimmed());
+    }
+
+    // Write output file
+    match fs::write(output, &result.tcx_xml) {
+        Ok(_) => {
+            println!("{} Exported to {}", "✓".green(), output.display());
+
+            if !verbose && result.has_warnings() {
+                println!(
+                    "  {} warnings (use {} to see details)",
+                    result.warnings.len().to_string().yellow(),
+                    "--verbose".cyan()
+                );
+            }
+
+            println!();
+            println!("Next steps:");
+            println!("  Upload to fitness platforms:");
+            println!("    • Garmin Connect");
+            println!("    • Strava");
+            println!("    • TrainingPeaks");
+            println!("    • Most other fitness platforms");
 
             ExitCode::SUCCESS
         }
