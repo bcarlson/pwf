@@ -13,10 +13,12 @@ authors.workspace = true
 [dependencies]
 pwf-core = { path = "../pwf-core" }
 fitparser = { workspace = true }
+tcx = { workspace = true }
 chrono = { workspace = true }
 thiserror = { workspace = true }
 serde = { workspace = true }
 serde_yaml = { workspace = true }
+serde-xml-rs = "0.5"
 
 [dev-dependencies]
 tempfile = "3.8"
