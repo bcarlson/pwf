@@ -147,8 +147,11 @@ pwf init --history export.yaml
 # Convert FIT file (Garmin/COROS/Wahoo) to PWF
 pwf convert --from fit --to pwf activity.fit workout.yaml
 
+# Convert TCX file (Training Center XML) to PWF
+pwf convert --from tcx --to pwf activity.tcx workout.yaml
+
 # Summary only (skip GPS time-series data)
-pwf convert --from fit --to pwf --summary-only activity.fit workout.yaml
+pwf convert --from tcx --to pwf --summary-only activity.tcx workout.yaml
 
 # Verbose output (show conversion warnings and progress)
 pwf convert --from fit --to pwf --verbose activity.fit workout.yaml
@@ -159,7 +162,8 @@ pwf history workout.yaml
 
 **Supported conversions:**
 - FIT → PWF (Garmin, COROS, Wahoo, Polar, Suunto devices)
-- Includes: GPS routes, power metrics, swimming data, multi-sport activities
+- TCX → PWF (Training Center XML - Garmin Connect, Strava exports)
+- Includes: GPS routes, power metrics, swimming data, multi-sport activities, heart rate telemetry
 
 See [`crates/pwf-converters/README.md`](crates/pwf-converters/README.md) for detailed conversion documentation.
 

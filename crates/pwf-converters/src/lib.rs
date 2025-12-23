@@ -21,7 +21,9 @@
 pub mod common;
 pub mod error;
 pub mod fit;
+pub mod tcx;
 
 // Re-export main types and functions
-pub use error::{ConversionError, ConversionResult, ConversionWarning};
+pub use error::{ConversionError, ConversionResult, ConversionWarning, TcxExportResult};
 pub use fit::fit_to_pwf;
+pub use tcx::{pwf_to_tcx, tcx_to_pwf};
