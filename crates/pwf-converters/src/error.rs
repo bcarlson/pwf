@@ -64,7 +64,7 @@ pub enum ConversionError {
 }
 
 /// Result type for conversions with warnings
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct ConversionResult {
     /// The converted PWF YAML content
     pub pwf_yaml: String,
@@ -94,7 +94,7 @@ impl ConversionResult {
 }
 
 /// Result type for TCX export with warnings
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct TcxExportResult {
     /// The generated TCX XML content
     pub tcx_xml: String,
@@ -124,7 +124,7 @@ impl TcxExportResult {
 }
 
 /// Result type for GPX export with warnings
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct GpxExportResult {
     /// The generated GPX XML content
     pub gpx_xml: String,
@@ -154,7 +154,7 @@ impl GpxExportResult {
 }
 
 /// Result type for CSV export with statistics
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct CsvExportResult {
     /// The generated CSV content
     pub csv_data: String,
@@ -192,7 +192,7 @@ impl CsvExportResult {
 }
 
 /// Warnings about conversion quality or data loss
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
 pub enum ConversionWarning {
     /// A field from the source format couldn't be mapped
     MissingField {

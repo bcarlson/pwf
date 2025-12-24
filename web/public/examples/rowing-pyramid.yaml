@@ -1,0 +1,43 @@
+plan_version: 1
+
+meta:
+  title: "Rowing Power Pyramid"
+  description: "Ramp test with gradual power increase"
+  author: "PWF Endurance"
+  tags:
+    - rowing
+    - endurance
+    - ramp
+  athlete_profile:
+    ftp_watts: 220
+    threshold_hr_bpm: 160
+    max_hr_bpm: 180
+
+cycle:
+  days:
+    - focus: "Power Ramp Test"
+      target_session_length_min: 30
+      exercises:
+        - name: "Warm-up Row"
+          modality: rowing
+          zones:
+            - zone: 1
+              duration_sec: 300
+              target_power_watts: 100
+              target_hr_bpm: 130
+
+        - name: "Ramp Test"
+          modality: rowing
+          ramp:
+            start_power_watts: 150
+            end_power_watts: 300
+            duration_sec: 900
+            step_duration_sec: 60
+          target_notes: "Increase 10W every minute"
+
+        - name: "Recovery Row"
+          modality: rowing
+          zones:
+            - zone: 1
+              duration_sec: 300
+              target_power_watts: 80

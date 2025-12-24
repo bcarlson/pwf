@@ -1,0 +1,232 @@
+# PWF History Export v2 - Swimming with Telemetry
+# Demonstrates telemetry metrics for pool swimming with stroke rate and pace data
+
+history_version: 2
+exported_at: "2025-12-20T20:15:00Z"
+
+export_source:
+  app_name: "Garmin Swim 2"
+  app_version: "9.20"
+  platform: "watch"
+  preferred_units:
+    weight: kg
+    distance: meters
+
+units:
+  weight: kg
+  distance: meters
+
+workouts:
+  - id: "swim-20251220-001"
+    date: "2025-12-20"
+    started_at: "2025-12-20T17:00:00Z"
+    ended_at: "2025-12-20T18:15:00Z"
+    duration_sec: 4500
+    title: "Endurance Swim - 3000m"
+    notes: "Pool swim focusing on technique and pacing"
+
+    telemetry:
+      heart_rate_avg: 142
+      heart_rate_max: 168
+      heart_rate_min: 88
+      total_distance_m: 3000
+      total_distance_km: 3.0
+      pace_avg_sec_per_km: 1500
+      cadence_avg: 32
+      total_calories: 520
+
+    exercises:
+      - name: "Warm-up"
+        modality: swimming
+        sets:
+          - set_number: 1
+            duration_sec: 600
+            distance_meters: 400
+            notes: "Easy freestyle"
+            telemetry:
+              heart_rate_avg: 112
+              heart_rate_max: 125
+              pace_avg_sec_per_km: 1500
+              stroke_rate: 28
+              calories: 68
+
+      - name: "Main Set - Intervals"
+        modality: interval
+        notes: "10x100m @ 1:45 with 15sec rest"
+        sets:
+          - set_number: 1
+            duration_sec: 105
+            distance_meters: 100
+            rpe: 6
+            telemetry:
+              heart_rate_avg: 145
+              heart_rate_max: 152
+              pace_avg_sec_per_km: 1050
+              stroke_rate: 34
+              calories: 19
+
+          - set_number: 2
+            duration_sec: 103
+            distance_meters: 100
+            rpe: 6.5
+            telemetry:
+              heart_rate_avg: 148
+              heart_rate_max: 155
+              pace_avg_sec_per_km: 1030
+              stroke_rate: 35
+              calories: 19
+
+          - set_number: 3
+            duration_sec: 104
+            distance_meters: 100
+            rpe: 7
+            telemetry:
+              heart_rate_avg: 151
+              heart_rate_max: 158
+              pace_avg_sec_per_km: 1040
+              stroke_rate: 35
+              calories: 19
+
+          - set_number: 4
+            duration_sec: 102
+            distance_meters: 100
+            rpe: 7
+            telemetry:
+              heart_rate_avg: 154
+              heart_rate_max: 161
+              pace_avg_sec_per_km: 1020
+              stroke_rate: 36
+              calories: 19
+
+          - set_number: 5
+            duration_sec: 105
+            distance_meters: 100
+            rpe: 7.5
+            telemetry:
+              heart_rate_avg: 156
+              heart_rate_max: 163
+              pace_avg_sec_per_km: 1050
+              stroke_rate: 35
+              calories: 19
+
+          - set_number: 6
+            duration_sec: 103
+            distance_meters: 100
+            rpe: 7.5
+            telemetry:
+              heart_rate_avg: 158
+              heart_rate_max: 165
+              pace_avg_sec_per_km: 1030
+              stroke_rate: 36
+              calories: 19
+
+          - set_number: 7
+            duration_sec: 104
+            distance_meters: 100
+            rpe: 8
+            telemetry:
+              heart_rate_avg: 160
+              heart_rate_max: 166
+              pace_avg_sec_per_km: 1040
+              stroke_rate: 37
+              calories: 19
+
+          - set_number: 8
+            duration_sec: 106
+            distance_meters: 100
+            rpe: 8
+            telemetry:
+              heart_rate_avg: 162
+              heart_rate_max: 168
+              pace_avg_sec_per_km: 1060
+              stroke_rate: 36
+              calories: 19
+
+          - set_number: 9
+            duration_sec: 105
+            distance_meters: 100
+            rpe: 8.5
+            telemetry:
+              heart_rate_avg: 163
+              heart_rate_max: 168
+              pace_avg_sec_per_km: 1050
+              stroke_rate: 37
+              calories: 19
+
+          - set_number: 10
+            duration_sec: 101
+            distance_meters: 100
+            rpe: 9
+            is_pr: true
+            notes: "Pushed hard on final rep"
+            telemetry:
+              heart_rate_avg: 165
+              heart_rate_max: 168
+              pace_avg_sec_per_km: 1010
+              stroke_rate: 38
+              calories: 20
+
+      - name: "Pull Set"
+        modality: swimming
+        notes: "With pull buoy"
+        sets:
+          - set_number: 1
+            duration_sec: 420
+            distance_meters: 300
+            notes: "Focus on catch and pull"
+            telemetry:
+              heart_rate_avg: 138
+              heart_rate_max: 148
+              pace_avg_sec_per_km: 1400
+              stroke_rate: 30
+              calories: 52
+
+          - set_number: 2
+            duration_sec: 425
+            distance_meters: 300
+            telemetry:
+              heart_rate_avg: 140
+              heart_rate_max: 150
+              pace_avg_sec_per_km: 1417
+              stroke_rate: 30
+              calories: 52
+
+          - set_number: 3
+            duration_sec: 422
+            distance_meters: 300
+            telemetry:
+              heart_rate_avg: 142
+              heart_rate_max: 152
+              pace_avg_sec_per_km: 1407
+              stroke_rate: 31
+              calories: 52
+
+      - name: "Cool-down"
+        modality: swimming
+        sets:
+          - set_number: 1
+            duration_sec: 600
+            distance_meters: 400
+            notes: "Easy backstroke and breaststroke mix"
+            telemetry:
+              heart_rate_avg: 105
+              heart_rate_max: 118
+              pace_avg_sec_per_km: 1500
+              stroke_rate: 25
+              calories: 66
+
+personal_records:
+  - exercise_name: "100m Freestyle"
+    record_type: fastest_time
+    value: 101
+    unit: seconds
+    achieved_at: "2025-12-20"
+    workout_id: "swim-20251220-001"
+    notes: "1:41 - pool PR!"
+
+body_measurements:
+  - date: "2025-12-20"
+    recorded_at: "2025-12-20T16:45:00Z"
+    weight_kg: 78.2
+    body_fat_percent: 14.8
+    notes: "Pre-swim measurement"

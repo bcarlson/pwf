@@ -1,0 +1,12 @@
+# PWF History Export v1 - Minimal Example
+# The smallest valid history export
+
+history_version: 1
+exported_at: "2025-01-15T10:30:00Z"
+
+workouts:
+  - date: "2025-01-15"
+    exercises:
+      - name: "Push-ups"
+        sets:
+          - reps: 20

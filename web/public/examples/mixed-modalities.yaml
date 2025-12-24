@@ -1,0 +1,83 @@
+# PWF v1 - Mixed Modalities Demo
+# Demonstrates all four PWF modalities in one plan
+
+plan_version: 1
+
+meta:
+  id: "mixed-modality-demo"
+  title: "Mixed Modality Training"
+  description: "A 2-day plan demonstrating all PWF modalities: strength, countdown, stopwatch, and interval."
+  author: "PWF Examples"
+  equipment: [kettlebell, bands]
+  daysPerWeek: 2
+  tags: [conditioning, kettlebell, demo]
+
+cycle:
+  notes: "This plan demonstrates all four modalities. Adjust loads and durations to your fitness level."
+
+  days:
+    - id: "strength-core"
+      order: 0
+      focus: "Strength & Core"
+      target_session_length_min: 40
+      exercises:
+        # STRENGTH: Traditional sets x reps
+        - name: "Kettlebell Goblet Squat"
+          modality: strength
+          target_sets: 4
+          target_reps: 8
+          target_notes: "Hold kettlebell at chest. Keep elbows inside knees at bottom."
+
+        - name: "Kettlebell Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 6
+          target_notes: "Each arm. Clean to rack position, press overhead."
+
+        # COUNTDOWN: Fixed duration, timer counts down
+        - name: "Dead Bug Hold"
+          modality: countdown
+          target_duration_sec: 30
+          target_notes: "Keep lower back pressed into floor. Opposite arm/leg extended."
+
+        - name: "Side Plank"
+          modality: countdown
+          target_duration_sec: 30
+          target_notes: "Each side. Stack feet or stagger for balance."
+
+        # STOPWATCH: Open-ended, user controls duration
+        - name: "Mobility Flow"
+          modality: stopwatch
+          target_duration_sec: 300
+          target_notes: "5 minutes minimum. World's greatest stretch, hip circles, thoracic rotations."
+
+    - id: "conditioning"
+      order: 1
+      focus: "Conditioning"
+      target_session_length_min: 35
+      exercises:
+        # INTERVAL: Repeating work periods
+        - name: "Kettlebell Swings"
+          modality: interval
+          target_sets: 10
+          target_duration_sec: 30
+          target_notes: "30 seconds work, 30 seconds rest. Hip hinge, not squat."
+
+        - name: "Band Pull-Aparts"
+          modality: strength
+          target_sets: 3
+          target_reps: 15
+          target_notes: "Between swing sets. Keep arms straight, squeeze shoulder blades."
+
+        # Another interval example with distance
+        - name: "Shuttle Runs"
+          modality: interval
+          target_sets: 6
+          target_distance_meters: 20
+          target_duration_sec: 10
+          target_notes: "Sprint 20m, touch line, sprint back. 60s rest between."
+
+        # Cool-down stopwatch
+        - name: "Cool-down Walk"
+          modality: stopwatch
+          target_notes: "Easy walking until heart rate returns to normal."
