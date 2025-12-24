@@ -4,12 +4,12 @@
 //! allowing PWF to be used in web browsers without a backend server.
 
 mod conversion;
-mod validation;
 mod utils;
+mod validation;
 
 pub use conversion::*;
-pub use validation::*;
 pub use utils::*;
+pub use validation::*;
 
 use wasm_bindgen::prelude::*;
 

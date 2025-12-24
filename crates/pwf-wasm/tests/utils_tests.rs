@@ -2,9 +2,9 @@
 
 #![cfg(target_arch = "wasm32")]
 
-use wasm_bindgen_test::*;
 use pwf_wasm::*;
 use serde_json::Value;
+use wasm_bindgen_test::*;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
@@ -12,7 +12,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 fn test_get_version() {
     let version = get_version();
     assert!(!version.is_empty());
-    assert!(version.contains('.'));  // Should be in format "X.Y.Z"
+    assert!(version.contains('.')); // Should be in format "X.Y.Z"
 }
 
 #[wasm_bindgen_test]
@@ -32,10 +32,7 @@ fn test_get_supported_modalities() {
     assert!(array.len() > 0);
 
     // Check for expected modalities
-    let modality_strings: Vec<&str> = array
-        .iter()
-        .filter_map(|v| v.as_str())
-        .collect();
+    let modality_strings: Vec<&str> = array.iter().filter_map(|v| v.as_str()).collect();
 
     assert!(modality_strings.contains(&"strength"));
     assert!(modality_strings.contains(&"countdown"));
@@ -56,10 +53,7 @@ fn test_get_supported_sports() {
     let array = sports.as_array().unwrap();
     assert!(array.len() > 0);
 
-    let sport_strings: Vec<&str> = array
-        .iter()
-        .filter_map(|v| v.as_str())
-        .collect();
+    let sport_strings: Vec<&str> = array.iter().filter_map(|v| v.as_str()).collect();
 
     // Check for expected sports
     assert!(sport_strings.contains(&"Swimming"));
@@ -93,10 +87,7 @@ fn test_get_supported_equipment() {
     let array = equipment.as_array().unwrap();
     assert!(array.len() > 0);
 
-    let equipment_strings: Vec<&str> = array
-        .iter()
-        .filter_map(|v| v.as_str())
-        .collect();
+    let equipment_strings: Vec<&str> = array.iter().filter_map(|v| v.as_str()).collect();
 
     // Check for expected equipment
     assert!(equipment_strings.contains(&"barbell"));
