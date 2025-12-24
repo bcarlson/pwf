@@ -328,11 +328,11 @@ We monitor the Rust ecosystem for FIT writing libraries. If a production-ready l
 
 ## Future Formats
 
-Additional planned converter support:
-- **TCX → PWF** (Garmin Training Center XML import)
-- **GPX → PWF** (GPS Exchange Format import)
-- **PWF → CSV** (Export time-series data for spreadsheets)
-- **PWF → TCX** (Primary export format - see above)
+Planned converter support:
+- **GPX → PWF** (GPS Exchange Format import for basic GPS tracks)
+- **GPX ← PWF** (Export routes for navigation apps)
+- **PWF → CSV** (Export time-series telemetry data for spreadsheet analysis)
+- **PWF → FIT** (If production-ready Rust library emerges - see `FIT_EXPORT_ANALYSIS.md`)
 
 ## Contributing
 
