@@ -2,9 +2,9 @@
 
 #![cfg(target_arch = "wasm32")]
 
-use wasm_bindgen_test::*;
 use pwf_wasm::*;
 use serde_json::Value;
+use wasm_bindgen_test::*;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
@@ -36,7 +36,10 @@ fn test_gpx_to_pwf_minimal() {
     let json: Value = serde_wasm_bindgen::from_value(result).unwrap();
 
     assert!(json["pwf_yaml"].is_string());
-    assert!(json["pwf_yaml"].as_str().unwrap().contains("history_version: 1"));
+    assert!(json["pwf_yaml"]
+        .as_str()
+        .unwrap()
+        .contains("history_version: 1"));
 }
 
 #[wasm_bindgen_test]
@@ -141,7 +144,10 @@ fn test_tcx_to_pwf_minimal() {
     let json: Value = serde_wasm_bindgen::from_value(result).unwrap();
 
     assert!(json["pwf_yaml"].is_string());
-    assert!(json["pwf_yaml"].as_str().unwrap().contains("history_version: 1"));
+    assert!(json["pwf_yaml"]
+        .as_str()
+        .unwrap()
+        .contains("history_version: 1"));
 }
 
 #[wasm_bindgen_test]
