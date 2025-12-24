@@ -40,7 +40,7 @@ pub fn get_supported_modalities() -> JsValue {
         "swimming",
     ];
 
-    serde_wasm_bindgen::to_value(&modalities).unwrap_or_else(|_| JsValue::NULL)
+    serde_wasm_bindgen::to_value(&modalities).unwrap_or(JsValue::NULL)
 }
 
 /// Get a list of supported sport types.
@@ -80,7 +80,7 @@ pub fn get_supported_sports() -> JsValue {
         "Other",
     ];
 
-    serde_wasm_bindgen::to_value(&sports).unwrap_or_else(|_| JsValue::NULL)
+    serde_wasm_bindgen::to_value(&sports).unwrap_or(JsValue::NULL)
 }
 
 /// Get a list of supported equipment tags.
@@ -107,5 +107,5 @@ pub fn get_supported_equipment() -> JsValue {
         "machine",
     ];
 
-    serde_wasm_bindgen::to_value(&equipment).unwrap_or_else(|_| JsValue::NULL)
+    serde_wasm_bindgen::to_value(&equipment).unwrap_or(JsValue::NULL)
 }
