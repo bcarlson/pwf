@@ -392,17 +392,25 @@ workouts:
 
 **Valid Sport Values:**
 
-- `generic` - Default/unspecified sport
-- `running` - Road/trail/track running
-- `cycling` - Road/mountain/indoor cycling
 - `swimming` - Pool or open water swimming
-- `walking` - Walking/hiking
-- `strength_training` - Weight lifting, resistance training
-- `triathlon` - Multi-sport events (see [Multi-Sport Sessions](#multi-sport-sessions-v21))
+- `cycling` - Road/mountain/indoor cycling
+- `running` - Road/trail/track running
 - `rowing` - Indoor or outdoor rowing
+- `transition` - Multi-sport transition periods
+- `strength` - General strength/resistance work
+- `strength-training` - Gym-based strength training
+- `hiking` - Hiking and trail walking
+- `walking` - Walking activities
 - `yoga` - Yoga practice
 - `pilates` - Pilates practice
-- `other` - Other activities
+- `cross-fit` - CrossFit and high-intensity functional training
+- `calisthenics` - Bodyweight exercises, calisthenics, HIIT
+- `cardio` - General cardio/fitness equipment
+- `cross-country-skiing` - Cross-country (Nordic) skiing
+- `downhill-skiing` - Downhill (Alpine) skiing and snowboarding
+- `elliptical` - Elliptical trainer
+- `stair-climbing` - Stair stepper, stair climbing
+- `other` - Other activities not covered above
 
 ### Exercise-Level Sport
 

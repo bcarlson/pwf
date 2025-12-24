@@ -1,0 +1,73 @@
+# PWF History Export v1 - Rowing Example
+# Demonstrates rowing sport type with indoor rowing machine data
+
+history_version: 1
+exported_at: "2025-01-19T11:00:00Z"
+
+export_source:
+  app_name: "Concept2 ErgData"
+  app_version: "2.0.0"
+  platform: "ios"
+
+units:
+  weight: kg
+  distance: meters
+
+workouts:
+  - date: "2025-01-19"
+    started_at: "2025-01-19T10:00:00Z"
+    ended_at: "2025-01-19T10:40:00Z"
+    duration_sec: 2400
+    title: "Indoor Rowing - 5K Intervals"
+    sport: rowing
+    exercises:
+      - name: "5K Rowing Intervals"
+        modality: interval
+        sets:
+          - set_number: 1
+            duration_sec: 1080
+            distance_meters: 2000
+            set_type: working
+            telemetry:
+              heart_rate_avg: 155
+              heart_rate_max: 168
+              power_avg: 220
+              stroke_rate: 24
+              pace_avg_sec_per_km: 540
+          - set_number: 2
+            duration_sec: 180
+            set_type: warmup
+            notes: "Active recovery"
+            telemetry:
+              heart_rate_avg: 125
+              stroke_rate: 18
+          - set_number: 3
+            duration_sec: 1080
+            distance_meters: 2000
+            set_type: working
+            telemetry:
+              heart_rate_avg: 162
+              heart_rate_max: 175
+              power_avg: 230
+              stroke_rate: 26
+              pace_avg_sec_per_km: 540
+
+    telemetry:
+      heart_rate_avg: 148
+      heart_rate_max: 175
+      heart_rate_min: 110
+      power_avg: 210
+      power_max: 245
+      total_distance_m: 5000
+      cadence_avg: 23
+      total_calories: 420
+
+    devices:
+      - device_index: 0
+        device_type: watch
+        manufacturer: "Polar"
+        product: "H10"
+      - device_index: 1
+        device_type: other
+        manufacturer: "Concept2"
+        product: "Model D PM5"
