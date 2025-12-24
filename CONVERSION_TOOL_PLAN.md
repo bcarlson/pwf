@@ -1,8 +1,9 @@
 # PWF Conversion Tool - Implementation Plan
 
 **Issue:** #23 - Conversion tool to/from FIT and TCX formats
-**Status:** Planning (Awaiting v2.1 Feature Parity)
+**Status:** ✅ COMPLETED (v1.2.0)
 **Date:** 2025-12-20
+**Completed:** 2025-12-23
 
 ---
 
