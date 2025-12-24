@@ -345,7 +345,7 @@ fn test_gpx_export_telemetry_without_gps_route() {
         ConversionWarning::MissingField { source_field, .. }
         if source_field == "gps_route"
     )));
-    
+
     // Warning message should mention the workout title
     assert!(result.warnings.iter().any(|w| match w {
         ConversionWarning::MissingField { reason, .. } => reason.contains("Treadmill Run"),
@@ -446,7 +446,7 @@ fn test_gpx_export_mixed_workouts_some_without_gps() {
 
     // Should still export the workout with GPS
     assert!(result.gpx_xml.contains("Morning Run"));
-    
+
     // Warning should mention the date for workout without title
     assert!(result.warnings.iter().any(|w| match w {
         ConversionWarning::MissingField { reason, .. } => reason.contains("2024-01-16"),

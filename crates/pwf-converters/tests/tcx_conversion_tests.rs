@@ -328,7 +328,9 @@ fn test_tcx_with_heart_rate() {
 #[test]
 fn test_tcx_export_workout_with_invalid_gps_timestamp() {
     use pwf_converters::pwf_to_tcx;
-    use pwf_core::history::{CompletedExercise, GpsPosition, GpsRoute, Workout, WorkoutTelemetry, WpsHistory};
+    use pwf_core::history::{
+        CompletedExercise, GpsPosition, GpsRoute, Workout, WorkoutTelemetry, WpsHistory,
+    };
 
     let history = WpsHistory {
         history_version: 1,
@@ -444,9 +446,7 @@ fn test_tcx_export_workout_without_started_at() {
 #[test]
 fn test_tcx_export_with_set_heart_rate_telemetry() {
     use pwf_converters::pwf_to_tcx;
-    use pwf_core::history::{
-        CompletedExercise, CompletedSet, SetTelemetry, Workout, WpsHistory,
-    };
+    use pwf_core::history::{CompletedExercise, CompletedSet, SetTelemetry, Workout, WpsHistory};
 
     let history = WpsHistory {
         history_version: 1,
@@ -596,7 +596,9 @@ fn test_tcx_export_strength_exercise_warning() {
 #[test]
 fn test_tcx_export_workout_level_calories() {
     use pwf_converters::pwf_to_tcx;
-    use pwf_core::history::{CompletedExercise, CompletedSet, Workout, WorkoutTelemetry, WpsHistory};
+    use pwf_core::history::{
+        CompletedExercise, CompletedSet, Workout, WorkoutTelemetry, WpsHistory,
+    };
 
     let history = WpsHistory {
         history_version: 1,
@@ -658,7 +660,10 @@ fn test_tcx_export_workout_level_calories() {
 #[test]
 fn test_tcx_export_with_gps_power_cadence_extensions() {
     use pwf_converters::pwf_to_tcx;
-    use pwf_core::history::{CompletedExercise, CompletedSet, GpsPosition, GpsRoute, Workout, WorkoutTelemetry, WpsHistory};
+    use pwf_core::history::{
+        CompletedExercise, CompletedSet, GpsPosition, GpsRoute, Workout, WorkoutTelemetry,
+        WpsHistory,
+    };
 
     let history = WpsHistory {
         history_version: 1,
@@ -716,7 +721,7 @@ fn test_tcx_export_with_gps_power_cadence_extensions() {
                             heading_deg: None,
                             heart_rate_bpm: Some(150),
                             power_watts: Some(250), // Power data for extensions
-                            cadence: Some(90),       // Cadence data for extensions
+                            cadence: Some(90),      // Cadence data for extensions
                             temperature_c: None,
                         },
                         GpsPosition {
@@ -767,7 +772,10 @@ fn test_tcx_export_with_gps_power_cadence_extensions() {
 #[test]
 fn test_tcx_export_exercise_with_bad_gps_timestamp() {
     use pwf_converters::pwf_to_tcx;
-    use pwf_core::history::{CompletedExercise, CompletedSet, GpsPosition, GpsRoute, Workout, WorkoutTelemetry, WpsHistory};
+    use pwf_core::history::{
+        CompletedExercise, CompletedSet, GpsPosition, GpsRoute, Workout, WorkoutTelemetry,
+        WpsHistory,
+    };
 
     let history = WpsHistory {
         history_version: 1,

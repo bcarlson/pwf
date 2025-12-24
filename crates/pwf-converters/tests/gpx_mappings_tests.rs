@@ -2,7 +2,6 @@
 
 use pwf_converters::gpx::mappings::{infer_sport_from_metadata, map_gpx_type_to_sport};
 use pwf_core::Sport;
-use gpx;
 
 #[test]
 fn test_map_gpx_type_basic_sports() {
@@ -30,20 +29,44 @@ fn test_map_gpx_type_water_sports() {
     assert_eq!(map_gpx_type_to_sport(Some("kayak")), Sport::Kayaking);
     assert_eq!(map_gpx_type_to_sport(Some("kayaking")), Sport::Kayaking);
     assert_eq!(map_gpx_type_to_sport(Some("canoe")), Sport::Kayaking);
-    assert_eq!(map_gpx_type_to_sport(Some("paddle")), Sport::StandUpPaddling);
-    assert_eq!(map_gpx_type_to_sport(Some("paddling")), Sport::StandUpPaddling);
+    assert_eq!(
+        map_gpx_type_to_sport(Some("paddle")),
+        Sport::StandUpPaddling
+    );
+    assert_eq!(
+        map_gpx_type_to_sport(Some("paddling")),
+        Sport::StandUpPaddling
+    );
     assert_eq!(map_gpx_type_to_sport(Some("sup")), Sport::StandUpPaddling);
 }
 
 #[test]
 fn test_map_gpx_type_winter_sports() {
-    assert_eq!(map_gpx_type_to_sport(Some("ski")), Sport::CrossCountrySkiing);
-    assert_eq!(map_gpx_type_to_sport(Some("skiing")), Sport::CrossCountrySkiing);
-    assert_eq!(map_gpx_type_to_sport(Some("xc-ski")), Sport::CrossCountrySkiing);
-    assert_eq!(map_gpx_type_to_sport(Some("downhill")), Sport::DownhillSkiing);
+    assert_eq!(
+        map_gpx_type_to_sport(Some("ski")),
+        Sport::CrossCountrySkiing
+    );
+    assert_eq!(
+        map_gpx_type_to_sport(Some("skiing")),
+        Sport::CrossCountrySkiing
+    );
+    assert_eq!(
+        map_gpx_type_to_sport(Some("xc-ski")),
+        Sport::CrossCountrySkiing
+    );
+    assert_eq!(
+        map_gpx_type_to_sport(Some("downhill")),
+        Sport::DownhillSkiing
+    );
     assert_eq!(map_gpx_type_to_sport(Some("alpine")), Sport::DownhillSkiing);
-    assert_eq!(map_gpx_type_to_sport(Some("snowboard")), Sport::Snowboarding);
-    assert_eq!(map_gpx_type_to_sport(Some("snowboarding")), Sport::Snowboarding);
+    assert_eq!(
+        map_gpx_type_to_sport(Some("snowboard")),
+        Sport::Snowboarding
+    );
+    assert_eq!(
+        map_gpx_type_to_sport(Some("snowboarding")),
+        Sport::Snowboarding
+    );
 }
 
 #[test]
