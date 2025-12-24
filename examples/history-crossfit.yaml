@@ -18,9 +18,9 @@ workouts:
     started_at: "2025-01-22T18:00:00Z"
     ended_at: "2025-01-22T18:55:00Z"
     duration_sec: 3300
-    title: "CrossFit WOD - Cindy"
+    title: "Functional Fitness WOD"
     sport: cross-fit
-    notes: "20-minute AMRAP (As Many Rounds As Possible): 5 Pull-ups, 10 Push-ups, 15 Air Squats"
+    notes: "20-minute AMRAP (As Many Rounds As Possible): 5 Pull-ups, 10 Push-ups, 15 Squats"
     exercises:
       - name: "Warm-up"
         modality: countdown
@@ -34,7 +34,7 @@ workouts:
           - reps: 5
             notes: "Practice strict form"
 
-      - name: "WOD - Cindy (AMRAP 20min)"
+      - name: "WOD - AMRAP 20min"
         modality: interval
         notes: "Completed 18 rounds + 5 pull-ups"
         sets:
@@ -59,7 +59,7 @@ workouts:
       total_calories: 485
 
 personal_records:
-  - exercise_name: "Cindy WOD"
+  - exercise_name: "AMRAP WOD"
     record_type: "max_reps"
     value: 18
     unit: "rounds"

@@ -1,0 +1,47 @@
+name: Publish @pwf/core
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Git tag to publish (checked out before publishing)"
+        required: true
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        working-directory: packages/pwf-core
+        run: npm ci
+
+      - name: Generate types
+        working-directory: packages/pwf-core
+        run: npm run generate:types
+
+      - name: Run tests with coverage
+        working-directory: packages/pwf-core
+        run: npm run test:coverage
+
+      - name: Build package
+        working-directory: packages/pwf-core
+        run: npm run build
+
+      - name: Publish to npm
+        working-directory: packages/pwf-core
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
