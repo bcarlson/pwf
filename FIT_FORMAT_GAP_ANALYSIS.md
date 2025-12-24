@@ -1,6 +1,14 @@
 # FIT File Format - Complete Gap Analysis for PWF
 
-**Document Version:** 1.0
+> **⚠️ SUPERSEDED:** This document was created during planning and is now outdated.
+> **See instead:**
+> - `FIT_EXPORT_ANALYSIS.md` - Current analysis of FIT export feasibility
+> - `crates/pwf-converters/README.md` - Implemented FIT import features
+> - Issue #23 - Completed implementation details
+>
+> **Status:** All critical gaps identified in this document have been addressed in PWF v2.1 and the FIT converter (v1.1.0).
+
+**Document Version:** 1.0 (Archived)
 **Date:** 2025-12-20
 **Author:** PWF Analysis
 **Purpose:** Identify all features required for complete FIT ↔ PWF conversion parity

@@ -74,14 +74,19 @@ cargo build --release
 ```
 pwf/
 ├── crates/
-│   ├── pwf-core/      # Library crate (parsing, validation)
+│   ├── pwf-core/       # Library crate (parsing, validation)
 │   │   └── src/
-│   │       ├── plan/      # Plan parsing & validation
-│   │       └── history/   # History parsing & validation
-│   └── pwf-cli/       # Binary crate (CLI)
-├── schema/            # JSON Schema files
-├── examples/          # Example YAML files
-└── docs/              # Documentation
+│   │       ├── plan/       # Plan parsing & validation
+│   │       └── history/    # History parsing & validation
+│   ├── pwf-converters/ # Format conversion library
+│   │   └── src/
+│   │       ├── fit/        # FIT format support
+│   │       ├── tcx/        # TCX format support
+│   │       └── common/     # Shared utilities
+│   └── pwf-cli/        # Binary crate (CLI)
+├── schema/             # JSON Schema files
+├── examples/           # Example YAML files
+└── docs/               # Documentation
 ```
 
 ### Running Tests
