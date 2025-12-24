@@ -249,31 +249,63 @@ Add to your `.vscode/settings.json`:
 
 ## Roadmap
 
-### v1.0.1 (Current)
-- [x] Plan specification with lifecycle tracking
-- [x] History export specification
-- [x] Four modalities (strength, countdown, stopwatch, interval)
-- [x] Personal records and body measurements
-- [x] Rep-specific PR types (1RM, 3RM, 5RM, 8RM, 10RM)
-- [x] RPE and RIR tracking on sets
-- [x] Plan status with timestamps (draft/active/completed/archived)
-- [x] Plan lifecycle timestamps (activated_at, completed_at)
-- [x] Glossary block for terminology definitions
-- [x] Preferred units in exports with validation
-- [x] Comprehensive error codes (PWF-P### and PWF-H###)
-- [x] JSON Schema validation
-- [x] Rust CLI validator
+### v1.2.0 (Current - Released 2025-12-23)
+- [x] **TCX Format Conversion (Bidirectional)**
+  - TCX → PWF import (Training Center XML)
+  - PWF → TCX export (Garmin Connect, Strava compatible)
+  - GPS routes, heart rate, power, cadence support
+  - Multi-lap and multi-sport activities
+- [x] **FIT Export Analysis**
+  - Comprehensive evaluation of FIT writing options
+  - Documented alternatives and workarounds
+- [x] **Enhanced Test Coverage**
+  - 729 tests (93.84% coverage)
+  - Comprehensive converter test suites
 
-### v1.1 (Planned)
-- [ ] Superset/circuit grouping
-- [ ] Rest period specifications
-- [ ] Percentage-based loading
+### v1.1.0 (Released 2025-12-22)
+- [x] **FIT Format Import**
+  - FIT → PWF conversion (Garmin, COROS, Wahoo, Polar, Suunto)
+  - Multi-sport activities (triathlon/duathlon)
+  - Swimming data (pool config, stroke types, SWOLF)
+  - Power metrics (NP, TSS, IF, VI, FTP)
+  - Device information extraction
+- [x] **pwf-converters Library**
+  - Format conversion infrastructure
+  - Warning system for data fidelity
+- [x] **Superset/circuit grouping**
+- [x] **Rest period specifications**
+- [x] **Percentage-based loading**
 
-### v2.0 (Future)
-- [ ] Multi-week periodization
-- [ ] Progressive overload rules
-- [ ] Exercise library references
-- [ ] Workout templates (reusable exercise groups)
+### v1.0.1 (Released 2025-12-21)
+- [x] **PWF v2.1 Advanced Features**
+  - Time-series telemetry data
+  - GPS route tracking
+  - Multi-sport activity segments
+  - Pool swimming length tracking
+- [x] **Multi-week periodization**
+- [x] **Progressive overload rules**
+- [x] **Exercise library references**
+- [x] **Workout templates**
+
+### Future Considerations
+- [ ] **GPX Format Support** (GPS Exchange Format)
+  - GPX → PWF import for basic GPS tracks
+  - PWF → GPX export for route sharing
+- [ ] **CSV Export** (Time-series data for spreadsheets)
+  - Export telemetry data to CSV for analysis
+  - Compatible with Excel, Google Sheets
+- [ ] **FIT Export** (if production-ready Rust library emerges)
+  - Monitor ecosystem for FIT writing libraries
+  - Currently recommended: use TCX export
+- [ ] **Additional Sport Types**
+  - Expand sport type mappings
+  - Rowing, skiing, hiking, etc.
+- [ ] **Web Interface**
+  - Browser-based validator
+  - Visual plan builder
+  - Conversion tool UI
+
+See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
 
 ## Adopters
 
