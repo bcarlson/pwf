@@ -324,3 +324,660 @@ fn test_tcx_with_heart_rate() {
         "Should have some heart rate data"
     );
 }
+
+#[test]
+fn test_tcx_export_workout_with_invalid_gps_timestamp() {
+    use pwf_converters::pwf_to_tcx;
+    use pwf_core::history::{
+        CompletedExercise, GpsPosition, GpsRoute, Workout, WorkoutTelemetry, WpsHistory,
+    };
+
+    let history = WpsHistory {
+        history_version: 1,
+        exported_at: "2024-01-15T16:00:00Z".to_string(),
+        export_source: None,
+        units: Default::default(),
+        personal_records: vec![],
+        body_measurements: vec![],
+        workouts: vec![Workout {
+            id: Some("workout1".to_string()),
+            date: "2024-01-15".to_string(),
+            started_at: Some("2024-01-15T14:30:00Z".to_string()),
+            ended_at: Some("2024-01-15T15:30:00Z".to_string()),
+            duration_sec: Some(3600),
+            title: Some("Run with exercises".to_string()),
+            notes: None,
+            plan_id: None,
+            plan_day_id: None,
+            exercises: vec![CompletedExercise {
+                id: Some("ex1".to_string()),
+                name: "Running".to_string(),
+                notes: None,
+                sets: vec![],
+                modality: None,
+                pool_config: None,
+                sport: None,
+            }],
+            telemetry: Some(WorkoutTelemetry {
+                gps_route: Some(GpsRoute {
+                    route_id: "route1".to_string(),
+                    name: None,
+                    positions: vec![GpsPosition {
+                        latitude_deg: 37.7749,
+                        longitude_deg: -122.4194,
+                        timestamp: "invalid-timestamp".to_string(), // Invalid timestamp
+                        elevation_m: Some(100.0),
+                        accuracy_m: None,
+                        speed_mps: None,
+                        heading_deg: None,
+                        heart_rate_bpm: None,
+                        power_watts: None,
+                        cadence: None,
+                        temperature_c: None,
+                    }],
+                    total_distance_m: None,
+                    total_ascent_m: None,
+                    total_descent_m: None,
+                    min_elevation_m: None,
+                    max_elevation_m: None,
+                    bbox_sw_lat: None,
+                    bbox_sw_lng: None,
+                    bbox_ne_lat: None,
+                    bbox_ne_lng: None,
+                    recording_mode: None,
+                    gps_fix: None,
+                }),
+                ..Default::default()
+            }),
+            devices: vec![],
+            sport: Some(pwf_core::Sport::Running),
+            sport_segments: None,
+        }],
+    };
+
+    let result = pwf_to_tcx(&history);
+
+    // Conversion should succeed but with warnings about bad timestamp
+    assert!(result.is_ok());
+    let tcx_result = result.unwrap();
+
+    // Should still generate valid XML structure
+    assert!(tcx_result.tcx_xml.contains("<?xml"));
+    assert!(tcx_result.tcx_xml.contains("<TrainingCenterDatabase"));
+}
+
+#[test]
+fn test_tcx_export_workout_without_started_at() {
+    use pwf_converters::pwf_to_tcx;
+    use pwf_core::history::{Workout, WpsHistory};
+
+    let history = WpsHistory {
+        history_version: 1,
+        exported_at: "2024-01-15T16:00:00Z".to_string(),
+        export_source: None,
+        units: Default::default(),
+        personal_records: vec![],
+        body_measurements: vec![],
+        workouts: vec![Workout {
+            id: Some("workout1".to_string()),
+            date: "2024-01-15".to_string(),
+            started_at: None, // No started_at - should use date fallback
+            ended_at: None,
+            duration_sec: Some(3600),
+            title: Some("Workout without start time".to_string()),
+            notes: None,
+            plan_id: None,
+            plan_day_id: None,
+            exercises: vec![],
+            telemetry: None,
+            devices: vec![],
+            sport: Some(pwf_core::Sport::Running),
+            sport_segments: None,
+        }],
+    };
+
+    let result = pwf_to_tcx(&history).unwrap();
+
+    // Should use date as fallback for ID
+    assert!(result.tcx_xml.contains("2024-01-15T00:00:00Z"));
+    assert!(result.tcx_xml.contains("<Activity"));
+}
+
+#[test]
+fn test_tcx_export_with_set_heart_rate_telemetry() {
+    use pwf_converters::pwf_to_tcx;
+    use pwf_core::history::{CompletedExercise, CompletedSet, SetTelemetry, Workout, WpsHistory};
+
+    let history = WpsHistory {
+        history_version: 1,
+        exported_at: "2024-01-15T16:00:00Z".to_string(),
+        export_source: None,
+        units: Default::default(),
+        personal_records: vec![],
+        body_measurements: vec![],
+        workouts: vec![Workout {
+            id: Some("workout1".to_string()),
+            date: "2024-01-15".to_string(),
+            started_at: Some("2024-01-15T14:30:00Z".to_string()),
+            ended_at: Some("2024-01-15T15:30:00Z".to_string()),
+            duration_sec: Some(3600),
+            title: Some("Workout with set HR data".to_string()),
+            notes: None,
+            plan_id: None,
+            plan_day_id: None,
+            exercises: vec![CompletedExercise {
+                id: Some("ex1".to_string()),
+                name: "Cardio".to_string(),
+                notes: None,
+                sets: vec![
+                    CompletedSet {
+                        set_number: Some(1),
+                        set_type: None,
+                        reps: Some(10),
+                        weight_kg: None,
+                        weight_lb: None,
+                        duration_sec: Some(60),
+                        distance_meters: None,
+                        rpe: None,
+                        rir: None,
+                        notes: None,
+                        completed_at: None,
+                        is_pr: None,
+                        swimming: None,
+                        telemetry: Some(SetTelemetry {
+                            heart_rate_avg: Some(150),
+                            heart_rate_max: Some(170),
+                            ..Default::default()
+                        }),
+                    },
+                    CompletedSet {
+                        set_number: Some(2),
+                        set_type: None,
+                        reps: Some(10),
+                        weight_kg: None,
+                        weight_lb: None,
+                        duration_sec: Some(60),
+                        distance_meters: None,
+                        rpe: None,
+                        rir: None,
+                        notes: None,
+                        completed_at: None,
+                        is_pr: None,
+                        swimming: None,
+                        telemetry: Some(SetTelemetry {
+                            heart_rate_avg: Some(160),
+                            heart_rate_max: Some(180),
+                            ..Default::default()
+                        }),
+                    },
+                ],
+                modality: Some(pwf_core::Modality::Interval),
+                pool_config: None,
+                sport: None,
+            }],
+            telemetry: None,
+            devices: vec![],
+            sport: Some(pwf_core::Sport::Running),
+            sport_segments: None,
+        }],
+    };
+
+    let result = pwf_to_tcx(&history).unwrap();
+
+    // Should include heart rate data from sets
+    assert!(result.tcx_xml.contains("<AverageHeartRateBpm>"));
+    assert!(result.tcx_xml.contains("<MaximumHeartRateBpm>"));
+}
+
+#[test]
+fn test_tcx_export_strength_exercise_warning() {
+    use pwf_converters::pwf_to_tcx;
+    use pwf_core::history::{CompletedExercise, CompletedSet, Workout, WpsHistory};
+
+    let history = WpsHistory {
+        history_version: 1,
+        exported_at: "2024-01-15T16:00:00Z".to_string(),
+        export_source: None,
+        units: Default::default(),
+        personal_records: vec![],
+        body_measurements: vec![],
+        workouts: vec![Workout {
+            id: Some("workout1".to_string()),
+            date: "2024-01-15".to_string(),
+            started_at: Some("2024-01-15T14:30:00Z".to_string()),
+            ended_at: Some("2024-01-15T15:30:00Z".to_string()),
+            duration_sec: Some(3600),
+            title: Some("Strength workout".to_string()),
+            notes: None,
+            plan_id: None,
+            plan_day_id: None,
+            exercises: vec![CompletedExercise {
+                id: Some("ex1".to_string()),
+                name: "Bench Press".to_string(),
+                notes: None,
+                sets: vec![CompletedSet {
+                    set_number: Some(1),
+                    set_type: None,
+                    reps: Some(10),
+                    weight_kg: Some(80.0),
+                    weight_lb: None,
+                    duration_sec: None,
+                    distance_meters: None,
+                    rpe: None,
+                    rir: None,
+                    notes: None,
+                    completed_at: None,
+                    is_pr: None,
+                    swimming: None,
+                    telemetry: None,
+                }],
+                modality: Some(pwf_core::Modality::Strength),
+                pool_config: None,
+                sport: None,
+            }],
+            telemetry: None,
+            devices: vec![],
+            sport: Some(pwf_core::Sport::StrengthTraining),
+            sport_segments: None,
+        }],
+    };
+
+    let result = pwf_to_tcx(&history).unwrap();
+
+    // Should warn about strength exercises not mapping well to TCX
+    assert!(result.has_warnings());
+    assert!(result.warnings.iter().any(|w| match w {
+        pwf_converters::ConversionWarning::UnsupportedFeature { feature } =>
+            feature.contains("Strength") && feature.contains("TCX"),
+        _ => false,
+    }));
+}
+
+#[test]
+fn test_tcx_export_workout_level_calories() {
+    use pwf_converters::pwf_to_tcx;
+    use pwf_core::history::{
+        CompletedExercise, CompletedSet, Workout, WorkoutTelemetry, WpsHistory,
+    };
+
+    let history = WpsHistory {
+        history_version: 1,
+        exported_at: "2024-01-15T16:00:00Z".to_string(),
+        export_source: None,
+        units: Default::default(),
+        personal_records: vec![],
+        body_measurements: vec![],
+        workouts: vec![Workout {
+            id: Some("workout1".to_string()),
+            date: "2024-01-15".to_string(),
+            started_at: Some("2024-01-15T14:30:00Z".to_string()),
+            ended_at: Some("2024-01-15T15:30:00Z".to_string()),
+            duration_sec: Some(3600),
+            title: Some("Workout with calories".to_string()),
+            notes: None,
+            plan_id: None,
+            plan_day_id: None,
+            exercises: vec![CompletedExercise {
+                id: Some("ex1".to_string()),
+                name: "Running".to_string(),
+                notes: None,
+                sets: vec![CompletedSet {
+                    set_number: Some(1),
+                    set_type: None,
+                    reps: Some(1),
+                    weight_kg: None,
+                    weight_lb: None,
+                    duration_sec: Some(3600),
+                    distance_meters: None,
+                    rpe: None,
+                    rir: None,
+                    notes: None,
+                    completed_at: None,
+                    is_pr: None,
+                    swimming: None,
+                    telemetry: None,
+                }],
+                modality: Some(pwf_core::Modality::Stopwatch),
+                pool_config: None,
+                sport: None,
+            }],
+            telemetry: Some(WorkoutTelemetry {
+                total_calories: Some(450),
+                ..Default::default()
+            }),
+            devices: vec![],
+            sport: Some(pwf_core::Sport::Running),
+            sport_segments: None,
+        }],
+    };
+
+    let result = pwf_to_tcx(&history).unwrap();
+
+    // Should include calories from workout-level telemetry
+    assert!(result.tcx_xml.contains("<Calories>450</Calories>"));
+}
+
+#[test]
+fn test_tcx_export_with_gps_power_cadence_extensions() {
+    use pwf_converters::pwf_to_tcx;
+    use pwf_core::history::{
+        CompletedExercise, CompletedSet, GpsPosition, GpsRoute, Workout, WorkoutTelemetry,
+        WpsHistory,
+    };
+
+    let history = WpsHistory {
+        history_version: 1,
+        exported_at: "2024-01-15T16:00:00Z".to_string(),
+        export_source: None,
+        units: Default::default(),
+        personal_records: vec![],
+        body_measurements: vec![],
+        workouts: vec![Workout {
+            id: Some("workout1".to_string()),
+            date: "2024-01-15".to_string(),
+            started_at: Some("2024-01-15T14:30:00Z".to_string()),
+            ended_at: Some("2024-01-15T15:30:00Z".to_string()),
+            duration_sec: Some(3600),
+            title: Some("Cycling with power".to_string()),
+            notes: None,
+            plan_id: None,
+            plan_day_id: None,
+            exercises: vec![CompletedExercise {
+                id: Some("ex1".to_string()),
+                name: "Cycling".to_string(),
+                notes: None,
+                sets: vec![CompletedSet {
+                    set_number: Some(1),
+                    set_type: None,
+                    reps: Some(1),
+                    weight_kg: None,
+                    weight_lb: None,
+                    duration_sec: Some(3600),
+                    distance_meters: Some(20000.0),
+                    rpe: None,
+                    rir: None,
+                    notes: None,
+                    completed_at: None,
+                    is_pr: None,
+                    swimming: None,
+                    telemetry: None,
+                }],
+                modality: Some(pwf_core::Modality::Stopwatch),
+                pool_config: None,
+                sport: None,
+            }],
+            telemetry: Some(WorkoutTelemetry {
+                gps_route: Some(GpsRoute {
+                    route_id: "route1".to_string(),
+                    name: None,
+                    positions: vec![
+                        GpsPosition {
+                            latitude_deg: 37.7749,
+                            longitude_deg: -122.4194,
+                            timestamp: "2024-01-15T14:30:00Z".to_string(),
+                            elevation_m: Some(100.0),
+                            accuracy_m: None,
+                            speed_mps: Some(8.5),
+                            heading_deg: None,
+                            heart_rate_bpm: Some(150),
+                            power_watts: Some(250), // Power data for extensions
+                            cadence: Some(90),      // Cadence data for extensions
+                            temperature_c: None,
+                        },
+                        GpsPosition {
+                            latitude_deg: 37.7750,
+                            longitude_deg: -122.4195,
+                            timestamp: "2024-01-15T14:31:00Z".to_string(),
+                            elevation_m: Some(102.0),
+                            accuracy_m: None,
+                            speed_mps: Some(9.0),
+                            heading_deg: None,
+                            heart_rate_bpm: Some(155),
+                            power_watts: Some(260),
+                            cadence: Some(92),
+                            temperature_c: None,
+                        },
+                    ],
+                    total_distance_m: Some(20000.0),
+                    total_ascent_m: Some(50.0),
+                    total_descent_m: Some(30.0),
+                    min_elevation_m: Some(90.0),
+                    max_elevation_m: Some(120.0),
+                    bbox_sw_lat: None,
+                    bbox_sw_lng: None,
+                    bbox_ne_lat: None,
+                    bbox_ne_lng: None,
+                    recording_mode: None,
+                    gps_fix: None,
+                }),
+                ..Default::default()
+            }),
+            devices: vec![],
+            sport: Some(pwf_core::Sport::Cycling),
+            sport_segments: None,
+        }],
+    };
+
+    let result = pwf_to_tcx(&history).unwrap();
+
+    // Should generate valid TCX with trackpoints and extensions
+    assert!(result.tcx_xml.contains("<Trackpoint>"));
+    assert!(result.tcx_xml.contains("<Extensions>"));
+    // Cadence should be in trackpoint or extensions
+    assert!(result.tcx_xml.contains("90") || result.tcx_xml.contains("92"));
+    // Should have heart rate
+    assert!(result.tcx_xml.contains("150") || result.tcx_xml.contains("155"));
+}
+
+#[test]
+fn test_tcx_export_exercise_with_bad_gps_timestamp() {
+    use pwf_converters::pwf_to_tcx;
+    use pwf_core::history::{
+        CompletedExercise, CompletedSet, GpsPosition, GpsRoute, Workout, WorkoutTelemetry,
+        WpsHistory,
+    };
+
+    let history = WpsHistory {
+        history_version: 1,
+        exported_at: "2024-01-15T16:00:00Z".to_string(),
+        export_source: None,
+        units: Default::default(),
+        personal_records: vec![],
+        body_measurements: vec![],
+        workouts: vec![Workout {
+            id: Some("workout1".to_string()),
+            date: "2024-01-15".to_string(),
+            started_at: Some("2024-01-15T14:30:00Z".to_string()),
+            ended_at: Some("2024-01-15T15:30:00Z".to_string()),
+            duration_sec: Some(3600),
+            title: Some("Run with bad GPS".to_string()),
+            notes: None,
+            plan_id: None,
+            plan_day_id: None,
+            exercises: vec![CompletedExercise {
+                id: Some("ex1".to_string()),
+                name: "Running".to_string(),
+                notes: None,
+                sets: vec![CompletedSet {
+                    set_number: Some(1),
+                    set_type: None,
+                    reps: Some(1),
+                    weight_kg: None,
+                    weight_lb: None,
+                    duration_sec: Some(3600),
+                    distance_meters: Some(5000.0),
+                    rpe: None,
+                    rir: None,
+                    notes: None,
+                    completed_at: None,
+                    is_pr: None,
+                    swimming: None,
+                    telemetry: None,
+                }],
+                modality: Some(pwf_core::Modality::Stopwatch),
+                pool_config: None,
+                sport: None,
+            }],
+            telemetry: Some(WorkoutTelemetry {
+                gps_route: Some(GpsRoute {
+                    route_id: "route1".to_string(),
+                    name: None,
+                    positions: vec![GpsPosition {
+                        latitude_deg: 37.7749,
+                        longitude_deg: -122.4194,
+                        timestamp: "not-a-valid-timestamp".to_string(), // Invalid!
+                        elevation_m: Some(100.0),
+                        accuracy_m: None,
+                        speed_mps: None,
+                        heading_deg: None,
+                        heart_rate_bpm: None,
+                        power_watts: None,
+                        cadence: None,
+                        temperature_c: None,
+                    }],
+                    total_distance_m: Some(5000.0),
+                    total_ascent_m: None,
+                    total_descent_m: None,
+                    min_elevation_m: None,
+                    max_elevation_m: None,
+                    bbox_sw_lat: None,
+                    bbox_sw_lng: None,
+                    bbox_ne_lat: None,
+                    bbox_ne_lng: None,
+                    recording_mode: None,
+                    gps_fix: None,
+                }),
+                ..Default::default()
+            }),
+            devices: vec![],
+            sport: Some(pwf_core::Sport::Running),
+            sport_segments: None,
+        }],
+    };
+
+    let result = pwf_to_tcx(&history);
+
+    // Should succeed but with warnings about failed exercise conversion
+    assert!(result.is_ok());
+    let tcx_result = result.unwrap();
+    assert!(tcx_result.has_warnings());
+    assert!(tcx_result.warnings.iter().any(|w| match w {
+        pwf_converters::ConversionWarning::DataQualityIssue { issue } =>
+            issue.contains("Failed to convert exercise"),
+        _ => false,
+    }));
+}
+
+#[test]
+fn test_tcx_export_workout_without_sport() {
+    use pwf_converters::pwf_to_tcx;
+    use pwf_core::history::{Workout, WpsHistory};
+
+    let history = WpsHistory {
+        history_version: 2,
+        exported_at: "2024-01-15T16:00:00Z".to_string(),
+        export_source: None,
+        units: Default::default(),
+        personal_records: vec![],
+        body_measurements: vec![],
+        workouts: vec![Workout {
+            id: Some("workout1".to_string()),
+            date: "2024-01-15".to_string(),
+            started_at: Some("2024-01-15T14:30:00Z".to_string()),
+            ended_at: Some("2024-01-15T15:30:00Z".to_string()),
+            duration_sec: Some(3600),
+            title: Some("Generic Workout".to_string()),
+            notes: None,
+            plan_id: None,
+            plan_day_id: None,
+            exercises: vec![],
+            telemetry: None,
+            devices: vec![],
+            sport: None, // No sport specified
+            sport_segments: None,
+        }],
+    };
+
+    let result = pwf_to_tcx(&history).unwrap();
+
+    // Should warn about missing sport field
+    assert!(result.has_warnings());
+    assert!(result.warnings.iter().any(|w| matches!(
+        w,
+        pwf_converters::ConversionWarning::MissingField { source_field, .. }
+        if source_field == "sport"
+    )));
+
+    // Should default to "Other" in TCX
+    assert!(result.tcx_xml.contains("Sport=\"Other\""));
+}
+
+#[test]
+fn test_tcx_export_empty_workout_list() {
+    use pwf_converters::pwf_to_tcx;
+    use pwf_core::history::WpsHistory;
+
+    let history = WpsHistory {
+        history_version: 2,
+        exported_at: "2024-01-15T16:00:00Z".to_string(),
+        export_source: None,
+        units: Default::default(),
+        personal_records: vec![],
+        body_measurements: vec![],
+        workouts: vec![], // No workouts
+    };
+
+    let result = pwf_to_tcx(&history).unwrap();
+
+    // Should warn about no workouts
+    assert!(result.has_warnings());
+    assert!(result.warnings.iter().any(|w| matches!(
+        w,
+        pwf_converters::ConversionWarning::DataQualityIssue { .. }
+    )));
+
+    // Should still generate valid TCX XML
+    assert!(result.tcx_xml.contains("<?xml"));
+    assert!(result.tcx_xml.contains("<TrainingCenterDatabase"));
+}
+
+#[test]
+fn test_tcx_export_workout_without_telemetry() {
+    use pwf_converters::pwf_to_tcx;
+    use pwf_core::history::{Workout, WpsHistory};
+    use pwf_core::Sport;
+
+    let history = WpsHistory {
+        history_version: 2,
+        exported_at: "2024-01-15T16:00:00Z".to_string(),
+        export_source: None,
+        units: Default::default(),
+        personal_records: vec![],
+        body_measurements: vec![],
+        workouts: vec![Workout {
+            id: Some("workout1".to_string()),
+            date: "2024-01-15".to_string(),
+            started_at: Some("2024-01-15T14:30:00Z".to_string()),
+            ended_at: Some("2024-01-15T15:30:00Z".to_string()),
+            duration_sec: Some(3600),
+            title: Some("Strength Training".to_string()),
+            notes: None,
+            plan_id: None,
+            plan_day_id: None,
+            exercises: vec![],
+            telemetry: None, // No telemetry
+            devices: vec![],
+            sport: Some(Sport::StrengthTraining),
+            sport_segments: None,
+        }],
+    };
+
+    let result = pwf_to_tcx(&history).unwrap();
+
+    // Should generate valid TCX even though workout might not have laps
+    assert!(result.tcx_xml.contains("<?xml"));
+    assert!(result.tcx_xml.contains("<TrainingCenterDatabase"));
+
+    // Workout without exercises/laps might generate warnings or be skipped
+    // This is acceptable behavior for edge case
+}

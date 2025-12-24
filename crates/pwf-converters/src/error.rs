@@ -26,6 +26,18 @@ pub enum ConversionError {
     #[error("Failed to write TCX file: {0}")]
     TcxWriteError(String),
 
+    /// Failed to read or parse GPX file
+    #[error("Failed to read GPX file: {0}")]
+    GpxReadError(String),
+
+    /// Invalid or inconsistent data in GPX file
+    #[error("Invalid GPX data: {0}")]
+    InvalidGpxData(String),
+
+    /// Failed to write or serialize GPX file
+    #[error("Failed to write GPX file: {0}")]
+    GpxWriteError(String),
+
     /// PWF validation failed after conversion
     #[error("PWF validation failed: {0}")]
     PwfValidationError(String),
@@ -45,6 +57,10 @@ pub enum ConversionError {
     /// Missing required data in source file
     #[error("Missing required field: {0}")]
     MissingRequiredField(String),
+
+    /// Failed to write or generate CSV file
+    #[error("Failed to write CSV file: {0}")]
+    CsvWriteError(String),
 }
 
 /// Result type for conversions with warnings
@@ -93,6 +109,74 @@ impl TcxExportResult {
         Self {
             tcx_xml,
             warnings: Vec::new(),
+        }
+    }
+
+    /// Add a warning to the result
+    pub fn add_warning(&mut self, warning: ConversionWarning) {
+        self.warnings.push(warning);
+    }
+
+    /// Check if there are any warnings
+    pub fn has_warnings(&self) -> bool {
+        !self.warnings.is_empty()
+    }
+}
+
+/// Result type for GPX export with warnings
+#[derive(Debug)]
+pub struct GpxExportResult {
+    /// The generated GPX XML content
+    pub gpx_xml: String,
+
+    /// List of warnings about data loss or quality issues
+    pub warnings: Vec<ConversionWarning>,
+}
+
+impl GpxExportResult {
+    /// Create a new GPX export result
+    pub fn new(gpx_xml: String) -> Self {
+        Self {
+            gpx_xml,
+            warnings: Vec::new(),
+        }
+    }
+
+    /// Add a warning to the result
+    pub fn add_warning(&mut self, warning: ConversionWarning) {
+        self.warnings.push(warning);
+    }
+
+    /// Check if there are any warnings
+    pub fn has_warnings(&self) -> bool {
+        !self.warnings.is_empty()
+    }
+}
+
+/// Result type for CSV export with statistics
+#[derive(Debug)]
+pub struct CsvExportResult {
+    /// The generated CSV content
+    pub csv_data: String,
+
+    /// List of warnings about data or export issues
+    pub warnings: Vec<ConversionWarning>,
+
+    /// Number of data points exported
+    pub data_points: usize,
+
+    /// Number of workouts processed
+    pub workouts_processed: usize,
+}
+
+impl CsvExportResult {
+    /// Create a new CSV export result
+    pub fn new(csv_data: String) -> Self {
+        Self {
+            csv_data,
+            warnings: Vec::new(),
+            data_points: 0,
+            workouts_processed: 0,
         }
     }
 

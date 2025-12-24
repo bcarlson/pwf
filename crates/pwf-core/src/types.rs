@@ -107,7 +107,7 @@ impl fmt::Display for DistanceUnit {
 
 /// Sport type for multi-sport activities (PWF v2)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "kebab-case")]
 pub enum Sport {
     Swimming,
     Cycling,
@@ -115,6 +115,21 @@ pub enum Sport {
     Rowing,
     Transition,
     Strength,
+    StrengthTraining,
+    Hiking,
+    Walking,
+    Yoga,
+    Pilates,
+    CrossFit,
+    Calisthenics,
+    Cardio,
+    CrossCountrySkiing,
+    DownhillSkiing,
+    Snowboarding,
+    StandUpPaddling,
+    Kayaking,
+    Elliptical,
+    StairClimbing,
     Other,
 }
 
@@ -127,6 +142,21 @@ impl fmt::Display for Sport {
             Sport::Rowing => write!(f, "rowing"),
             Sport::Transition => write!(f, "transition"),
             Sport::Strength => write!(f, "strength"),
+            Sport::StrengthTraining => write!(f, "strength-training"),
+            Sport::Hiking => write!(f, "hiking"),
+            Sport::Walking => write!(f, "walking"),
+            Sport::Yoga => write!(f, "yoga"),
+            Sport::Pilates => write!(f, "pilates"),
+            Sport::CrossFit => write!(f, "cross-fit"),
+            Sport::Calisthenics => write!(f, "calisthenics"),
+            Sport::Cardio => write!(f, "cardio"),
+            Sport::CrossCountrySkiing => write!(f, "cross-country-skiing"),
+            Sport::DownhillSkiing => write!(f, "downhill-skiing"),
+            Sport::Snowboarding => write!(f, "snowboarding"),
+            Sport::StandUpPaddling => write!(f, "stand-up-paddling"),
+            Sport::Kayaking => write!(f, "kayaking"),
+            Sport::Elliptical => write!(f, "elliptical"),
+            Sport::StairClimbing => write!(f, "stair-climbing"),
             Sport::Other => write!(f, "other"),
         }
     }
@@ -143,6 +173,21 @@ impl std::str::FromStr for Sport {
             "rowing" => Ok(Sport::Rowing),
             "transition" => Ok(Sport::Transition),
             "strength" => Ok(Sport::Strength),
+            "strength-training" => Ok(Sport::StrengthTraining),
+            "hiking" => Ok(Sport::Hiking),
+            "walking" => Ok(Sport::Walking),
+            "yoga" => Ok(Sport::Yoga),
+            "pilates" => Ok(Sport::Pilates),
+            "cross-fit" => Ok(Sport::CrossFit),
+            "calisthenics" => Ok(Sport::Calisthenics),
+            "cardio" => Ok(Sport::Cardio),
+            "cross-country-skiing" => Ok(Sport::CrossCountrySkiing),
+            "downhill-skiing" => Ok(Sport::DownhillSkiing),
+            "snowboarding" => Ok(Sport::Snowboarding),
+            "stand-up-paddling" | "sup" => Ok(Sport::StandUpPaddling),
+            "kayaking" | "kayak" => Ok(Sport::Kayaking),
+            "elliptical" => Ok(Sport::Elliptical),
+            "stair-climbing" => Ok(Sport::StairClimbing),
             "other" => Ok(Sport::Other),
             _ => Err(format!("Unknown sport: {}", s)),
         }
@@ -695,6 +740,21 @@ mod tests {
         assert_eq!(Sport::Rowing.to_string(), "rowing");
         assert_eq!(Sport::Transition.to_string(), "transition");
         assert_eq!(Sport::Strength.to_string(), "strength");
+        assert_eq!(Sport::StrengthTraining.to_string(), "strength-training");
+        assert_eq!(Sport::Hiking.to_string(), "hiking");
+        assert_eq!(Sport::Walking.to_string(), "walking");
+        assert_eq!(Sport::Yoga.to_string(), "yoga");
+        assert_eq!(Sport::Pilates.to_string(), "pilates");
+        assert_eq!(Sport::CrossFit.to_string(), "cross-fit");
+        assert_eq!(Sport::Calisthenics.to_string(), "calisthenics");
+        assert_eq!(Sport::Cardio.to_string(), "cardio");
+        assert_eq!(
+            Sport::CrossCountrySkiing.to_string(),
+            "cross-country-skiing"
+        );
+        assert_eq!(Sport::DownhillSkiing.to_string(), "downhill-skiing");
+        assert_eq!(Sport::Elliptical.to_string(), "elliptical");
+        assert_eq!(Sport::StairClimbing.to_string(), "stair-climbing");
         assert_eq!(Sport::Other.to_string(), "other");
     }
 
@@ -706,6 +766,33 @@ mod tests {
         assert_eq!(Sport::from_str("rowing").unwrap(), Sport::Rowing);
         assert_eq!(Sport::from_str("transition").unwrap(), Sport::Transition);
         assert_eq!(Sport::from_str("strength").unwrap(), Sport::Strength);
+        assert_eq!(
+            Sport::from_str("strength-training").unwrap(),
+            Sport::StrengthTraining
+        );
+        assert_eq!(Sport::from_str("hiking").unwrap(), Sport::Hiking);
+        assert_eq!(Sport::from_str("walking").unwrap(), Sport::Walking);
+        assert_eq!(Sport::from_str("yoga").unwrap(), Sport::Yoga);
+        assert_eq!(Sport::from_str("pilates").unwrap(), Sport::Pilates);
+        assert_eq!(Sport::from_str("cross-fit").unwrap(), Sport::CrossFit);
+        assert_eq!(
+            Sport::from_str("calisthenics").unwrap(),
+            Sport::Calisthenics
+        );
+        assert_eq!(Sport::from_str("cardio").unwrap(), Sport::Cardio);
+        assert_eq!(
+            Sport::from_str("cross-country-skiing").unwrap(),
+            Sport::CrossCountrySkiing
+        );
+        assert_eq!(
+            Sport::from_str("downhill-skiing").unwrap(),
+            Sport::DownhillSkiing
+        );
+        assert_eq!(Sport::from_str("elliptical").unwrap(), Sport::Elliptical);
+        assert_eq!(
+            Sport::from_str("stair-climbing").unwrap(),
+            Sport::StairClimbing
+        );
         assert_eq!(Sport::from_str("other").unwrap(), Sport::Other);
     }
 
@@ -746,6 +833,45 @@ mod tests {
             serde_json::to_string(&Sport::Strength).unwrap(),
             "\"strength\""
         );
+        assert_eq!(
+            serde_json::to_string(&Sport::StrengthTraining).unwrap(),
+            "\"strength-training\""
+        );
+        assert_eq!(serde_json::to_string(&Sport::Hiking).unwrap(), "\"hiking\"");
+        assert_eq!(
+            serde_json::to_string(&Sport::Walking).unwrap(),
+            "\"walking\""
+        );
+        assert_eq!(serde_json::to_string(&Sport::Yoga).unwrap(), "\"yoga\"");
+        assert_eq!(
+            serde_json::to_string(&Sport::Pilates).unwrap(),
+            "\"pilates\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Sport::CrossFit).unwrap(),
+            "\"cross-fit\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Sport::Calisthenics).unwrap(),
+            "\"calisthenics\""
+        );
+        assert_eq!(serde_json::to_string(&Sport::Cardio).unwrap(), "\"cardio\"");
+        assert_eq!(
+            serde_json::to_string(&Sport::CrossCountrySkiing).unwrap(),
+            "\"cross-country-skiing\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Sport::DownhillSkiing).unwrap(),
+            "\"downhill-skiing\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Sport::Elliptical).unwrap(),
+            "\"elliptical\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Sport::StairClimbing).unwrap(),
+            "\"stair-climbing\""
+        );
         assert_eq!(serde_json::to_string(&Sport::Other).unwrap(), "\"other\"");
     }
 
@@ -774,6 +900,18 @@ mod tests {
             Sport::Rowing,
             Sport::Transition,
             Sport::Strength,
+            Sport::StrengthTraining,
+            Sport::Hiking,
+            Sport::Walking,
+            Sport::Yoga,
+            Sport::Pilates,
+            Sport::CrossFit,
+            Sport::Calisthenics,
+            Sport::Cardio,
+            Sport::CrossCountrySkiing,
+            Sport::DownhillSkiing,
+            Sport::Elliptical,
+            Sport::StairClimbing,
             Sport::Other,
         ];
 
