@@ -1,7 +1,10 @@
 //! Integration tests for CSV export functionality
 
 use pwf_converters::{export_telemetry_to_csv, CsvExportOptions};
-use pwf_core::history::{CompletedExercise, CompletedSet, ExportSource, SetTelemetry, TimeSeriesData, Units, Workout, WpsHistory};
+use pwf_core::history::{
+    CompletedExercise, CompletedSet, ExportSource, SetTelemetry, TimeSeriesData, Units, Workout,
+    WpsHistory,
+};
 use pwf_core::Sport;
 
 /// Create a test history with comprehensive telemetry data
@@ -252,7 +255,10 @@ fn test_csv_export_validates_time_series() {
 
     // Create a valid time series
     let valid_time_series = TimeSeriesData {
-        timestamps: vec!["2025-01-15T14:30:00Z".to_string(), "2025-01-15T14:30:01Z".to_string()],
+        timestamps: vec![
+            "2025-01-15T14:30:00Z".to_string(),
+            "2025-01-15T14:30:01Z".to_string(),
+        ],
         heart_rate: Some(vec![150, 152]),
         ..Default::default()
     };

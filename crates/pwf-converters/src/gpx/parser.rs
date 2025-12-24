@@ -46,9 +46,8 @@ pub fn gpx_to_pwf<R: Read>(
     let mut result = ConversionResult::new(String::new());
 
     // Parse GPX file
-    let gpx: Gpx = gpx::read(reader).map_err(|e| {
-        ConversionError::GpxReadError(format!("Failed to parse GPX file: {}", e))
-    })?;
+    let gpx: Gpx = gpx::read(reader)
+        .map_err(|e| ConversionError::GpxReadError(format!("Failed to parse GPX file: {}", e)))?;
 
     // Create PWF history structure
     let mut workouts = Vec::new();
@@ -447,8 +446,7 @@ fn calculate_distance(wp1: &Waypoint, wp2: &Waypoint) -> f64 {
     let dlat = lat2 - lat1;
     let dlon = lon2 - lon1;
 
-    let a = (dlat / 2.0).sin().powi(2)
-        + lat1.cos() * lat2.cos() * (dlon / 2.0).sin().powi(2);
+    let a = (dlat / 2.0).sin().powi(2) + lat1.cos() * lat2.cos() * (dlon / 2.0).sin().powi(2);
     let c = 2.0 * a.sqrt().atan2((1.0 - a).sqrt());
 
     const EARTH_RADIUS_M: f64 = 6371000.0; // meters

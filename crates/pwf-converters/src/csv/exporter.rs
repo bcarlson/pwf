@@ -99,9 +99,9 @@ pub fn export_telemetry_to_csv(
             export_time_series(&mut writer, ts, label, &mut result)?;
         }
 
-        writer.flush().map_err(|e| {
-            ConversionError::IoError(std::io::Error::other(e))
-        })?;
+        writer
+            .flush()
+            .map_err(|e| ConversionError::IoError(std::io::Error::other(e)))?;
     } // writer dropped here
 
     result.csv_data = String::from_utf8(csv_buffer).map_err(|e| {
@@ -251,9 +251,9 @@ fn export_time_series<W: IoWrite>(
         // SWOLF
         record.push(format_optional_u32(&ts.swolf, i));
 
-        writer.write_record(&record).map_err(|e| {
-            ConversionError::IoError(std::io::Error::other(e))
-        })?;
+        writer
+            .write_record(&record)
+            .map_err(|e| ConversionError::IoError(std::io::Error::other(e)))?;
 
         result.data_points += 1;
     }
@@ -305,7 +305,9 @@ fn format_optional_f64(field: &Option<Vec<f64>>, index: usize) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use pwf_core::history::{CompletedExercise, CompletedSet, SetTelemetry, TimeSeriesData, Units, WpsHistory};
+    use pwf_core::history::{
+        CompletedExercise, CompletedSet, SetTelemetry, TimeSeriesData, Units, WpsHistory,
+    };
 
     fn create_test_history_with_time_series() -> WpsHistory {
         let time_series = TimeSeriesData {
