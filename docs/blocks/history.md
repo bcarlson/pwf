@@ -407,7 +407,10 @@ workouts:
 - `calisthenics` - Bodyweight exercises, calisthenics, HIIT
 - `cardio` - General cardio/fitness equipment
 - `cross-country-skiing` - Cross-country (Nordic) skiing
-- `downhill-skiing` - Downhill (Alpine) skiing and snowboarding
+- `downhill-skiing` - Downhill (Alpine) skiing
+- `snowboarding` - Snowboarding
+- `stand-up-paddling` - Stand-up paddleboarding
+- `kayaking` - Kayaking and canoeing
 - `elliptical` - Elliptical trainer
 - `stair-climbing` - Stair stepper, stair climbing
 - `other` - Other activities not covered above

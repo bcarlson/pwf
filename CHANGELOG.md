@@ -17,17 +17,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Heart rate, cadence, and power telemetry import/export
   - TrainingPeaks extensions for power/cadence in TCX export
   - Multi-lap activity support
+- **GPX Format Support (Bidirectional)**
+  - GPX → PWF import conversion (GPS Exchange Format v1.1)
+  - PWF → GPX export conversion for route sharing
+  - Full CLI integration: `pwf convert --from gpx --to pwf` and `pwf convert --from pwf --to gpx`
+  - GPS coordinate, elevation, and timestamp extraction
+  - Haversine formula distance calculation
+  - Compatible with Garmin Connect, Strava, and other GPS platforms
+- **CSV Export for Telemetry Data**
+  - PWF → CSV export for time-series telemetry analysis
+  - CLI integration: `pwf convert --from pwf --to csv`
+  - Exports heart rate, power, cadence, GPS coordinates, elevation, speed, temperature
+  - Excel and Google Sheets compatible
+  - Configurable field selection and metadata inclusion
+- **Expanded Sport Type Mappings**
+  - Sport enum expanded from 7 to 22 types
+  - New sports: Hiking, Walking, Yoga, Pilates, CrossFit, Calisthenics, Cardio, Cross-Country Skiing, Downhill Skiing, Snowboarding, Stand-Up Paddleboarding, Kayaking, Elliptical, Stair Climbing
+  - Comprehensive FIT sport code mappings (62 codes + subsports)
+  - TCX sport mappings with common extensions
+  - GPX activity type inference from metadata
+  - Updated JSON schema and documentation
 - **FIT Export Documentation**
   - Comprehensive `FIT_EXPORT_ANALYSIS.md` documenting why FIT export is not feasible
   - Evaluation of all available Rust FIT libraries
   - Recommended alternatives (TCX export + Garmin FitCSVTool)
   - Helpful CLI error messages for unsupported `--from pwf --to fit`
 - **Test Coverage**
-  - 159 new tests (729 total, up from 570)
-  - 93.84% code coverage (exceeds 90% requirement)
-  - 23 TCX-specific CLI tests
-  - 13 TCX exporter unit tests
-  - 10 TCX conversion integration tests
+  - 793 tests total (up from 570)
+  - 93%+ code coverage (exceeds 90% requirement)
+  - Comprehensive converter test suites for GPX, CSV, and sport mappings
 
 ### Changed
 - Improved CLI error handling for format conversion edge cases
