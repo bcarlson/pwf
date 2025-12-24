@@ -25,3 +25,4 @@ web/.vite/
 packages/pwf-core/dist/
 packages/pwf-core/node_modules/
 packages/pwf-core/docs/
+packages/pwf-core/coverage/
