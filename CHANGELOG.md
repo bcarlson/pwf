@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-12-24
+
+### Added
+- **Enhanced Test Coverage**
+  - 825 tests total (up from 793)
+  - 95%+ code coverage achieved for all converter modules
+  - GPX exporter: 98.80% coverage
+  - GPX mappings: 97.59% coverage
+  - TCX exporter: 96.04% coverage
+  - Overall workspace coverage: 92.81%
+  - New comprehensive GPX mappings test suite with 16 tests covering:
+    - Sport type mappings (running, cycling, hiking, water sports, winter sports)
+    - Metadata sport inference from keywords and descriptions
+    - Edge cases and fallback behavior
+
+### Fixed
+- **Critical Bug Fixes**
+  - Integer overflow in GPX duration calculation now saturates at u32::MAX instead of wrapping
+  - GPX date fallback now uses current date instead of hardcoded "2025-01-01"
+
+### Changed
+- Improved test coverage for error handling and edge cases in all converters
+- Enhanced GPX exporter tests for workouts without telemetry or GPS data
+- Expanded TCX exporter tests for set-level telemetry and GPS extensions
+
 ## [1.2.0] - 2025-12-23
 
 ### Added
@@ -147,6 +172,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Release Links
 
+- [1.3.0](https://github.com/bcarlson/pwf/releases/tag/v1.3.0) - Quality & Reliability Improvements
 - [1.2.0](https://github.com/bcarlson/pwf/releases/tag/v1.2.0) - TCX Format Conversion
 - [1.1.0](https://github.com/bcarlson/pwf/releases/tag/v1.1.0) - FIT Format Import & Coverage Improvements
 - [1.0.1](https://github.com/bcarlson/pwf/releases/tag/v1.0.1) - PWF v2.1 Advanced Features
