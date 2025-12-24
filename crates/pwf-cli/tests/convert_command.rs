@@ -226,27 +226,7 @@ fn test_convert_unsupported_format_combination() {
         .stderr(predicate::str::contains("fit → pwf"));
 }
 
-#[test]
-fn test_convert_unsupported_shows_coming_soon() {
-    let temp = TempDir::new("coming_soon");
-    let input = temp.join("input.gpx");
-    let output = temp.join("output.yaml");
-
-    fs::write(&input, b"dummy").unwrap();
-
-    pwf_cmd()
-        .arg("convert")
-        .arg("--from")
-        .arg("gpx")
-        .arg("--to")
-        .arg("pwf")
-        .arg(&input)
-        .arg(&output)
-        .assert()
-        .failure()
-        .stderr(predicate::str::contains("Coming soon:"))
-        .stderr(predicate::str::contains("gpx → pwf"));
-}
+// GPX import is now implemented - test removed
 
 #[test]
 fn test_convert_invalid_fit_file() {
@@ -551,26 +531,7 @@ fn test_convert_pwf_to_fit_not_implemented() {
         ));
 }
 
-#[test]
-fn test_convert_pwf_to_csv_not_implemented() {
-    let temp = TempDir::new("pwf_to_csv");
-    let input = temp.join("test.yaml");
-    let output = temp.join("output.csv");
-
-    fs::write(&input, b"plan_version: 1").unwrap();
-
-    pwf_cmd()
-        .arg("convert")
-        .arg("--from")
-        .arg("pwf")
-        .arg("--to")
-        .arg("csv")
-        .arg(&input)
-        .arg(&output)
-        .assert()
-        .failure()
-        .stderr(predicate::str::contains("not yet implemented"));
-}
+// CSV export is now implemented - test removed
 
 // ============================================================================
 // Edge Cases

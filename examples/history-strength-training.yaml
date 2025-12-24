@@ -1,0 +1,86 @@
+# PWF History Export v1 - Strength Training Example
+# Demonstrates strength-training sport type with typical gym exercises
+
+history_version: 1
+exported_at: "2025-01-20T14:30:00Z"
+
+export_source:
+  app_name: "PWF Example Generator"
+  app_version: "1.0.0"
+  platform: "web"
+
+units:
+  weight: kg
+  distance: meters
+
+workouts:
+  - date: "2025-01-20"
+    started_at: "2025-01-20T14:00:00Z"
+    ended_at: "2025-01-20T15:15:00Z"
+    duration_sec: 4500
+    title: "Upper Body Strength Training"
+    sport: strength-training
+    exercises:
+      - name: "Barbell Bench Press"
+        modality: strength
+        sets:
+          - set_number: 1
+            set_type: warmup
+            reps: 10
+            weight_kg: 60
+          - set_number: 2
+            set_type: working
+            reps: 8
+            weight_kg: 80
+            rpe: 7
+          - set_number: 3
+            set_type: working
+            reps: 8
+            weight_kg: 80
+            rpe: 7.5
+          - set_number: 4
+            set_type: working
+            reps: 6
+            weight_kg: 85
+            rpe: 8
+            is_pr: true
+
+      - name: "Dumbbell Rows"
+        modality: strength
+        sets:
+          - set_number: 1
+            reps: 12
+            weight_kg: 30
+            rpe: 6
+          - set_number: 2
+            reps: 10
+            weight_kg: 32.5
+            rpe: 7
+          - set_number: 3
+            reps: 10
+            weight_kg: 32.5
+            rpe: 7.5
+
+      - name: "Overhead Press"
+        modality: strength
+        sets:
+          - set_number: 1
+            reps: 10
+            weight_kg: 40
+            rpe: 6.5
+          - set_number: 2
+            reps: 8
+            weight_kg: 45
+            rpe: 8
+          - set_number: 3
+            reps: 6
+            weight_kg: 47.5
+            rpe: 9
+
+personal_records:
+  - exercise_name: "Barbell Bench Press"
+    record_type: "max_weight_8rm"
+    value: 85
+    unit: "kg"
+    achieved_at: "2025-01-20"
+    notes: "New 8RM PR!"

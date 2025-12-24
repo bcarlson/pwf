@@ -1,0 +1,61 @@
+# PWF History Export v1 - Yoga Example
+# Demonstrates yoga sport type with mindfulness exercises
+
+history_version: 1
+exported_at: "2025-01-21T08:30:00Z"
+
+export_source:
+  app_name: "Mindful Yoga Tracker"
+  app_version: "1.0.0"
+  platform: "android"
+
+workouts:
+  - date: "2025-01-21"
+    started_at: "2025-01-21T07:00:00Z"
+    ended_at: "2025-01-21T08:00:00Z"
+    duration_sec: 3600
+    title: "Vinyasa Flow - Morning Practice"
+    sport: yoga
+    notes: "Focus on breath work and flexibility"
+    exercises:
+      - name: "Sun Salutations"
+        modality: countdown
+        sets:
+          - duration_sec: 600
+            rpe: 4
+            notes: "5 rounds, gentle warm-up"
+
+      - name: "Standing Poses Sequence"
+        modality: countdown
+        sets:
+          - duration_sec: 900
+            rpe: 5
+            notes: "Warrior I, II, III, Triangle, Extended Side Angle"
+
+      - name: "Balance Poses"
+        modality: countdown
+        sets:
+          - duration_sec: 600
+            rpe: 6
+            notes: "Tree, Eagle, Half Moon"
+
+      - name: "Floor Poses"
+        modality: countdown
+        sets:
+          - duration_sec: 900
+            rpe: 4
+            notes: "Pigeon, Seated Forward Fold, Spinal Twists"
+
+      - name: "Savasana"
+        modality: countdown
+        sets:
+          - duration_sec: 600
+            rpe: 1
+            notes: "Final relaxation"
+
+    telemetry:
+      heart_rate_avg: 95
+      heart_rate_max: 125
+      heart_rate_min: 72
+      total_calories: 180
+      temperature_c: 22

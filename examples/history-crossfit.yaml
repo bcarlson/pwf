@@ -1,0 +1,67 @@
+# PWF History Export v1 - CrossFit Example
+# Demonstrates cross-fit sport type with WOD (Workout of the Day)
+
+history_version: 1
+exported_at: "2025-01-22T19:00:00Z"
+
+export_source:
+  app_name: "CrossFit Logger"
+  app_version: "3.0.0"
+  platform: "ios"
+
+units:
+  weight: kg
+  distance: meters
+
+workouts:
+  - date: "2025-01-22"
+    started_at: "2025-01-22T18:00:00Z"
+    ended_at: "2025-01-22T18:55:00Z"
+    duration_sec: 3300
+    title: "CrossFit WOD - Cindy"
+    sport: cross-fit
+    notes: "20-minute AMRAP (As Many Rounds As Possible): 5 Pull-ups, 10 Push-ups, 15 Air Squats"
+    exercises:
+      - name: "Warm-up"
+        modality: countdown
+        sets:
+          - duration_sec: 600
+            notes: "Row 500m, dynamic stretching"
+
+      - name: "Skill Work - Pull-ups"
+        modality: strength
+        sets:
+          - reps: 5
+            notes: "Practice strict form"
+
+      - name: "WOD - Cindy (AMRAP 20min)"
+        modality: interval
+        notes: "Completed 18 rounds + 5 pull-ups"
+        sets:
+          - set_number: 1
+            duration_sec: 1200
+            rpe: 9
+            notes: "Round 1-18 complete, partial round 19"
+            telemetry:
+              heart_rate_avg: 168
+              heart_rate_max: 185
+
+      - name: "Cool Down"
+        modality: countdown
+        sets:
+          - duration_sec: 300
+            notes: "Light stretching"
+
+    telemetry:
+      heart_rate_avg: 145
+      heart_rate_max: 185
+      heart_rate_min: 98
+      total_calories: 485
+
+personal_records:
+  - exercise_name: "Cindy WOD"
+    record_type: "max_reps"
+    value: 18
+    unit: "rounds"
+    achieved_at: "2025-01-22"
+    notes: "18 complete rounds + 5 pull-ups in 20 minutes"

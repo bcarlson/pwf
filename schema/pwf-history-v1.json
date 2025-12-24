@@ -375,7 +375,30 @@
     },
     "Sport": {
       "type": "string",
-      "enum": ["swimming", "cycling", "running", "rowing", "transition", "strength", "other"],
+      "enum": [
+        "swimming",
+        "cycling",
+        "running",
+        "rowing",
+        "transition",
+        "strength",
+        "strength-training",
+        "hiking",
+        "walking",
+        "yoga",
+        "pilates",
+        "cross-fit",
+        "calisthenics",
+        "cardio",
+        "cross-country-skiing",
+        "downhill-skiing",
+        "snowboarding",
+        "stand-up-paddling",
+        "kayaking",
+        "elliptical",
+        "stair-climbing",
+        "other"
+      ],
       "description": "Sport classification (PWF v2.1)"
     },
     "WorkoutTelemetry": {
