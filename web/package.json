@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build:wasm": "cd .. && wasm-pack build crates/pwf-wasm --target web --out-dir web/src/wasm --release && node web/fix-wasm-jsdoc.js",
+    "build:wasm": "cd .. && wasm-pack build crates/pwf-wasm --target web --out-dir ../../web/src/wasm --release && node web/fix-wasm-jsdoc.js",
     "build:web": "vite build",
     "build": "npm run build:wasm && npm run build:web",
     "preview": "vite preview",
