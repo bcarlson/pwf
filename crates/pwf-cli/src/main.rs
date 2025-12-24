@@ -563,6 +563,7 @@ fn convert_file(
         ("tcx", "pwf") => convert_tcx_to_pwf(input, output, summary_only, verbose),
         ("gpx", "pwf") => convert_gpx_to_pwf(input, output, summary_only, verbose),
         ("pwf", "tcx") => convert_pwf_to_tcx(input, output, verbose),
+        ("pwf", "gpx") => convert_pwf_to_gpx(input, output, verbose),
         ("pwf", "csv") => convert_pwf_to_csv(input, output, verbose),
         ("pwf", "fit") => {
             // Special error message for FIT export
@@ -899,6 +900,109 @@ fn convert_gpx_to_pwf(
                 "  Validate: {}",
                 format!("pwf history {}", output.display()).cyan()
             );
+
+            ExitCode::SUCCESS
+        }
+        Err(e) => {
+            eprintln!("{}: Failed to write output file: {}", "error".red(), e);
+            ExitCode::FAILURE
+        }
+    }
+}
+
+fn convert_pwf_to_gpx(input: &PathBuf, output: &PathBuf, verbose: bool) -> ExitCode {
+    println!("{} Exporting {} to GPX...", "→".cyan(), input.display());
+
+    if verbose {
+        println!("  {} Reading PWF history file...", "→".dimmed());
+    }
+
+    // Read PWF history file
+    let content = match fs::read_to_string(input) {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("{}: Failed to read input file: {}", "error".red(), e);
+            return ExitCode::FAILURE;
+        }
+    };
+
+    if verbose {
+        println!("  {} Parsing PWF history...", "→".dimmed());
+    }
+
+    // Parse PWF history
+    let history: pwf_core::history::WpsHistory = match pwf_core::history::parse(&content) {
+        Ok(h) => h,
+        Err(e) => {
+            eprintln!("{}: Failed to parse PWF history: {}", "error".red(), e);
+            eprintln!();
+            eprintln!("Hint: Validate your PWF file first:");
+            eprintln!("  {}", format!("pwf history {}", input.display()).cyan());
+            return ExitCode::FAILURE;
+        }
+    };
+
+    if verbose {
+        println!(
+            "  {} Converting {} workouts to GPX format...",
+            "→".dimmed(),
+            history.workouts.len()
+        );
+    }
+
+    // Convert to GPX using pwf-converters library
+    let result = match pwf_converters::pwf_to_gpx(&history) {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("{}: Export failed: {}", "error".red(), e);
+            return ExitCode::FAILURE;
+        }
+    };
+
+    // Show warnings if verbose
+    if verbose && !result.warnings.is_empty() {
+        println!();
+        println!("{} Export warnings:", "⚠".yellow());
+        for warning in &result.warnings {
+            println!("  {} {}", "⚠".yellow(), warning.to_string().yellow());
+        }
+        println!();
+    }
+
+    if verbose {
+        // Show export statistics
+        let line_count = result.gpx_xml.lines().count();
+        let size_kb = result.gpx_xml.len() as f64 / 1024.0;
+        println!(
+            "  {} Generated GPX XML: {} lines, {:.1} KB",
+            "✓".dimmed(),
+            line_count,
+            size_kb
+        );
+        println!("  {} Writing output file...", "→".dimmed());
+    }
+
+    // Write output file
+    match fs::write(output, &result.gpx_xml) {
+        Ok(_) => {
+            println!("{} Exported to {}", "✓".green(), output.display());
+
+            if !verbose && result.has_warnings() {
+                println!(
+                    "  {} warnings (use {} to see details)",
+                    result.warnings.len().to_string().yellow(),
+                    "--verbose".cyan()
+                );
+            }
+
+            println!();
+            println!("Next steps:");
+            println!("  Upload to GPS platforms:");
+            println!("    • Garmin Connect");
+            println!("    • Strava");
+            println!("    • Komoot");
+            println!("    • AllTrails");
+            println!("    • Most GPS/mapping platforms");
 
             ExitCode::SUCCESS
         }

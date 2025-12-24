@@ -67,6 +67,9 @@ pub fn map_pwf_sport_to_tcx(sport: &Sport) -> String {
         Sport::Cardio => "Cardio".to_string(),     // Extension
         Sport::CrossCountrySkiing => "CrossCountrySkiing".to_string(), // Extension
         Sport::DownhillSkiing => "DownhillSkiing".to_string(), // Extension
+        Sport::Snowboarding => "Snowboarding".to_string(), // Extension
+        Sport::StandUpPaddling => "StandUpPaddleboarding".to_string(), // Extension
+        Sport::Kayaking => "Kayaking".to_string(), // Extension
         Sport::Elliptical => "Elliptical".to_string(), // Extension
         Sport::StairClimbing => "StairClimbing".to_string(), // Extension
         Sport::Other => "Other".to_string(),

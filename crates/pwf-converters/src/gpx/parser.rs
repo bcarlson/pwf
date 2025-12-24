@@ -86,7 +86,7 @@ pub fn gpx_to_pwf<R: Read>(
 
     // Create history export
     let history = WpsHistory {
-        history_version: 2,
+        history_version: 1,
         exported_at: chrono::Utc::now().to_rfc3339(),
         export_source: Some(ExportSource {
             app_name: Some(format!(
@@ -126,15 +126,12 @@ fn convert_track_to_workout(
 
     let notes = track.description.clone().or_else(|| track.comment.clone());
 
-    // Determine sport type from track type or metadata
-    let sport_string = track
+    // Determine sport type from GPX track type or metadata
+    let sport = track
         .type_
         .as_ref()
         .map(|t| map_gpx_type_to_sport(Some(t.as_str())))
         .unwrap_or_else(|| infer_sport_from_metadata(gpx));
-
-    // Convert sport string to Sport enum
-    let sport = sport_string.parse().unwrap_or(pwf_core::Sport::Other);
 
     // Combine all track segments
     let mut all_positions = Vec::new();

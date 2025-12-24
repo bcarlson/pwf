@@ -1,20 +1,25 @@
 //! GPX activity type mappings to PWF sports
 
+use pwf_core::Sport;
+
 /// Map GPX activity type to PWF sport
 ///
 /// GPX doesn't have a standard activity type field, so this is primarily
 /// for future extension if we parse GPX extension data.
-pub fn map_gpx_type_to_sport(gpx_type: Option<&str>) -> String {
+pub fn map_gpx_type_to_sport(gpx_type: Option<&str>) -> Sport {
     match gpx_type {
-        Some("run") | Some("running") => "Running".to_string(),
-        Some("bike") | Some("biking") | Some("cycling") => "Cycling".to_string(),
-        Some("hike") | Some("hiking") => "Hiking".to_string(),
-        Some("walk") | Some("walking") => "Walking".to_string(),
-        Some("swim") | Some("swimming") => "Swimming".to_string(),
-        Some("ski") | Some("skiing") => "Skiing".to_string(),
-        Some("paddle") | Some("paddling") | Some("kayaking") => "Paddling".to_string(),
-        Some("row") | Some("rowing") => "Rowing".to_string(),
-        _ => "Other".to_string(),
+        Some("run") | Some("running") => Sport::Running,
+        Some("bike") | Some("biking") | Some("cycling") => Sport::Cycling,
+        Some("hike") | Some("hiking") => Sport::Hiking,
+        Some("walk") | Some("walking") => Sport::Walking,
+        Some("swim") | Some("swimming") => Sport::Swimming,
+        Some("ski") | Some("skiing") | Some("xc-ski") => Sport::CrossCountrySkiing,
+        Some("downhill") | Some("alpine") => Sport::DownhillSkiing,
+        Some("snowboard") | Some("snowboarding") => Sport::Snowboarding,
+        Some("paddle") | Some("paddling") | Some("sup") => Sport::StandUpPaddling,
+        Some("kayak") | Some("kayaking") | Some("canoe") => Sport::Kayaking,
+        Some("row") | Some("rowing") => Sport::Rowing,
+        _ => Sport::Other,
     }
 }
 
@@ -22,40 +27,40 @@ pub fn map_gpx_type_to_sport(gpx_type: Option<&str>) -> String {
 ///
 /// Some GPX files include metadata about the activity type.
 /// This function tries to extract that information.
-pub fn infer_sport_from_metadata(gpx: &gpx::Gpx) -> String {
+pub fn infer_sport_from_metadata(gpx: &gpx::Gpx) -> Sport {
     // Check metadata keywords or description for sport hints
     if let Some(ref metadata) = gpx.metadata {
         if let Some(ref keywords) = metadata.keywords {
             let keywords_lower = keywords.to_lowercase();
             if keywords_lower.contains("run") {
-                return "Running".to_string();
+                return Sport::Running;
             } else if keywords_lower.contains("bike") || keywords_lower.contains("cycl") {
-                return "Cycling".to_string();
+                return Sport::Cycling;
             } else if keywords_lower.contains("hike") {
-                return "Hiking".to_string();
+                return Sport::Hiking;
             } else if keywords_lower.contains("walk") {
-                return "Walking".to_string();
+                return Sport::Walking;
             } else if keywords_lower.contains("swim") {
-                return "Swimming".to_string();
+                return Sport::Swimming;
             }
         }
 
         if let Some(ref description) = metadata.description {
             let desc_lower = description.to_lowercase();
             if desc_lower.contains("run") {
-                return "Running".to_string();
+                return Sport::Running;
             } else if desc_lower.contains("bike") || desc_lower.contains("cycl") {
-                return "Cycling".to_string();
+                return Sport::Cycling;
             } else if desc_lower.contains("hike") {
-                return "Hiking".to_string();
+                return Sport::Hiking;
             } else if desc_lower.contains("walk") {
-                return "Walking".to_string();
+                return Sport::Walking;
             }
         }
     }
 
     // Default to "Other" if we can't determine the sport
-    "Other".to_string()
+    Sport::Other
 }
 
 #[cfg(test)]
@@ -64,15 +69,21 @@ mod tests {
 
     #[test]
     fn test_map_gpx_type_to_sport() {
-        assert_eq!(map_gpx_type_to_sport(Some("run")), "Running");
-        assert_eq!(map_gpx_type_to_sport(Some("running")), "Running");
-        assert_eq!(map_gpx_type_to_sport(Some("bike")), "Cycling");
-        assert_eq!(map_gpx_type_to_sport(Some("cycling")), "Cycling");
-        assert_eq!(map_gpx_type_to_sport(Some("hike")), "Hiking");
-        assert_eq!(map_gpx_type_to_sport(Some("walk")), "Walking");
-        assert_eq!(map_gpx_type_to_sport(Some("swim")), "Swimming");
-        assert_eq!(map_gpx_type_to_sport(Some("unknown")), "Other");
-        assert_eq!(map_gpx_type_to_sport(None), "Other");
+        assert_eq!(map_gpx_type_to_sport(Some("run")), Sport::Running);
+        assert_eq!(map_gpx_type_to_sport(Some("running")), Sport::Running);
+        assert_eq!(map_gpx_type_to_sport(Some("bike")), Sport::Cycling);
+        assert_eq!(map_gpx_type_to_sport(Some("cycling")), Sport::Cycling);
+        assert_eq!(map_gpx_type_to_sport(Some("hike")), Sport::Hiking);
+        assert_eq!(map_gpx_type_to_sport(Some("walk")), Sport::Walking);
+        assert_eq!(map_gpx_type_to_sport(Some("swim")), Sport::Swimming);
+        assert_eq!(map_gpx_type_to_sport(Some("kayaking")), Sport::Kayaking);
+        assert_eq!(
+            map_gpx_type_to_sport(Some("snowboarding")),
+            Sport::Snowboarding
+        );
+        assert_eq!(map_gpx_type_to_sport(Some("sup")), Sport::StandUpPaddling);
+        assert_eq!(map_gpx_type_to_sport(Some("unknown")), Sport::Other);
+        assert_eq!(map_gpx_type_to_sport(None), Sport::Other);
     }
 
     #[test]
@@ -84,7 +95,7 @@ mod tests {
         };
         gpx.metadata = Some(metadata);
 
-        assert_eq!(infer_sport_from_metadata(&gpx), "Running");
+        assert_eq!(infer_sport_from_metadata(&gpx), Sport::Running);
     }
 
     #[test]
@@ -96,12 +107,12 @@ mod tests {
         };
         gpx.metadata = Some(metadata);
 
-        assert_eq!(infer_sport_from_metadata(&gpx), "Cycling");
+        assert_eq!(infer_sport_from_metadata(&gpx), Sport::Cycling);
     }
 
     #[test]
     fn test_infer_sport_default() {
         let gpx = gpx::Gpx::default();
-        assert_eq!(infer_sport_from_metadata(&gpx), "Other");
+        assert_eq!(infer_sport_from_metadata(&gpx), Sport::Other);
     }
 }

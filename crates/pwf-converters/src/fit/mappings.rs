@@ -25,8 +25,9 @@ pub fn map_fit_sport(fit_sport: u8, fit_subsport: Option<u8>) -> Sport {
         19 => Sport::CrossCountrySkiing, // Cross-country skiing
         20 => Sport::DownhillSkiing,     // Alpine skiing / downhill
         21 => Sport::DownhillSkiing,     // Backcountry skiing
-        22 => Sport::DownhillSkiing,     // Snowboarding
-        25 => Sport::Cardio,             // Stand-up paddleboarding
+        22 => Sport::Snowboarding,       // Snowboarding
+        23 => Sport::Kayaking,           // Kayaking / canoeing
+        25 => Sport::StandUpPaddling,    // Stand-up paddleboarding
         26 => Sport::Strength,           // Strength training
         27 => Sport::Yoga,               // Yoga
         29 => Sport::Pilates,            // Pilates (unofficial, some devices use 29)
@@ -110,7 +111,8 @@ mod tests {
         assert_eq!(map_fit_sport(19, None), Sport::CrossCountrySkiing);
         assert_eq!(map_fit_sport(20, None), Sport::DownhillSkiing);
         assert_eq!(map_fit_sport(21, None), Sport::DownhillSkiing);
-        assert_eq!(map_fit_sport(22, None), Sport::DownhillSkiing);
+        assert_eq!(map_fit_sport(22, None), Sport::Snowboarding);
+        assert_eq!(map_fit_sport(23, None), Sport::Kayaking);
     }
 
     #[test]
@@ -123,7 +125,7 @@ mod tests {
     #[test]
     fn test_map_fit_sport_cardio_calisthenics() {
         assert_eq!(map_fit_sport(9, None), Sport::Cardio);
-        assert_eq!(map_fit_sport(25, None), Sport::Cardio);
+        assert_eq!(map_fit_sport(25, None), Sport::StandUpPaddling);
         assert_eq!(map_fit_sport(30, None), Sport::Cardio);
         assert_eq!(map_fit_sport(45, None), Sport::Cardio);
         assert_eq!(map_fit_sport(37, None), Sport::Calisthenics);
