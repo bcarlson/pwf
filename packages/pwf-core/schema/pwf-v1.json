@@ -1,0 +1,439 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pwf.dev/schema/v1/plan.json",
+  "title": "PWF Plan v1",
+  "description": "Portable Workout Format v1 schema for validating plan documents",
+  "type": "object",
+  "required": ["plan_version", "cycle"],
+  "additionalProperties": false,
+  "properties": {
+    "plan_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Specification version (must be 1)"
+    },
+    "meta": {
+      "$ref": "#/$defs/Meta"
+    },
+    "glossary": {
+      "type": "object",
+      "description": "Term definitions for exercises and concepts used in this plan",
+      "maxProperties": 100,
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "propertyNames": {
+        "pattern": "^[a-zA-Z0-9\\s\\-']+$",
+        "minLength": 1,
+        "maxLength": 50
+      }
+    },
+    "cycle": {
+      "$ref": "#/$defs/Cycle"
+    }
+  },
+  "$defs": {
+    "Meta": {
+      "type": "object",
+      "description": "Plan metadata for display and organization",
+      "additionalProperties": false,
+      "required": ["title"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique plan identifier"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 80,
+          "minLength": 1,
+          "description": "Plan display name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Brief plan description"
+        },
+        "author": {
+          "type": "string",
+          "description": "Coach or creator name"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "active", "completed", "archived"],
+          "default": "draft",
+          "description": "Plan status"
+        },
+        "activated_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(Z|[+-]\\d{2}:\\d{2})$",
+          "description": "ISO 8601 timestamp when plan was activated"
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(Z|[+-]\\d{2}:\\d{2})$",
+          "description": "ISO 8601 timestamp when plan was completed"
+        },
+        "equipment": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true,
+          "description": "Required equipment tags"
+        },
+        "daysPerWeek": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 7,
+          "description": "Intended training frequency"
+        },
+        "recommendedFirst": {
+          "type": "boolean",
+          "default": false,
+          "description": "Suggest as starter plan"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Searchable tags"
+        },
+        "athlete_profile": {
+          "$ref": "#/$defs/AthleteProfile"
+        }
+      }
+    },
+    "AthleteProfile": {
+      "type": "object",
+      "description": "Athlete metrics for endurance training",
+      "additionalProperties": false,
+      "properties": {
+        "ftp_watts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Functional Threshold Power in watts"
+        },
+        "threshold_hr_bpm": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 250,
+          "description": "Threshold heart rate in BPM"
+        },
+        "max_hr_bpm": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 250,
+          "description": "Maximum heart rate in BPM"
+        },
+        "threshold_pace_sec_per_km": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Threshold pace in seconds per kilometer"
+        },
+        "weight_kg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Athlete weight in kilograms"
+        }
+      }
+    },
+    "Cycle": {
+      "type": "object",
+      "description": "Training cycle containing workout days",
+      "additionalProperties": false,
+      "required": ["days"],
+      "properties": {
+        "start_date": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "ISO 8601 date (YYYY-MM-DD)"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Cycle-level coaching notes"
+        },
+        "days": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Day"
+          },
+          "description": "Training days in this cycle"
+        }
+      }
+    },
+    "Day": {
+      "type": "object",
+      "description": "Single training day",
+      "additionalProperties": false,
+      "required": ["exercises"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique day identifier"
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Day sequence (0-indexed)"
+        },
+        "focus": {
+          "type": "string",
+          "description": "Training focus or theme"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Day-level coaching notes"
+        },
+        "scheduled_date": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Planned workout date"
+        },
+        "target_session_length_min": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Expected duration in minutes"
+        },
+        "exercises": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Exercise"
+          },
+          "description": "Exercises in this day"
+        }
+      }
+    },
+    "Exercise": {
+      "type": "object",
+      "description": "Single exercise definition",
+      "additionalProperties": false,
+      "required": ["modality"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique exercise identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Exercise name"
+        },
+        "modality": {
+          "type": "string",
+          "enum": ["strength", "countdown", "stopwatch", "interval", "cycling", "running", "rowing", "swimming"],
+          "description": "Exercise type"
+        },
+        "target_sets": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Target number of sets"
+        },
+        "target_reps": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Target reps per set"
+        },
+        "target_duration_sec": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Target duration in seconds"
+        },
+        "target_distance_meters": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Target distance in meters"
+        },
+        "target_load": {
+          "type": "string",
+          "description": "Loading guidance (weight, RPE, %1RM)"
+        },
+        "target_weight_percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 200,
+          "description": "Target weight as percentage of reference max (requires percent_of)"
+        },
+        "percent_of": {
+          "type": "string",
+          "enum": ["1rm", "3rm", "5rm", "10rm"],
+          "description": "Reference max for percentage calculation (requires target_weight_percent)"
+        },
+        "reference_exercise": {
+          "type": "string",
+          "description": "Reference another exercise's max for percentage calculation"
+        },
+        "cues": {
+          "type": "string",
+          "description": "Form cues (alias for target_notes)"
+        },
+        "target_notes": {
+          "type": "string",
+          "description": "Coaching notes for this exercise"
+        },
+        "link": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "Tutorial URL (HTTPS only)"
+        },
+        "image": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "Demo image URL (HTTPS only)"
+        },
+        "group": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50,
+          "pattern": "^[a-zA-Z0-9_-]+$",
+          "description": "Group identifier for supersets/circuits (alphanumeric, hyphens, underscores only)"
+        },
+        "group_type": {
+          "type": "string",
+          "enum": ["superset", "circuit"],
+          "description": "Type of exercise grouping"
+        },
+        "rest_between_sets_sec": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Rest period in seconds between sets"
+        },
+        "rest_after_sec": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Rest period in seconds after completing all sets"
+        },
+        "zones": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/TrainingZone"
+          },
+          "description": "Training zones for endurance workouts"
+        },
+        "ramp": {
+          "$ref": "#/$defs/RampConfig"
+        },
+        "interval_phases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/IntervalPhase"
+          },
+          "description": "Structured interval phases for complex endurance workouts"
+        }
+      }
+    },
+    "TrainingZone": {
+      "type": "object",
+      "description": "Training zone specification",
+      "additionalProperties": false,
+      "required": ["zone"],
+      "properties": {
+        "zone": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 7,
+          "description": "Training zone number (1-7)"
+        },
+        "duration_sec": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Duration in this zone (seconds)"
+        },
+        "target_power_watts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Target power in watts"
+        },
+        "target_hr_bpm": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 250,
+          "description": "Target heart rate in BPM"
+        },
+        "target_pace_sec_per_km": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Target pace in seconds per kilometer"
+        }
+      }
+    },
+    "RampConfig": {
+      "type": "object",
+      "description": "Ramp configuration for gradual intensity changes",
+      "additionalProperties": false,
+      "required": ["start_power_watts", "end_power_watts", "duration_sec"],
+      "properties": {
+        "start_power_watts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Starting power in watts"
+        },
+        "end_power_watts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Ending power in watts"
+        },
+        "duration_sec": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Ramp duration in seconds"
+        },
+        "step_duration_sec": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Duration of each step in seconds"
+        }
+      }
+    },
+    "IntervalPhase": {
+      "type": "object",
+      "description": "Phase in a structured interval workout",
+      "additionalProperties": false,
+      "required": ["name", "duration_sec"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Phase name (e.g., 'warmup', 'work', 'recovery')"
+        },
+        "duration_sec": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Phase duration in seconds"
+        },
+        "target_power_watts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Target power in watts"
+        },
+        "target_hr_bpm": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 250,
+          "description": "Target heart rate in BPM"
+        },
+        "target_pace_sec_per_km": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Target pace in seconds per kilometer"
+        },
+        "cadence_rpm": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Target cadence in RPM"
+        }
+      }
+    }
+  }
+}

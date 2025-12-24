@@ -1,0 +1,766 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pwf.dev/schema/v1/history.json",
+  "title": "PWF History Export v1",
+  "description": "Schema for validating PWF workout history exports",
+  "type": "object",
+  "required": ["history_version", "exported_at", "workouts"],
+  "additionalProperties": false,
+  "properties": {
+    "history_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Specification version (must be 1)"
+    },
+    "exported_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 datetime when export was created"
+    },
+    "export_source": {
+      "$ref": "#/$defs/ExportSource"
+    },
+    "units": {
+      "$ref": "#/$defs/Units"
+    },
+    "workouts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Workout"
+      },
+      "description": "Completed workout sessions"
+    },
+    "personal_records": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/PersonalRecord"
+      },
+      "description": "Personal records achieved"
+    },
+    "body_measurements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/BodyMeasurement"
+      },
+      "description": "Body measurements recorded"
+    }
+  },
+  "$defs": {
+    "ExportSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "app_name": {
+          "type": "string",
+          "description": "Application name"
+        },
+        "app_version": {
+          "type": "string",
+          "description": "Application version"
+        },
+        "platform": {
+          "type": "string",
+          "enum": ["ios", "android", "web", "desktop"],
+          "description": "Platform"
+        },
+        "preferred_units": {
+          "$ref": "#/$defs/Units",
+          "description": "User's preferred units"
+        }
+      }
+    },
+    "Units": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "weight": {
+          "type": "string",
+          "enum": ["kg", "lb"],
+          "default": "kg"
+        },
+        "distance": {
+          "type": "string",
+          "enum": ["meters", "kilometers", "miles", "feet", "yards"],
+          "default": "meters"
+        }
+      }
+    },
+    "Workout": {
+      "type": "object",
+      "required": ["date", "exercises"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique workout identifier"
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Workout date (YYYY-MM-DD)"
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Start timestamp"
+        },
+        "ended_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "End timestamp"
+        },
+        "duration_sec": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total duration in seconds"
+        },
+        "title": {
+          "type": "string",
+          "description": "Workout title"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Workout notes"
+        },
+        "plan_id": {
+          "type": "string",
+          "description": "Reference to PWF plan"
+        },
+        "plan_day_id": {
+          "type": "string",
+          "description": "Reference to plan day"
+        },
+        "exercises": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CompletedExercise"
+          },
+          "description": "Exercises performed"
+        },
+        "telemetry": {
+          "$ref": "#/$defs/WorkoutTelemetry",
+          "description": "Telemetry metrics for entire workout session (PWF v2)"
+        },
+        "devices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DeviceInfo"
+          },
+          "description": "Devices used during workout (PWF v2)"
+        },
+        "sport": {
+          "$ref": "#/$defs/Sport",
+          "description": "Primary sport for this workout (PWF v2.1)"
+        },
+        "sport_segments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SportSegment"
+          },
+          "description": "Sport segments for multi-sport workouts like triathlon (PWF v2.1)"
+        }
+      }
+    },
+    "CompletedExercise": {
+      "type": "object",
+      "required": ["name", "sets"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique exercise identifier"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Exercise name"
+        },
+        "modality": {
+          "type": "string",
+          "enum": ["strength", "countdown", "stopwatch", "interval", "swimming"],
+          "description": "Exercise modality"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Exercise-level notes"
+        },
+        "sets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CompletedSet"
+          },
+          "description": "Completed sets"
+        },
+        "pool_config": {
+          "$ref": "#/$defs/PoolConfig",
+          "description": "Pool configuration for swimming exercises (PWF v2.1)"
+        },
+        "sport": {
+          "$ref": "#/$defs/Sport",
+          "description": "Sport classification for this exercise (PWF v2.1)"
+        }
+      }
+    },
+    "CompletedSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "set_number": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Set order (1-indexed)"
+        },
+        "set_type": {
+          "type": "string",
+          "enum": ["working", "warmup", "dropset", "failure", "amrap"],
+          "default": "working",
+          "description": "Type of set"
+        },
+        "reps": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Repetitions completed"
+        },
+        "weight_kg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Weight in kilograms"
+        },
+        "weight_lb": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Weight in pounds"
+        },
+        "duration_sec": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Duration in seconds"
+        },
+        "distance_meters": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Distance in meters"
+        },
+        "rpe": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Rate of Perceived Exertion (1-10 scale)"
+        },
+        "rir": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Reps in Reserve (alternative to RPE)"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Set-level notes"
+        },
+        "is_pr": {
+          "type": "boolean",
+          "description": "Whether this set was a personal record"
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When set was completed"
+        },
+        "telemetry": {
+          "$ref": "#/$defs/SetTelemetry",
+          "description": "Telemetry metrics for this set (PWF v2)"
+        },
+        "swimming": {
+          "$ref": "#/$defs/SwimmingSetData",
+          "description": "Swimming-specific data for this set (PWF v2.1)"
+        }
+      }
+    },
+    "PersonalRecord": {
+      "type": "object",
+      "required": ["exercise_name", "record_type", "value", "achieved_at"],
+      "additionalProperties": false,
+      "properties": {
+        "exercise_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Exercise name"
+        },
+        "record_type": {
+          "type": "string",
+          "enum": ["1rm", "max_weight_3rm", "max_weight_5rm", "max_weight_8rm", "max_weight_10rm", "max_weight", "max_reps", "max_volume", "max_duration", "max_distance", "fastest_time"],
+          "description": "Type of record"
+        },
+        "value": {
+          "type": "number",
+          "description": "Record value"
+        },
+        "unit": {
+          "type": "string",
+          "description": "Unit for the value"
+        },
+        "achieved_at": {
+          "type": "string",
+          "format": "date",
+          "description": "Date achieved"
+        },
+        "workout_id": {
+          "type": "string",
+          "description": "Reference to workout"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional notes"
+        }
+      }
+    },
+    "BodyMeasurement": {
+      "type": "object",
+      "required": ["date"],
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Measurement date"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Exact timestamp"
+        },
+        "weight_kg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Body weight in kg"
+        },
+        "weight_lb": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Body weight in lb"
+        },
+        "body_fat_percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Body fat percentage"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Notes"
+        },
+        "measurements": {
+          "$ref": "#/$defs/BodyDimensions"
+        }
+      }
+    },
+    "BodyDimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "neck_cm": { "type": "number", "minimum": 0 },
+        "shoulders_cm": { "type": "number", "minimum": 0 },
+        "chest_cm": { "type": "number", "minimum": 0 },
+        "waist_cm": { "type": "number", "minimum": 0 },
+        "hips_cm": { "type": "number", "minimum": 0 },
+        "bicep_left_cm": { "type": "number", "minimum": 0 },
+        "bicep_right_cm": { "type": "number", "minimum": 0 },
+        "forearm_left_cm": { "type": "number", "minimum": 0 },
+        "forearm_right_cm": { "type": "number", "minimum": 0 },
+        "thigh_left_cm": { "type": "number", "minimum": 0 },
+        "thigh_right_cm": { "type": "number", "minimum": 0 },
+        "calf_left_cm": { "type": "number", "minimum": 0 },
+        "calf_right_cm": { "type": "number", "minimum": 0 }
+      }
+    },
+    "Sport": {
+      "type": "string",
+      "enum": [
+        "swimming",
+        "cycling",
+        "running",
+        "rowing",
+        "transition",
+        "strength",
+        "strength-training",
+        "hiking",
+        "walking",
+        "yoga",
+        "pilates",
+        "cross-fit",
+        "calisthenics",
+        "cardio",
+        "cross-country-skiing",
+        "downhill-skiing",
+        "snowboarding",
+        "stand-up-paddling",
+        "kayaking",
+        "elliptical",
+        "stair-climbing",
+        "other"
+      ],
+      "description": "Sport classification (PWF v2.1)"
+    },
+    "WorkoutTelemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Telemetry metrics for entire workout session (PWF v2)",
+      "properties": {
+        "heart_rate_avg": { "type": "integer", "minimum": 0, "description": "Average heart rate (bpm)" },
+        "heart_rate_max": { "type": "integer", "minimum": 0, "description": "Maximum heart rate (bpm)" },
+        "heart_rate_min": { "type": "integer", "minimum": 0, "description": "Minimum heart rate (bpm)" },
+        "power_avg": { "type": "integer", "minimum": 0, "description": "Average power (watts)" },
+        "power_max": { "type": "integer", "minimum": 0, "description": "Maximum power (watts)" },
+        "total_distance_m": { "type": "number", "minimum": 0, "description": "Total distance in meters" },
+        "total_distance_km": { "type": "number", "minimum": 0, "description": "Total distance in kilometers" },
+        "total_distance_mi": { "type": "number", "minimum": 0, "description": "Total distance in miles" },
+        "total_elevation_gain_m": { "type": "number", "description": "Total elevation gain in meters" },
+        "total_elevation_gain_ft": { "type": "number", "description": "Total elevation gain in feet" },
+        "total_elevation_loss_m": { "type": "number", "description": "Total elevation loss in meters" },
+        "total_elevation_loss_ft": { "type": "number", "description": "Total elevation loss in feet" },
+        "speed_avg_kph": { "type": "number", "minimum": 0, "description": "Average speed in km/h" },
+        "speed_avg_mph": { "type": "number", "minimum": 0, "description": "Average speed in mph" },
+        "speed_max_kph": { "type": "number", "minimum": 0, "description": "Maximum speed in km/h" },
+        "speed_max_mph": { "type": "number", "minimum": 0, "description": "Maximum speed in mph" },
+        "pace_avg_sec_per_km": { "type": "integer", "minimum": 0, "description": "Average pace in seconds per km" },
+        "pace_avg_sec_per_mi": { "type": "integer", "minimum": 0, "description": "Average pace in seconds per mile" },
+        "cadence_avg": { "type": "integer", "minimum": 0, "description": "Average cadence (RPM or SPM)" },
+        "temperature_c": { "type": "number", "description": "Temperature in Celsius" },
+        "temperature_f": { "type": "number", "description": "Temperature in Fahrenheit" },
+        "humidity_percent": { "type": "number", "minimum": 0, "maximum": 100, "description": "Humidity percentage" },
+        "total_calories": { "type": "integer", "minimum": 0, "description": "Total calories burned" },
+        "gps_route_id": { "type": "string", "description": "GPS route identifier" },
+        "gps_route": { "$ref": "#/$defs/GpsRoute", "description": "Full GPS route data (PWF v2.1)" },
+        "advanced_metrics": { "$ref": "#/$defs/AdvancedMetrics", "description": "Advanced physiological metrics (PWF v2.1)" },
+        "power_metrics": { "$ref": "#/$defs/PowerMetrics", "description": "Power-based cycling metrics (PWF v2.1)" },
+        "time_in_zones": { "$ref": "#/$defs/TimeInZones", "description": "Time in HR/power zones (PWF v2.1)" }
+      }
+    },
+    "SetTelemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Telemetry metrics for a completed set (PWF v2)",
+      "properties": {
+        "heart_rate_avg": { "type": "integer", "minimum": 0, "description": "Average heart rate (bpm)" },
+        "heart_rate_max": { "type": "integer", "minimum": 0, "description": "Maximum heart rate (bpm)" },
+        "heart_rate_min": { "type": "integer", "minimum": 0, "description": "Minimum heart rate (bpm)" },
+        "power_avg": { "type": "integer", "minimum": 0, "description": "Average power (watts)" },
+        "power_max": { "type": "integer", "minimum": 0, "description": "Maximum power (watts)" },
+        "power_min": { "type": "integer", "minimum": 0, "description": "Minimum power (watts)" },
+        "elevation_gain_m": { "type": "number", "description": "Elevation gain in meters" },
+        "elevation_gain_ft": { "type": "number", "description": "Elevation gain in feet" },
+        "elevation_loss_m": { "type": "number", "description": "Elevation loss in meters" },
+        "elevation_loss_ft": { "type": "number", "description": "Elevation loss in feet" },
+        "speed_avg_mps": { "type": "number", "minimum": 0, "description": "Average speed in m/s" },
+        "speed_avg_kph": { "type": "number", "minimum": 0, "description": "Average speed in km/h" },
+        "speed_avg_mph": { "type": "number", "minimum": 0, "description": "Average speed in mph" },
+        "speed_max_mps": { "type": "number", "minimum": 0, "description": "Maximum speed in m/s" },
+        "speed_max_kph": { "type": "number", "minimum": 0, "description": "Maximum speed in km/h" },
+        "speed_max_mph": { "type": "number", "minimum": 0, "description": "Maximum speed in mph" },
+        "pace_avg_sec_per_km": { "type": "integer", "minimum": 0, "description": "Average pace in seconds per km" },
+        "pace_avg_sec_per_mi": { "type": "integer", "minimum": 0, "description": "Average pace in seconds per mile" },
+        "cadence_avg": { "type": "integer", "minimum": 0, "description": "Average cadence (RPM or SPM)" },
+        "cadence_max": { "type": "integer", "minimum": 0, "description": "Maximum cadence (RPM or SPM)" },
+        "temperature_c": { "type": "number", "description": "Temperature in Celsius" },
+        "temperature_f": { "type": "number", "description": "Temperature in Fahrenheit" },
+        "humidity_percent": { "type": "number", "minimum": 0, "maximum": 100, "description": "Humidity percentage" },
+        "calories": { "type": "integer", "minimum": 0, "description": "Calories burned in this set" },
+        "stroke_rate": { "type": "integer", "minimum": 0, "description": "Stroke rate for swimming/rowing (strokes per minute)" },
+        "gps_route_id": { "type": "string", "description": "GPS route identifier" },
+        "time_series": { "$ref": "#/$defs/TimeSeriesData", "description": "Second-by-second time-series data (PWF v2.1)" }
+      }
+    },
+    "AdvancedMetrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Advanced physiological and performance metrics (PWF v2.1)",
+      "properties": {
+        "training_effect": { "type": "number", "minimum": 0, "maximum": 5, "description": "Aerobic Training Effect score (0.0-5.0)" },
+        "anaerobic_training_effect": { "type": "number", "minimum": 0, "maximum": 5, "description": "Anaerobic Training Effect score (0.0-5.0)" },
+        "recovery_time_hours": { "type": "integer", "minimum": 0, "description": "Recommended recovery time in hours" },
+        "vo2_max_estimate": { "type": "number", "minimum": 0, "description": "VO2 Max estimate in ml/kg/min" },
+        "lactate_threshold": { "$ref": "#/$defs/LactateThreshold", "description": "Lactate threshold data" },
+        "performance_condition": { "type": "integer", "minimum": -20, "maximum": 20, "description": "Real-time performance assessment (-20 to +20)" },
+        "training_load": { "type": "integer", "minimum": 0, "description": "Cumulative training stress (0-1000+)" },
+        "training_status": { "$ref": "#/$defs/TrainingStatus", "description": "Training status assessment" }
+      }
+    },
+    "LactateThreshold": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Lactate threshold tracking",
+      "properties": {
+        "heart_rate_bpm": { "type": "integer", "minimum": 0, "description": "Heart rate at lactate threshold (bpm)" },
+        "speed_mps": { "type": "number", "minimum": 0, "description": "Speed at lactate threshold (m/s)" },
+        "power_watts": { "type": "integer", "minimum": 0, "description": "Power at lactate threshold (watts, for cycling)" },
+        "detected_at": { "type": "string", "format": "date-time", "description": "When threshold was detected/calculated" }
+      }
+    },
+    "TrainingStatus": {
+      "type": "string",
+      "enum": ["detraining", "recovery", "maintaining", "productive", "peaking", "overreaching", "unknown"],
+      "description": "Training status classification"
+    },
+    "PowerMetrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Power-based cycling metrics (PWF v2.1)",
+      "properties": {
+        "normalized_power": { "type": "integer", "minimum": 0, "description": "Normalized Power (NP) - weighted average accounting for variability" },
+        "training_stress_score": { "type": "number", "minimum": 0, "description": "Training Stress Score (TSS) - quantifies training load" },
+        "intensity_factor": { "type": "number", "minimum": 0, "description": "Intensity Factor (IF) - ratio of NP to FTP" },
+        "variability_index": { "type": "number", "minimum": 0, "description": "Variability Index (VI) - ratio of NP to average power" },
+        "ftp_watts": { "type": "integer", "minimum": 0, "description": "Functional Threshold Power used for calculations (watts)" },
+        "total_work_kj": { "type": "number", "minimum": 0, "description": "Total work in kilojoules" },
+        "left_right_balance": { "type": "number", "minimum": 0, "maximum": 100, "description": "Left/right power balance (percentage left)" },
+        "left_pedal_smoothness": { "type": "number", "minimum": 0, "maximum": 100, "description": "Average left pedal smoothness (percentage)" },
+        "right_pedal_smoothness": { "type": "number", "minimum": 0, "maximum": 100, "description": "Average right pedal smoothness (percentage)" },
+        "left_torque_effectiveness": { "type": "number", "minimum": 0, "maximum": 100, "description": "Average left torque effectiveness (percentage)" },
+        "right_torque_effectiveness": { "type": "number", "minimum": 0, "maximum": 100, "description": "Average right torque effectiveness (percentage)" }
+      }
+    },
+    "TimeInZones": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Time spent in heart rate and power zones (PWF v2.1)",
+      "properties": {
+        "hr_zones_sec": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "description": "Time in each HR zone (seconds per zone)" },
+        "power_zones_sec": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "description": "Time in each power zone (seconds per zone)" },
+        "hr_zone_boundaries": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "description": "HR zone boundaries in bpm" },
+        "power_zone_boundaries": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "description": "Power zone boundaries in watts" },
+        "pace_zones_sec": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "description": "Time in each pace zone (seconds per zone)" },
+        "pace_zone_boundaries": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "description": "Pace zone boundaries (seconds per km)" }
+      }
+    },
+    "SportSegment": {
+      "type": "object",
+      "required": ["segment_id", "sport", "segment_index"],
+      "additionalProperties": false,
+      "description": "A segment within a multi-sport workout (PWF v2.1)",
+      "properties": {
+        "segment_id": { "type": "string", "description": "Segment identifier" },
+        "sport": { "$ref": "#/$defs/Sport", "description": "Sport for this segment" },
+        "segment_index": { "type": "integer", "minimum": 0, "description": "Segment number in sequence (0-indexed)" },
+        "started_at": { "type": "string", "format": "date-time", "description": "When segment started (ISO 8601)" },
+        "duration_sec": { "type": "integer", "minimum": 0, "description": "Segment duration in seconds" },
+        "distance_m": { "type": "number", "minimum": 0, "description": "Distance covered in this segment (meters)" },
+        "exercise_ids": { "type": "array", "items": { "type": "string" }, "description": "Exercises/sets completed during this segment" },
+        "telemetry": { "$ref": "#/$defs/WorkoutTelemetry", "description": "Telemetry specific to this segment" },
+        "transition": { "$ref": "#/$defs/TransitionData", "description": "Transition data after this segment" },
+        "notes": { "type": "string", "description": "Notes specific to this segment" }
+      }
+    },
+    "TransitionData": {
+      "type": "object",
+      "required": ["transition_id", "from_sport", "to_sport"],
+      "additionalProperties": false,
+      "description": "Transition between sports in a multi-sport event (PWF v2.1)",
+      "properties": {
+        "transition_id": { "type": "string", "description": "Transition identifier (e.g., T1, T2)" },
+        "from_sport": { "$ref": "#/$defs/Sport", "description": "From which sport" },
+        "to_sport": { "$ref": "#/$defs/Sport", "description": "To which sport" },
+        "duration_sec": { "type": "integer", "minimum": 0, "description": "Transition duration in seconds" },
+        "started_at": { "type": "string", "format": "date-time", "description": "When transition started (ISO 8601)" },
+        "heart_rate_avg": { "type": "integer", "minimum": 0, "description": "Average heart rate during transition" },
+        "notes": { "type": "string", "description": "Notes about transition (e.g., equipment changes)" }
+      }
+    },
+    "GpsRoute": {
+      "type": "object",
+      "required": ["route_id", "positions"],
+      "additionalProperties": false,
+      "description": "A GPS route/track containing multiple positions (PWF v2.1)",
+      "properties": {
+        "route_id": { "type": "string", "description": "Unique identifier for this route" },
+        "name": { "type": "string", "description": "Human-readable route name" },
+        "positions": { "type": "array", "items": { "$ref": "#/$defs/GpsPosition" }, "description": "GPS positions in chronological order" },
+        "total_distance_m": { "type": "number", "minimum": 0, "description": "Total distance calculated from GPS (meters)" },
+        "total_ascent_m": { "type": "number", "minimum": 0, "description": "Total elevation gain (meters)" },
+        "total_descent_m": { "type": "number", "minimum": 0, "description": "Total elevation loss (meters)" },
+        "min_elevation_m": { "type": "number", "description": "Minimum elevation on route (meters)" },
+        "max_elevation_m": { "type": "number", "description": "Maximum elevation on route (meters)" },
+        "bbox_sw_lat": { "type": "number", "minimum": -90, "maximum": 90, "description": "Bounding box - southwest corner latitude" },
+        "bbox_sw_lng": { "type": "number", "minimum": -180, "maximum": 180, "description": "Bounding box - southwest corner longitude" },
+        "bbox_ne_lat": { "type": "number", "minimum": -90, "maximum": 90, "description": "Bounding box - northeast corner latitude" },
+        "bbox_ne_lng": { "type": "number", "minimum": -180, "maximum": 180, "description": "Bounding box - northeast corner longitude" },
+        "recording_mode": { "type": "string", "description": "Recording mode (e.g., auto, smart, 1s, gps_only)" },
+        "gps_fix": { "$ref": "#/$defs/GpsFix", "description": "GPS fix quality indicator" }
+      }
+    },
+    "GpsPosition": {
+      "type": "object",
+      "required": ["latitude_deg", "longitude_deg", "timestamp"],
+      "additionalProperties": false,
+      "description": "A single GPS position/waypoint with timestamp (PWF v2.1)",
+      "properties": {
+        "latitude_deg": { "type": "number", "minimum": -90, "maximum": 90, "description": "Latitude in decimal degrees (WGS84)" },
+        "longitude_deg": { "type": "number", "minimum": -180, "maximum": 180, "description": "Longitude in decimal degrees (WGS84)" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Timestamp when position was recorded (ISO 8601)" },
+        "elevation_m": { "type": "number", "description": "Elevation/altitude above sea level (meters)" },
+        "accuracy_m": { "type": "number", "minimum": 0, "description": "Horizontal accuracy/uncertainty (meters)" },
+        "speed_mps": { "type": "number", "minimum": 0, "description": "Speed at this point (meters per second)" },
+        "heading_deg": { "type": "number", "minimum": 0, "maximum": 360, "description": "Heading/bearing (degrees from north, 0-360)" },
+        "heart_rate_bpm": { "type": "integer", "minimum": 0, "description": "Heart rate at this position (bpm)" },
+        "power_watts": { "type": "integer", "minimum": 0, "description": "Power at this position (watts)" },
+        "cadence": { "type": "integer", "minimum": 0, "description": "Cadence at this position (RPM or SPM)" },
+        "temperature_c": { "type": "number", "description": "Temperature at this position (Celsius)" }
+      }
+    },
+    "GpsFix": {
+      "type": "string",
+      "enum": ["none", "fix_2d", "fix_3d", "dgps", "unknown"],
+      "description": "GPS fix quality indicator"
+    },
+    "TimeSeriesData": {
+      "type": "object",
+      "required": ["timestamps"],
+      "additionalProperties": false,
+      "description": "Columnar time-series data for second-by-second telemetry (PWF v2.1)",
+      "properties": {
+        "timestamps": { "type": "array", "items": { "type": "string", "format": "date-time" }, "description": "Timestamps for each record (ISO 8601). All other arrays must match this length." },
+        "elapsed_sec": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "description": "Elapsed time in seconds since start" },
+        "heart_rate": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "description": "Heart rate readings (bpm)" },
+        "power": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "description": "Power readings (watts)" },
+        "cadence": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "description": "Cadence readings (RPM for cycling, SPM for running/swimming)" },
+        "speed_mps": { "type": "array", "items": { "type": "number", "minimum": 0 }, "description": "Speed readings (meters per second)" },
+        "distance_m": { "type": "array", "items": { "type": "number", "minimum": 0 }, "description": "Distance readings (cumulative meters)" },
+        "elevation_m": { "type": "array", "items": { "type": "number" }, "description": "Elevation/altitude readings (meters)" },
+        "temperature_c": { "type": "array", "items": { "type": "number" }, "description": "Temperature readings (Celsius)" },
+        "latitude": { "type": "array", "items": { "type": "number", "minimum": -90, "maximum": 90 }, "description": "Latitude readings (decimal degrees)" },
+        "longitude": { "type": "array", "items": { "type": "number", "minimum": -180, "maximum": 180 }, "description": "Longitude readings (decimal degrees)" },
+        "grade_percent": { "type": "array", "items": { "type": "number", "minimum": -100, "maximum": 100 }, "description": "Grade/slope readings (percentage)" },
+        "respiration_rate": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "description": "Respiration rate (breaths per minute)" },
+        "core_temperature_c": { "type": "array", "items": { "type": "number" }, "description": "Core body temperature (Celsius)" },
+        "muscle_oxygen_percent": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 100 }, "description": "Muscle oxygen saturation (percentage)" },
+        "power_balance": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 100 }, "description": "Left/right power balance (percentage left)" },
+        "left_pedal_smoothness": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 100 }, "description": "Left pedal smoothness (percentage)" },
+        "right_pedal_smoothness": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 100 }, "description": "Right pedal smoothness (percentage)" },
+        "left_torque_effectiveness": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 100 }, "description": "Left torque effectiveness (percentage)" },
+        "right_torque_effectiveness": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 100 }, "description": "Right torque effectiveness (percentage)" },
+        "stride_length_m": { "type": "array", "items": { "type": "number", "minimum": 0 }, "description": "Running stride length (meters)" },
+        "vertical_oscillation_cm": { "type": "array", "items": { "type": "number", "minimum": 0 }, "description": "Running vertical oscillation (centimeters)" },
+        "ground_contact_time_ms": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "description": "Running ground contact time (milliseconds)" },
+        "ground_contact_balance": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 100 }, "description": "Running ground contact balance (percentage left)" },
+        "stroke_rate": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "description": "Swimming stroke rate (strokes per minute)" },
+        "stroke_count": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "description": "Swimming stroke count (cumulative)" },
+        "swolf": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "description": "Swimming SWOLF score" },
+        "stroke_type": { "type": "array", "items": { "$ref": "#/$defs/StrokeType" }, "description": "Swimming stroke type at each point" }
+      }
+    },
+    "PoolConfig": {
+      "type": "object",
+      "required": ["pool_length"],
+      "additionalProperties": false,
+      "description": "Pool configuration for swimming workouts (PWF v2.1)",
+      "properties": {
+        "pool_length": { "type": "number", "minimum": 0, "description": "Length of the pool in the specified units" },
+        "pool_length_unit": { "$ref": "#/$defs/PoolLengthUnit", "description": "Unit for pool length (meters or yards)" }
+      }
+    },
+    "PoolLengthUnit": {
+      "type": "string",
+      "enum": ["meters", "yards"],
+      "default": "meters",
+      "description": "Unit for pool length measurement"
+    },
+    "SwimmingSetData": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Swimming-specific data for a completed set (PWF v2.1)",
+      "properties": {
+        "lengths": { "type": "array", "items": { "$ref": "#/$defs/SwimmingLength" }, "description": "Individual lengths within this set/lap" },
+        "stroke_type": { "$ref": "#/$defs/StrokeType", "description": "Primary stroke type for the set (if all lengths same stroke)" },
+        "total_lengths": { "type": "integer", "minimum": 0, "description": "Total number of lengths in this set" },
+        "active_lengths": { "type": "integer", "minimum": 0, "description": "Number of active lengths (excludes rest at wall)" },
+        "swolf_avg": { "type": "integer", "minimum": 0, "description": "Average SWOLF across all lengths in this set" },
+        "drill_mode": { "type": "boolean", "description": "Whether this set was drill work (technique focus)" }
+      }
+    },
+    "SwimmingLength": {
+      "type": "object",
+      "required": ["length_number", "stroke_type", "duration_sec"],
+      "additionalProperties": false,
+      "description": "A single length (one pool length) within a swimming set/lap (PWF v2.1)",
+      "properties": {
+        "length_number": { "type": "integer", "minimum": 1, "description": "Length number within the set (1-indexed)" },
+        "stroke_type": { "$ref": "#/$defs/StrokeType", "description": "Stroke type used for this length" },
+        "duration_sec": { "type": "integer", "minimum": 0, "description": "Duration of this length in seconds" },
+        "stroke_count": { "type": "integer", "minimum": 0, "description": "Number of strokes taken during this length" },
+        "swolf": { "type": "integer", "minimum": 0, "description": "SWOLF score (duration + stroke_count) - lower is better" },
+        "started_at": { "type": "string", "format": "date-time", "description": "Timestamp when this length started (ISO 8601)" },
+        "active": { "type": "boolean", "description": "Whether this was an active length (vs. rest at wall)" }
+      }
+    },
+    "StrokeType": {
+      "type": "string",
+      "enum": ["freestyle", "backstroke", "breaststroke", "butterfly", "drill", "mixed", "im"],
+      "description": "Swimming stroke type for pool and open water swimming"
+    },
+    "DeviceInfo": {
+      "type": "object",
+      "required": ["device_type", "manufacturer"],
+      "additionalProperties": false,
+      "description": "Information about a device used during the workout (PWF v2)",
+      "properties": {
+        "device_index": { "type": "integer", "minimum": 0, "maximum": 255, "description": "Device index for multi-device workouts (e.g., 0=watch, 1=HRM, 2=power meter)" },
+        "device_type": { "$ref": "#/$defs/DeviceType", "description": "Type of device" },
+        "manufacturer": { "type": "string", "description": "Device manufacturer (can be a known manufacturer or custom string)" },
+        "product": { "type": "string", "description": "Specific product/model name" },
+        "serial_number": { "type": "string", "description": "Unique device serial number" },
+        "software_version": { "type": "string", "description": "Software/firmware version" },
+        "hardware_version": { "type": "string", "description": "Hardware version" },
+        "battery": { "$ref": "#/$defs/BatteryInfo", "description": "Battery information" },
+        "cumulative_operating_time_hours": { "type": "number", "minimum": 0, "description": "Cumulative operating time in hours" },
+        "connection": { "$ref": "#/$defs/ConnectionInfo", "description": "Connection information for sensors" },
+        "calibration": { "$ref": "#/$defs/CalibrationInfo", "description": "Calibration information for sensors" }
+      }
+    },
+    "DeviceType": {
+      "type": "string",
+      "enum": ["watch", "bike_computer", "heart_rate_monitor", "power_meter", "speed_sensor", "cadence_sensor", "speed_cadence_sensor", "foot_pod", "smart_trainer", "camera", "phone", "other"],
+      "description": "Type of device"
+    },
+    "BatteryInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Battery information for a device",
+      "properties": {
+        "start_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Battery level at start of workout (percentage)" },
+        "end_percent": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Battery level at end of workout (percentage)" },
+        "voltage": { "type": "number", "minimum": 0, "description": "Battery voltage" },
+        "status": { "$ref": "#/$defs/BatteryStatus", "description": "Battery status indicator" }
+      }
+    },
+    "BatteryStatus": {
+      "type": "string",
+      "enum": ["good", "low", "critical", "charging", "unknown"],
+      "description": "Battery status indicator"
+    },
+    "ConnectionInfo": {
+      "type": "object",
+      "required": ["connection_type"],
+      "additionalProperties": false,
+      "description": "Connection information for wireless sensors",
+      "properties": {
+        "connection_type": { "$ref": "#/$defs/ConnectionType", "description": "Type of connection" },
+        "ant_device_number": { "type": "integer", "minimum": 0, "description": "ANT+ device number (for ANT+ sensors)" },
+        "bluetooth_id": { "type": "string", "description": "Bluetooth MAC address or identifier" }
+      }
+    },
+    "ConnectionType": {
+      "type": "string",
+      "enum": ["local", "ant_plus", "bluetooth_le", "bluetooth", "wifi", "usb", "unknown"],
+      "description": "Type of device connection"
+    },
+    "CalibrationInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Calibration information for sensors (e.g., power meters)",
+      "properties": {
+        "calibration_factor": { "type": "number", "description": "Calibration factor or zero offset" },
+        "last_calibrated": { "type": "string", "format": "date-time", "description": "Timestamp of last calibration" },
+        "auto_zero_enabled": { "type": "boolean", "description": "Auto-zero setting (for power meters)" }
+      }
+    }
+  }
+}

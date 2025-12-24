@@ -20,3 +20,8 @@ web/dist/
 web/node_modules/
 web/src/wasm/
 web/.vite/
+
+# TypeScript packages
+packages/pwf-core/dist/
+packages/pwf-core/node_modules/
+packages/pwf-core/docs/

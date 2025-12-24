@@ -1,0 +1,46 @@
+{
+  "name": "@pwf/core",
+  "version": "0.1.0",
+  "description": "Portable Workout Format core parser and validator",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "schema"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prebuild": "npm run generate:types",
+    "build": "tsup",
+    "generate:types": "node scripts/generate-types.mjs",
+    "test": "vitest",
+    "test:coverage": "vitest --run --coverage",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "docs": "typedoc"
+  },
+  "dependencies": {
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1",
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@vitest/coverage-v8": "^1.6.1",
+    "json-schema-to-typescript": "^13.1.1",
+    "tsup": "^8.0.1",
+    "typedoc": "^0.25.12",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.0"
+  }
+}
