@@ -1,0 +1,201 @@
+# PWF History Export v1
+# A complete workout history export example
+
+history_version: 1
+exported_at: "2025-01-20T15:30:00Z"
+
+export_source:
+  app_name: "OwnLift"
+  app_version: "1.2.0"
+  platform: "ios"
+  preferred_units:
+    weight: kg
+    distance: meters
+
+units:
+  weight: kg
+  distance: meters
+
+workouts:
+  # First workout - Push Day
+  - id: "w-20250115-001"
+    date: "2025-01-15"
+    started_at: "2025-01-15T09:00:00Z"
+    ended_at: "2025-01-15T10:15:00Z"
+    duration_sec: 4500
+    title: "Push Day - Week 3"
+    notes: "Great session. Hit new bench PR!"
+    plan_id: "beginner-strength-v1"
+    plan_day_id: "day-a"
+
+    exercises:
+      - name: "Bench Press"
+        modality: strength
+        sets:
+          - set_number: 1
+            set_type: warmup
+            reps: 10
+            weight_kg: 40
+          - set_number: 2
+            set_type: warmup
+            reps: 5
+            weight_kg: 60
+          - set_number: 3
+            set_type: warmup
+            reps: 3
+            weight_kg: 80
+          - set_number: 4
+            set_type: working
+            reps: 5
+            weight_kg: 100
+            rpe: 7.5
+          - set_number: 5
+            set_type: working
+            reps: 5
+            weight_kg: 100
+            rpe: 8
+          - set_number: 6
+            set_type: working
+            reps: 5
+            weight_kg: 100
+            rpe: 9
+            rir: 1
+            is_pr: true
+            notes: "New 5RM!"
+
+      - name: "Overhead Press"
+        modality: strength
+        sets:
+          - reps: 5
+            weight_kg: 50
+            rpe: 7
+          - reps: 5
+            weight_kg: 50
+            rpe: 7.5
+          - reps: 5
+            weight_kg: 50
+            rpe: 8
+
+      - name: "Plank"
+        modality: countdown
+        sets:
+          - duration_sec: 60
+          - duration_sec: 55
+          - duration_sec: 45
+            notes: "Core fatigued"
+
+  # Second workout - Pull Day
+  - id: "w-20250117-001"
+    date: "2025-01-17"
+    started_at: "2025-01-17T18:00:00Z"
+    ended_at: "2025-01-17T19:10:00Z"
+    duration_sec: 4200
+    title: "Pull Day - Week 3"
+    plan_id: "beginner-strength-v1"
+    plan_day_id: "day-b"
+
+    exercises:
+      - name: "Deadlift"
+        modality: strength
+        notes: "Back felt tight, focused on form"
+        sets:
+          - set_type: warmup
+            reps: 5
+            weight_kg: 60
+          - set_type: warmup
+            reps: 3
+            weight_kg: 100
+          - set_type: warmup
+            reps: 1
+            weight_kg: 130
+          - set_type: working
+            reps: 5
+            weight_kg: 150
+            rpe: 8.5
+
+      - name: "Barbell Row"
+        modality: strength
+        sets:
+          - reps: 8
+            weight_kg: 70
+            rpe: 7
+          - reps: 8
+            weight_kg: 70
+            rpe: 7.5
+          - reps: 8
+            weight_kg: 70
+            rpe: 8
+
+      - name: "Pull-ups"
+        modality: strength
+        notes: "Bodyweight only"
+        sets:
+          - reps: 8
+          - reps: 7
+          - reps: 6
+
+  # Third workout - Conditioning
+  - id: "w-20250119-001"
+    date: "2025-01-19"
+    started_at: "2025-01-19T10:00:00Z"
+    ended_at: "2025-01-19T10:35:00Z"
+    duration_sec: 2100
+    title: "Conditioning Session"
+
+    exercises:
+      - name: "400m Runs"
+        modality: interval
+        sets:
+          - set_number: 1
+            distance_meters: 400
+            duration_sec: 95
+          - set_number: 2
+            distance_meters: 400
+            duration_sec: 98
+          - set_number: 3
+            distance_meters: 400
+            duration_sec: 102
+          - set_number: 4
+            distance_meters: 400
+            duration_sec: 105
+            notes: "Legs burning"
+
+      - name: "Cool-down Walk"
+        modality: stopwatch
+        sets:
+          - duration_sec: 600
+            notes: "Easy pace"
+
+personal_records:
+  - exercise_name: "Bench Press"
+    record_type: max_weight_5rm
+    value: 100
+    unit: kg
+    achieved_at: "2025-01-15"
+    workout_id: "w-20250115-001"
+    notes: "5x100kg - new 5RM"
+
+  - exercise_name: "Deadlift"
+    record_type: max_weight
+    value: 150
+    unit: kg
+    achieved_at: "2025-01-17"
+    workout_id: "w-20250117-001"
+
+body_measurements:
+  - date: "2025-01-15"
+    recorded_at: "2025-01-15T07:30:00Z"
+    weight_kg: 85.5
+    body_fat_percent: 15.2
+    notes: "Morning, fasted"
+    measurements:
+      chest_cm: 102
+      waist_cm: 84
+      bicep_left_cm: 36
+      bicep_right_cm: 36.5
+
+  - date: "2025-01-20"
+    recorded_at: "2025-01-20T07:30:00Z"
+    weight_kg: 85.2
+    body_fat_percent: 14.9
+    notes: "Good progress this week"

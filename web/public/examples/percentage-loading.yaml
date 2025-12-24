@@ -1,0 +1,218 @@
+# PWF v1 - Percentage-Based Loading Example
+# Demonstrates using percentage-based loading for progressive overload programming
+
+plan_version: 1
+
+meta:
+  id: "percentage-loading-example"
+  title: "Percentage-Based Progressive Overload"
+  description: "4-week program using percentage-based loading to build strength systematically."
+  author: "PWF Examples"
+  status: draft
+  equipment: [barbell, bench, pullup_bar]
+  daysPerWeek: 3
+  tags: [intermediate, strength, percentage-based, progressive-overload]
+
+glossary:
+  "1RM": "One Rep Max - the maximum weight you can lift for a single repetition"
+  "3RM": "Three Rep Max - the maximum weight you can lift for three repetitions"
+  "5RM": "Five Rep Max - the maximum weight you can lift for five repetitions"
+  "Progressive Overload": "Gradually increasing intensity over time by increasing percentage of max"
+
+cycle:
+  notes: "This program uses percentage-based loading. Test your 1RM before starting. Each week increases intensity by 5%."
+
+  days:
+    # Week 1 - Day 1: 70% intensity
+    - id: "week1-day1"
+      order: 0
+      focus: "Week 1 - Foundation (70% 1RM)"
+      notes: "Focus on technique. Should feel relatively easy."
+      exercises:
+        - id: "squat-w1"
+          name: "Barbell Back Squat"
+          modality: strength
+          target_sets: 4
+          target_reps: 6
+          target_weight_percent: 70
+          percent_of: "1rm"
+          target_notes: "Week 1 baseline. Perfect form."
+
+        - id: "bench-w1"
+          name: "Bench Press"
+          modality: strength
+          target_sets: 4
+          target_reps: 6
+          target_weight_percent: 70
+          percent_of: "1rm"
+          target_notes: "Controlled tempo. Pause on chest."
+
+        - id: "deadlift-w1"
+          name: "Deadlift"
+          modality: strength
+          target_sets: 3
+          target_reps: 5
+          target_weight_percent: 70
+          percent_of: "1rm"
+          target_notes: "Reset between reps. Maintain neutral spine."
+
+    # Week 2 - Day 1: 75% intensity
+    - id: "week2-day1"
+      order: 1
+      focus: "Week 2 - Building (75% 1RM)"
+      notes: "5% increase from Week 1. Maintain good form."
+      exercises:
+        - name: "Barbell Back Squat"
+          modality: strength
+          target_sets: 4
+          target_reps: 5
+          target_weight_percent: 75
+          percent_of: "1rm"
+          target_notes: "Week 2 progression. Should feel moderately challenging."
+
+        - name: "Bench Press"
+          modality: strength
+          target_sets: 4
+          target_reps: 5
+          target_weight_percent: 75
+          percent_of: "1rm"
+
+        - name: "Deadlift"
+          modality: strength
+          target_sets: 3
+          target_reps: 4
+          target_weight_percent: 75
+          percent_of: "1rm"
+
+    # Week 3 - Day 1: 80% intensity
+    - id: "week3-day1"
+      order: 2
+      focus: "Week 3 - Intensity (80% 1RM)"
+      notes: "Getting heavy. Focus on consistency."
+      exercises:
+        - name: "Barbell Back Squat"
+          modality: strength
+          target_sets: 4
+          target_reps: 4
+          target_weight_percent: 80
+          percent_of: "1rm"
+          target_notes: "Week 3 peak. This should be challenging."
+
+        - name: "Bench Press"
+          modality: strength
+          target_sets: 4
+          target_reps: 4
+          target_weight_percent: 80
+          percent_of: "1rm"
+
+        - name: "Deadlift"
+          modality: strength
+          target_sets: 3
+          target_reps: 3
+          target_weight_percent: 80
+          percent_of: "1rm"
+
+    # Week 4 - Day 1: 85% intensity with accessory work
+    - id: "week4-day1"
+      order: 3
+      focus: "Week 4 - Peak (85% 1RM)"
+      notes: "Peak week. Heavy lifts with lower volume."
+      exercises:
+        - name: "Barbell Back Squat"
+          modality: strength
+          target_sets: 3
+          target_reps: 3
+          target_weight_percent: 85
+          percent_of: "1rm"
+          target_notes: "Peak intensity. RPE should be 8-9."
+
+        - name: "Bench Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 3
+          target_weight_percent: 85
+          percent_of: "1rm"
+
+        - name: "Deadlift"
+          modality: strength
+          target_sets: 2
+          target_reps: 2
+          target_weight_percent: 85
+          percent_of: "1rm"
+
+        # Accessory work using different reference max
+        - name: "Front Squat"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          target_weight_percent: 70
+          percent_of: "1rm"
+          reference_exercise: "Barbell Back Squat"
+          target_notes: "Accessory work at 70% of main squat 1RM. Keep elbows high."
+
+        - name: "Close-Grip Bench Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          target_weight_percent: 65
+          percent_of: "1rm"
+          reference_exercise: "Bench Press"
+          target_notes: "Triceps focus. Hands shoulder-width apart."
+
+    # Deload Week - Day 1: 60% intensity
+    - id: "week5-deload"
+      order: 4
+      focus: "Deload Week (60% 1RM)"
+      notes: "Recovery week. Focus on technique and movement quality."
+      exercises:
+        - name: "Barbell Back Squat"
+          modality: strength
+          target_sets: 3
+          target_reps: 5
+          target_weight_percent: 60
+          percent_of: "1rm"
+          target_notes: "Deload week. Should feel very easy. Focus on perfect form."
+
+        - name: "Bench Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 5
+          target_weight_percent: 60
+          percent_of: "1rm"
+
+        - name: "Deadlift"
+          modality: strength
+          target_sets: 2
+          target_reps: 5
+          target_weight_percent: 60
+          percent_of: "1rm"
+
+    # 3RM and 5RM examples
+    - id: "rm-variations"
+      order: 5
+      focus: "Using Different RM References"
+      notes: "Examples using 3RM and 5RM instead of 1RM."
+      exercises:
+        - name: "Overhead Press"
+          modality: strength
+          target_sets: 4
+          target_reps: 6
+          target_weight_percent: 90
+          percent_of: "3rm"
+          target_notes: "90% of 3RM for volume work."
+
+        - name: "Romanian Deadlift"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          target_weight_percent: 85
+          percent_of: "5rm"
+          target_notes: "85% of 5RM. Feel the stretch in hamstrings."
+
+        - name: "Barbell Row"
+          modality: strength
+          target_sets: 4
+          target_reps: 12
+          target_weight_percent: 70
+          percent_of: "10rm"
+          target_notes: "High-rep work at 70% of 10RM."

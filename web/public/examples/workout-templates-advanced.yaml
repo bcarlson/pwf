@@ -1,0 +1,221 @@
+plan_version: 2
+
+meta:
+  title: "Progressive Overload with Template Customization"
+  description: "Shows how to use templates with per-day overrides and additions"
+  author: "PWF Examples"
+  equipment:
+    - barbell
+    - dumbbells
+    - kettlebell
+  daysPerWeek: 4
+  tags:
+    - strength
+    - progressive-overload
+    - templates
+
+exercise_library:
+  - id: squat
+    name: "Back Squat"
+    modality: strength
+    default_sets: 5
+    default_reps: 5
+    difficulty: intermediate
+    cues: "Brace core, break at hips, drive through heels"
+
+  - id: bench
+    name: "Bench Press"
+    modality: strength
+    default_sets: 5
+    default_reps: 5
+    difficulty: intermediate
+    cues: "Retract scapula, arch back, leg drive"
+
+  - id: deadlift
+    name: "Deadlift"
+    modality: strength
+    default_sets: 3
+    default_reps: 5
+    difficulty: advanced
+    cues: "Neutral spine, push floor away"
+
+  - id: overhead-press
+    name: "Overhead Press"
+    modality: strength
+    default_sets: 5
+    default_reps: 5
+    difficulty: intermediate
+    cues: "Tight core, press path around face"
+
+  - id: plank
+    name: "Plank Hold"
+    modality: countdown
+    default_sets: 3
+    default_duration_sec: 45
+    difficulty: beginner
+    cues: "Straight line from head to heels"
+
+  - id: kb-swing
+    name: "Kettlebell Swing"
+    modality: strength
+    default_sets: 3
+    default_reps: 20
+    difficulty: intermediate
+    cues: "Hip hinge, power from glutes"
+
+workout_templates:
+  - id: lower-strength
+    name: "Lower Body Strength"
+    description: "Heavy squats with core work"
+    focus: "Lower Body Strength"
+    target_session_length_min: 60
+    tags:
+      - lower
+      - strength
+    exercises:
+      - exercise_ref: squat
+        target_notes: "Heavy sets - 3 min rest"
+
+      - exercise_ref: plank
+        target_notes: "Core finisher"
+
+  - id: upper-strength
+    name: "Upper Body Strength"
+    description: "Heavy pressing with accessories"
+    focus: "Upper Body Strength"
+    target_session_length_min: 60
+    tags:
+      - upper
+      - strength
+    exercises:
+      - exercise_ref: bench
+        target_notes: "Heavy sets - 3 min rest"
+
+      - exercise_ref: kb-swing
+        target_notes: "Power finisher"
+
+  - id: full-body
+    name: "Full Body Power"
+    description: "Major compound lifts"
+    focus: "Full Body"
+    target_session_length_min: 75
+    tags:
+      - full-body
+      - compound
+    exercises:
+      - exercise_ref: deadlift
+        target_notes: "Main lift - heaviest of the day"
+
+      - exercise_ref: overhead-press
+        target_notes: "Secondary compound"
+
+      - exercise_ref: kb-swing
+        target_notes: "Metabolic finisher"
+
+cycle:
+  start_date: "2025-01-06"
+  notes: |
+    4-week linear progression using templates with weekly load increases.
+    Each week increases weight by 5lbs on lower body, 2.5lbs on upper body.
+
+  days:
+    # Week 1 - Baseline loads
+    - order: 0
+      template_ref: lower-strength
+      scheduled_date: "2025-01-06"
+      focus: "Week 1: Lower Strength - Baseline"
+      exercises:
+        # Template provides squat and plank
+        # Adding extra exercise to this day
+        - name: "Bulgarian Split Squat"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+          target_notes: "Accessory work - bodyweight or light dumbbells"
+
+    - order: 1
+      template_ref: upper-strength
+      scheduled_date: "2025-01-08"
+      focus: "Week 1: Upper Strength - Baseline"
+
+    - order: 2
+      template_ref: full-body
+      scheduled_date: "2025-01-10"
+      focus: "Week 1: Full Body"
+
+    # Week 2 - Load increase
+    - order: 3
+      template_ref: lower-strength
+      scheduled_date: "2025-01-13"
+      focus: "Week 2: Lower Strength - +5lbs"
+      notes: "Add 5lbs to squat from week 1"
+      exercises:
+        - name: "Bulgarian Split Squat"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+          target_load: "10lbs dumbbells"
+
+    - order: 4
+      template_ref: upper-strength
+      scheduled_date: "2025-01-15"
+      focus: "Week 2: Upper Strength - +2.5lbs"
+      notes: "Add 2.5lbs to bench from week 1"
+
+    - order: 5
+      template_ref: full-body
+      scheduled_date: "2025-01-17"
+      focus: "Week 2: Full Body"
+      notes: "Add 5lbs to deadlift, 2.5lbs to OHP from week 1"
+
+    # Week 3 - Continue progression
+    - order: 6
+      template_ref: lower-strength
+      scheduled_date: "2025-01-20"
+      focus: "Week 3: Lower Strength - +10lbs total"
+      notes: "Add 5lbs from week 2"
+      exercises:
+        - name: "Bulgarian Split Squat"
+          modality: strength
+          target_sets: 3
+          target_reps: 12
+          target_load: "15lbs dumbbells"
+          target_notes: "Increased reps and load"
+
+    - order: 7
+      template_ref: upper-strength
+      scheduled_date: "2025-01-22"
+      focus: "Week 3: Upper Strength - +5lbs total"
+      notes: "Add 2.5lbs from week 2"
+
+    - order: 8
+      template_ref: full-body
+      scheduled_date: "2025-01-24"
+      focus: "Week 3: Full Body"
+      notes: "Continue weekly progression"
+
+    # Week 4 - Peak week
+    - order: 9
+      template_ref: lower-strength
+      scheduled_date: "2025-01-27"
+      focus: "Week 4: Lower Strength - Peak"
+      notes: "Final progression - add 5lbs from week 3"
+      exercises:
+        - name: "Bulgarian Split Squat"
+          modality: strength
+          target_sets: 4
+          target_reps: 12
+          target_load: "20lbs dumbbells"
+          target_notes: "Added set for peak volume"
+
+    - order: 10
+      template_ref: upper-strength
+      scheduled_date: "2025-01-29"
+      focus: "Week 4: Upper Strength - Peak"
+      notes: "Final progression - add 2.5lbs from week 3"
+
+    - order: 11
+      template_ref: full-body
+      scheduled_date: "2025-01-31"
+      focus: "Week 4: Full Body - Peak"
+      notes: "Testing new PRs this week"

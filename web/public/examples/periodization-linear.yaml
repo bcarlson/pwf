@@ -1,0 +1,416 @@
+# PWF v2.0 - Linear Periodization Example
+# Classic 12-week strength program with progressive loading
+
+plan_version: 2
+
+meta:
+  id: "linear-periodization-12week"
+  title: "12-Week Linear Periodization"
+  description: "Classic linear periodization focusing on progressive strength development. Volume decreases while intensity increases over 12 weeks."
+  author: "PWF Examples"
+  status: draft
+  equipment: [barbell, bench, squat_rack, plates]
+  daysPerWeek: 4
+  tags: [intermediate, strength, periodization, linear, powerlifting]
+
+glossary:
+  "Linear Periodization": "Training methodology where volume decreases and intensity increases progressively over time"
+  "Accumulation": "Phase focused on building work capacity through higher volume at moderate intensity"
+  "Intensification": "Phase focused on building maximal strength through lower volume at high intensity"
+  "Taper": "Reduction in training volume to allow for recovery and peak performance"
+
+cycle:
+  notes: "12-week linear periodization. Weeks 1-4: Accumulation (higher volume, moderate intensity). Weeks 5-8: Transition (moderate volume, higher intensity). Weeks 9-11: Intensification (low volume, high intensity). Week 12: Deload/Taper."
+
+  # Multi-week structure: each week can override exercise parameters
+  weeks:
+    # Week 1: Accumulation Phase Start
+    - week_number: 1
+      name: "Accumulation Week 1"
+      notes: "Focus on volume. 70-75% intensity."
+      overrides:
+        - exercise_id: "squat"
+          target_sets: 4
+          target_reps: 8
+          target_weight_percent: 70
+          percent_of: "1rm"
+
+        - exercise_id: "bench"
+          target_sets: 4
+          target_reps: 8
+          target_weight_percent: 70
+          percent_of: "1rm"
+
+        - exercise_id: "deadlift"
+          target_sets: 3
+          target_reps: 6
+          target_weight_percent: 75
+          percent_of: "1rm"
+
+    # Week 2: Accumulation continues
+    - week_number: 2
+      name: "Accumulation Week 2"
+      notes: "Volume maintained, slight intensity increase to 72-77%."
+      overrides:
+        - exercise_id: "squat"
+          target_sets: 4
+          target_reps: 8
+          target_weight_percent: 72
+          percent_of: "1rm"
+
+        - exercise_id: "bench"
+          target_sets: 4
+          target_reps: 8
+          target_weight_percent: 72
+          percent_of: "1rm"
+
+        - exercise_id: "deadlift"
+          target_sets: 3
+          target_reps: 6
+          target_weight_percent: 77
+          percent_of: "1rm"
+
+    # Week 3: Peak accumulation
+    - week_number: 3
+      name: "Accumulation Week 3"
+      notes: "Peak volume week. 75-80% intensity."
+      overrides:
+        - exercise_id: "squat"
+          target_sets: 5
+          target_reps: 8
+          target_weight_percent: 75
+          percent_of: "1rm"
+
+        - exercise_id: "bench"
+          target_sets: 5
+          target_reps: 8
+          target_weight_percent: 75
+          percent_of: "1rm"
+
+        - exercise_id: "deadlift"
+          target_sets: 4
+          target_reps: 6
+          target_weight_percent: 80
+          percent_of: "1rm"
+
+    # Week 4: Accumulation deload
+    - week_number: 4
+      name: "Accumulation Deload"
+      notes: "Recovery week. Reduce volume and intensity to 65-70%."
+      overrides:
+        - exercise_id: "squat"
+          target_sets: 3
+          target_reps: 6
+          target_weight_percent: 65
+          percent_of: "1rm"
+
+        - exercise_id: "bench"
+          target_sets: 3
+          target_reps: 6
+          target_weight_percent: 65
+          percent_of: "1rm"
+
+        - exercise_id: "deadlift"
+          target_sets: 2
+          target_reps: 5
+          target_weight_percent: 70
+          percent_of: "1rm"
+
+    # Week 5: Transition Phase - Reduce reps, increase weight
+    - week_number: 5
+      name: "Transition Week 1"
+      notes: "Transitioning to strength focus. 78-82% intensity, reduced reps."
+      overrides:
+        - exercise_id: "squat"
+          target_sets: 4
+          target_reps: 6
+          target_weight_percent: 78
+          percent_of: "1rm"
+
+        - exercise_id: "bench"
+          target_sets: 4
+          target_reps: 6
+          target_weight_percent: 78
+          percent_of: "1rm"
+
+        - exercise_id: "deadlift"
+          target_sets: 3
+          target_reps: 5
+          target_weight_percent: 82
+          percent_of: "1rm"
+
+    # Week 6: Transition continues
+    - week_number: 6
+      name: "Transition Week 2"
+      notes: "80-85% intensity."
+      overrides:
+        - exercise_id: "squat"
+          target_sets: 4
+          target_reps: 5
+          target_weight_percent: 80
+          percent_of: "1rm"
+
+        - exercise_id: "bench"
+          target_sets: 4
+          target_reps: 5
+          target_weight_percent: 80
+          percent_of: "1rm"
+
+        - exercise_id: "deadlift"
+          target_sets: 3
+          target_reps: 4
+          target_weight_percent: 85
+          percent_of: "1rm"
+
+    # Week 7: Peak transition
+    - week_number: 7
+      name: "Transition Week 3"
+      notes: "82-87% intensity."
+      overrides:
+        - exercise_id: "squat"
+          target_sets: 5
+          target_reps: 5
+          target_weight_percent: 82
+          percent_of: "1rm"
+
+        - exercise_id: "bench"
+          target_sets: 5
+          target_reps: 5
+          target_weight_percent: 82
+          percent_of: "1rm"
+
+        - exercise_id: "deadlift"
+          target_sets: 4
+          target_reps: 4
+          target_weight_percent: 87
+          percent_of: "1rm"
+
+    # Week 8: Transition deload
+    - week_number: 8
+      name: "Transition Deload"
+      notes: "Recovery week. 70-75% intensity."
+      overrides:
+        - exercise_id: "squat"
+          target_sets: 3
+          target_reps: 5
+          target_weight_percent: 70
+          percent_of: "1rm"
+
+        - exercise_id: "bench"
+          target_sets: 3
+          target_reps: 5
+          target_weight_percent: 70
+          percent_of: "1rm"
+
+        - exercise_id: "deadlift"
+          target_sets: 2
+          target_reps: 4
+          target_weight_percent: 75
+          percent_of: "1rm"
+
+    # Week 9: Intensification Phase - Low volume, high intensity
+    - week_number: 9
+      name: "Intensification Week 1"
+      notes: "Strength peaking. 85-90% intensity."
+      overrides:
+        - exercise_id: "squat"
+          target_sets: 4
+          target_reps: 3
+          target_weight_percent: 85
+          percent_of: "1rm"
+
+        - exercise_id: "bench"
+          target_sets: 4
+          target_reps: 3
+          target_weight_percent: 85
+          percent_of: "1rm"
+
+        - exercise_id: "deadlift"
+          target_sets: 3
+          target_reps: 2
+          target_weight_percent: 90
+          percent_of: "1rm"
+
+    # Week 10: Peak intensification
+    - week_number: 10
+      name: "Intensification Week 2"
+      notes: "90-95% intensity."
+      overrides:
+        - exercise_id: "squat"
+          target_sets: 5
+          target_reps: 2
+          target_weight_percent: 90
+          percent_of: "1rm"
+
+        - exercise_id: "bench"
+          target_sets: 5
+          target_reps: 2
+          target_weight_percent: 90
+          percent_of: "1rm"
+
+        - exercise_id: "deadlift"
+          target_sets: 4
+          target_reps: 2
+          target_weight_percent: 92
+          percent_of: "1rm"
+
+    # Week 11: Maximum intensity
+    - week_number: 11
+      name: "Intensification Week 3"
+      notes: "Peak week. 92-97% intensity, singles and doubles."
+      overrides:
+        - exercise_id: "squat"
+          target_sets: 6
+          target_reps: 1
+          target_weight_percent: 92
+          percent_of: "1rm"
+          target_notes: "Work up to a top single at 97%"
+
+        - exercise_id: "bench"
+          target_sets: 6
+          target_reps: 1
+          target_weight_percent: 92
+          percent_of: "1rm"
+          target_notes: "Work up to a top single at 97%"
+
+        - exercise_id: "deadlift"
+          target_sets: 5
+          target_reps: 1
+          target_weight_percent: 95
+          percent_of: "1rm"
+          target_notes: "Work up to a top single at 97-100%"
+
+    # Week 12: Taper/Deload before testing
+    - week_number: 12
+      name: "Taper Week"
+      notes: "Final preparation. Very low volume, moderate-high intensity to maintain strength while recovering."
+      overrides:
+        - exercise_id: "squat"
+          target_sets: 2
+          target_reps: 2
+          target_weight_percent: 80
+          percent_of: "1rm"
+          target_notes: "Light technique work. Prepare for max testing next week."
+
+        - exercise_id: "bench"
+          target_sets: 2
+          target_reps: 2
+          target_weight_percent: 80
+          percent_of: "1rm"
+          target_notes: "Light technique work. Prepare for max testing next week."
+
+        - exercise_id: "deadlift"
+          target_sets: 1
+          target_reps: 2
+          target_weight_percent: 80
+          percent_of: "1rm"
+          target_notes: "Light technique work. Prepare for max testing next week."
+
+  # Base template days (these values are overridden by week-specific settings above)
+  days:
+    - id: "day-1"
+      order: 0
+      focus: "Lower Body Strength"
+      target_session_length_min: 75
+      exercises:
+        - id: "squat"
+          name: "Barbell Back Squat"
+          modality: strength
+          target_sets: 4
+          target_reps: 8
+          target_notes: "Competition depth. Controlled tempo."
+          rest_between_sets_sec: 180
+
+        - id: "front-squat"
+          name: "Front Squat"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          target_notes: "Accessory work. Lighter than back squat."
+
+        - id: "leg-curl"
+          name: "Leg Curl"
+          modality: strength
+          target_sets: 3
+          target_reps: 12
+          target_notes: "Hamstring accessory."
+
+    - id: "day-2"
+      order: 1
+      focus: "Upper Body Press"
+      target_session_length_min: 70
+      exercises:
+        - id: "bench"
+          name: "Bench Press"
+          modality: strength
+          target_sets: 4
+          target_reps: 8
+          target_notes: "Competition pause. Touch chest."
+          rest_between_sets_sec: 180
+
+        - id: "incline-press"
+          name: "Incline Dumbbell Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+          target_notes: "Upper chest accessory."
+
+        - id: "tricep-ext"
+          name: "Tricep Extension"
+          modality: strength
+          target_sets: 3
+          target_reps: 12
+          target_notes: "Lockout strength."
+
+    - id: "day-3"
+      order: 2
+      focus: "Lower Body Hinge"
+      target_session_length_min: 70
+      exercises:
+        - id: "deadlift"
+          name: "Conventional Deadlift"
+          modality: strength
+          target_sets: 3
+          target_reps: 6
+          target_notes: "Competition style. Reset each rep."
+          rest_between_sets_sec: 240
+
+        - id: "rdl"
+          name: "Romanian Deadlift"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          target_notes: "Posterior chain accessory."
+
+        - id: "leg-press"
+          name: "Leg Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 15
+          target_notes: "Volume work for quads."
+
+    - id: "day-4"
+      order: 3
+      focus: "Upper Body Pull"
+      target_session_length_min: 65
+      exercises:
+        - id: "row"
+          name: "Barbell Row"
+          modality: strength
+          target_sets: 4
+          target_reps: 8
+          target_notes: "Back thickness."
+
+        - id: "pullups"
+          name: "Pull-ups"
+          modality: strength
+          target_sets: 4
+          target_reps: 8
+          target_notes: "Add weight if possible."
+
+        - id: "facepulls"
+          name: "Face Pulls"
+          modality: strength
+          target_sets: 3
+          target_reps: 15
+          target_notes: "Rear delt and upper back health."

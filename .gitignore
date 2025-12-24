@@ -14,3 +14,9 @@
 CLAUDE.md
 agents.md
 lcov.info
+
+# Web frontend
+web/dist/
+web/node_modules/
+web/src/wasm/
+web/.vite/
