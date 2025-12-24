@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary Meta Tags -->
+    <title>PWF Web Tools - Workout Format Validator, Converter & Visualizer</title>
+    <meta name="title" content="PWF Web Tools - Workout Format Validator, Converter & Visualizer">
+    <meta name="description" content="Browser-based tool for validating, converting, and visualizing Portable Workout Format (PWF) files. Convert between FIT, TCX, GPX, and PWF formats. No server required - everything runs in your browser.">
+    <meta name="keywords" content="PWF, workout format, FIT converter, TCX converter, GPX converter, workout validator, fitness data, WASM, workout visualization">
+    <meta name="author" content="PWF Project">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bcarlson.github.io/pwf/">
+    <meta property="og:title" content="PWF Web Tools - Workout Format Validator, Converter & Visualizer">
+    <meta property="og:description" content="Validate, convert, and visualize workout files. Convert between FIT, TCX, GPX, and PWF formats in your browser.">
+    <meta property="og:image" content="https://bcarlson.github.io/pwf/og-image.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://bcarlson.github.io/pwf/">
+    <meta property="twitter:title" content="PWF Web Tools - Workout Format Validator, Converter & Visualizer">
+    <meta property="twitter:description" content="Validate, convert, and visualize workout files. Convert between FIT, TCX, GPX, and PWF formats in your browser.">
+    <meta property="twitter:image" content="https://bcarlson.github.io/pwf/og-image.png">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/pwf/manifest.json">
+    <meta name="theme-color" content="#0d6efd">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="PWF Tools">
+
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/pwf/icon-192.png">
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/pwf/service-worker.js')
+            .then(registration => {
+              console.log('Service Worker registered successfully:', registration.scope);
+            })
+            .catch(error => {
+              console.log('Service Worker registration failed:', error);
+            });
+        });
+      }
+    </script>
+  </body>
+</html>

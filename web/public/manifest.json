@@ -1,0 +1,55 @@
+{
+  "name": "PWF Web Tools - Portable Workout Format Validator & Converter",
+  "short_name": "PWF Tools",
+  "description": "Browser-based validator, converter, and visualizer for Portable Workout Format (PWF) files. Convert between FIT, TCX, GPX, and PWF formats.",
+  "start_url": "/pwf/",
+  "scope": "/pwf/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0d6efd",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/pwf/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pwf/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "fitness", "productivity", "utilities"],
+  "screenshots": [
+    {
+      "src": "/pwf/screenshot-validator.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "PWF Validator - Validate workout plans and history"
+    },
+    {
+      "src": "/pwf/screenshot-converter.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Format Converter - Convert between FIT, TCX, GPX, and PWF"
+    },
+    {
+      "src": "/pwf/screenshot-visualizer.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Workout Visualizer - Charts and GPS route visualization"
+    }
+  ],
+  "share_target": {
+    "action": "/pwf/",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}

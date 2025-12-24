@@ -1,0 +1,148 @@
+plan_version: 2
+meta:
+  title: "Exercise Library Example"
+  description: "Demonstrates PWF v2.0 exercise library feature"
+  author: "PWF Team"
+  equipment:
+    - barbell
+    - dumbbells
+    - bench
+    - pullup_bar
+
+exercise_library:
+  - id: squat
+    name: "Barbell Back Squat"
+    description: "Compound lower body exercise targeting quads, glutes, and hamstrings"
+    equipment:
+      - barbell
+      - squat_rack
+    muscle_groups:
+      - quads
+      - glutes
+      - hamstrings
+      - core
+    difficulty: intermediate
+    modality: strength
+    default_sets: 3
+    default_reps: 8
+    cues: "Keep chest up, break at hips and knees simultaneously, depth below parallel"
+    link: "https://example.com/exercises/squat"
+
+  - id: bench-press
+    name: "Barbell Bench Press"
+    description: "Compound upper body push exercise"
+    equipment:
+      - barbell
+      - bench
+    muscle_groups:
+      - chest
+      - triceps
+      - shoulders
+    difficulty: beginner
+    modality: strength
+    default_sets: 3
+    default_reps: 10
+    cues: "Retract scapula, feet flat on floor, bar touches mid-chest"
+    link: "https://example.com/exercises/bench-press"
+
+  - id: deadlift
+    name: "Conventional Deadlift"
+    description: "Full body compound pull exercise"
+    equipment:
+      - barbell
+    muscle_groups:
+      - hamstrings
+      - glutes
+      - back
+      - core
+      - grip
+    difficulty: advanced
+    modality: strength
+    default_sets: 3
+    default_reps: 5
+    cues: "Neutral spine, push through heels, hinge at hips"
+
+  - id: pullup
+    name: "Pull-up"
+    description: "Bodyweight upper body pull exercise"
+    equipment:
+      - pullup_bar
+    muscle_groups:
+      - lats
+      - biceps
+      - back
+    difficulty: intermediate
+    modality: strength
+    default_sets: 3
+    default_reps: 8
+    cues: "Full hang at bottom, chin over bar at top, control the descent"
+
+  - id: plank
+    name: "Front Plank"
+    description: "Isometric core stability exercise"
+    equipment:
+      - bodyweight
+    muscle_groups:
+      - core
+      - abs
+    difficulty: beginner
+    modality: countdown
+    default_sets: 3
+    default_duration_sec: 30
+    cues: "Straight line from head to heels, squeeze glutes, don't sag hips"
+
+  - id: run-5k
+    name: "5K Run"
+    description: "Moderate distance endurance run"
+    equipment:
+      - running_shoes
+    muscle_groups:
+      - legs
+      - cardio
+    difficulty: intermediate
+    modality: running
+    default_distance_meters: 5000
+    cues: "Maintain steady pace, focus on breathing rhythm"
+
+cycle:
+  days:
+    - focus: "Lower Body"
+      exercises:
+        # Use library reference with override
+        - exercise_ref: squat
+          target_sets: 4
+          target_reps: 6
+          target_load: "140kg"
+          target_notes: "Working weight, controlled tempo"
+
+        # Use library reference with defaults
+        - exercise_ref: deadlift
+          target_load: "160kg"
+
+        # Inline exercise without library reference
+        - name: "Leg Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 12
+          target_load: "200kg"
+          cues: "Full range of motion, knees track over toes"
+
+    - focus: "Upper Body"
+      exercises:
+        - exercise_ref: bench-press
+          target_sets: 4
+          target_reps: 8
+          target_load: "80kg"
+
+        - exercise_ref: pullup
+          target_reps: 10
+          target_notes: "Add weight if completing 10 reps easily"
+
+        - exercise_ref: plank
+          target_duration_sec: 45
+          target_sets: 3
+
+    - focus: "Cardio"
+      exercises:
+        - exercise_ref: run-5k
+          target_notes: "Easy pace, recovery run"

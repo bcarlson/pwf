@@ -1,0 +1,204 @@
+plan_version: 2
+meta:
+  title: "Double Progression Program"
+  description: "Intermediate program using double progression (increase reps, then weight)"
+  author: "PWF Team"
+  equipment:
+    - dumbbells
+    - bench
+    - pullup_bar
+  tags:
+    - strength
+    - hypertrophy
+    - intermediate
+    - double_progression
+
+glossary:
+  "Double Progression": "Increase reps within a range until hitting the top, then increase weight and drop back to bottom of range"
+  "RIR": "Reps in Reserve - how many more reps you could have done"
+
+cycle:
+  days:
+    - focus: "Upper Body Push"
+      exercises:
+        - name: "Dumbbell Bench Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          target_load: "32kg DBs"
+          cues: "Full range of motion, control the descent"
+          progression_rules:
+            type: double_progression
+            success_condition: all_sets_completed
+            weight_increment_kg: 2.0
+            reps_range_min: 8
+            reps_range_max: 12
+            deload_condition: failed_twice_consecutive
+            deload_percent: 90
+            notes: "Start at 3x8, work up to 3x12, then add weight and return to 3x8"
+
+        - name: "Overhead Dumbbell Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+          target_load: "20kg DBs"
+          progression_rules:
+            type: double_progression
+            success_condition: all_sets_completed
+            weight_increment_kg: 2.0
+            reps_range_min: 10
+            reps_range_max: 15
+            deload_condition: failed_twice_consecutive
+            deload_percent: 85
+
+        - name: "Dumbbell Flyes"
+          modality: strength
+          target_sets: 3
+          target_reps: 12
+          target_load: "16kg DBs"
+          progression_rules:
+            type: double_progression
+            success_condition: all_sets_completed
+            weight_increment_kg: 2.0
+            reps_range_min: 12
+            reps_range_max: 15
+            deload_condition: failed_three_consecutive
+            deload_percent: 90
+
+        - name: "Tricep Dips"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          target_load: "bodyweight"
+          cues: "Full depth, chest forward, elbows in"
+          progression_rules:
+            type: double_progression
+            success_condition: all_sets_completed
+            weight_increment_kg: 2.5
+            reps_range_min: 8
+            reps_range_max: 12
+            deload_condition: failed_twice_consecutive
+            deload_percent: 90
+            notes: "Progress reps first, then add weight via dip belt"
+
+    - focus: "Upper Body Pull"
+      exercises:
+        - name: "Pull-ups"
+          modality: strength
+          target_sets: 3
+          target_reps: 6
+          target_load: "bodyweight"
+          cues: "Full hang, chin over bar, control descent"
+          progression_rules:
+            type: double_progression
+            success_condition: all_sets_completed
+            weight_increment_kg: 2.5
+            reps_range_min: 6
+            reps_range_max: 10
+            deload_condition: failed_twice_consecutive
+            deload_percent: 85
+            notes: "Once hitting 3x10, add weight and return to 3x6"
+
+        - name: "Dumbbell Row"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+          target_load: "32kg DB"
+          progression_rules:
+            type: double_progression
+            success_condition: all_sets_completed
+            weight_increment_kg: 2.0
+            reps_range_min: 10
+            reps_range_max: 15
+            deload_condition: failed_twice_consecutive
+            deload_percent: 90
+
+        - name: "Face Pulls"
+          modality: strength
+          target_sets: 3
+          target_reps: 15
+          target_load: "light"
+          progression_rules:
+            type: double_progression
+            success_condition: all_sets_completed
+            weight_increment_kg: 2.5
+            reps_range_min: 15
+            reps_range_max: 20
+            deload_condition: failed_three_consecutive
+            deload_percent: 90
+
+        - name: "Dumbbell Curl"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+          target_load: "16kg DBs"
+          progression_rules:
+            type: double_progression
+            success_condition: last_set_completed
+            weight_increment_kg: 1.0
+            reps_range_min: 10
+            reps_range_max: 12
+            deload_condition: failed_three_consecutive
+            deload_percent: 85
+            notes: "Smaller jumps for isolation exercises"
+
+    - focus: "Lower Body"
+      exercises:
+        - name: "Goblet Squat"
+          modality: strength
+          target_sets: 3
+          target_reps: 12
+          target_load: "32kg DB"
+          cues: "Chest up, elbows inside knees, full depth"
+          progression_rules:
+            type: double_progression
+            success_condition: all_sets_completed
+            weight_increment_kg: 4.0
+            reps_range_min: 12
+            reps_range_max: 20
+            deload_condition: failed_twice_consecutive
+            deload_percent: 90
+
+        - name: "Dumbbell Romanian Deadlift"
+          modality: strength
+          target_sets: 3
+          target_reps: 12
+          target_load: "28kg DBs"
+          progression_rules:
+            type: double_progression
+            success_condition: all_sets_completed
+            weight_increment_kg: 2.0
+            reps_range_min: 12
+            reps_range_max: 15
+            deload_condition: failed_twice_consecutive
+            deload_percent: 85
+
+        - name: "Dumbbell Lunges"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+          target_load: "20kg DBs"
+          target_notes: "10 reps per leg"
+          progression_rules:
+            type: double_progression
+            success_condition: all_sets_completed
+            weight_increment_kg: 2.0
+            reps_range_min: 10
+            reps_range_max: 15
+            deload_condition: failed_twice_consecutive
+            deload_percent: 90
+
+        - name: "Dumbbell Calf Raises"
+          modality: strength
+          target_sets: 3
+          target_reps: 15
+          target_load: "32kg DBs"
+          progression_rules:
+            type: double_progression
+            success_condition: all_sets_completed
+            weight_increment_kg: 2.0
+            reps_range_min: 15
+            reps_range_max: 25
+            deload_condition: failed_three_consecutive
+            deload_percent: 85
+            notes: "Calves respond well to higher reps"

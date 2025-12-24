@@ -1,0 +1,134 @@
+# PWF v1.1 - Complete Feature Demonstration
+# This example demonstrates all v1.1 features:
+# - Plan status timestamps (activated_at, completed_at)
+# - Glossary block for term definitions
+#
+# A completed 4-week strength program with full lifecycle tracking
+
+plan_version: 1
+
+meta:
+  id: "v1.1-demo-complete"
+  title: "PWF v1.1 Complete Feature Demo"
+  description: "Demonstrates all v1.1 features including plan lifecycle tracking and glossary"
+  author: "PWF Maintainers"
+  status: completed
+  activated_at: "2025-01-06T08:00:00Z"    # When the user started following this plan
+  completed_at: "2025-02-03T20:00:00Z"    # When the user finished the plan (4 weeks later)
+  equipment: [barbell, bench, squat_rack]
+  daysPerWeek: 3
+  tags: [demo, v1.1, lifecycle-tracking, powerlifting]
+
+glossary:
+  "1RM": "One Rep Max - the maximum weight you can lift for a single repetition"
+  "RPE": "Rate of Perceived Exertion on a 1-10 scale, where 10 is maximal effort"
+  "RIR": "Reps in Reserve - how many more reps you could complete before failure"
+  "AMRAP": "As Many Reps As Possible - perform reps with good form until exhaustion"
+  "Autoregulation": "Adjusting training load based on daily readiness and bar speed"
+  "Top Set": "The heaviest working set of the day"
+  "Back-off Sets": "Lighter sets performed after the top set, typically 85-90% of top set weight"
+  "Deload": "A planned recovery week with reduced volume and intensity"
+  "Progressive Overload": "Gradually increasing training stimulus over time through weight, reps, or sets"
+
+cycle:
+  start_date: "2025-01-06"
+  notes: "4-week strength cycle with RPE-based autoregulation. Deload on week 4. Track RPE on all main lifts."
+
+  days:
+    # Day 1 - Squat Focus
+    - id: "squat-day"
+      order: 0
+      focus: "Lower Body - Squat Emphasis"
+      target_session_length_min: 75
+      notes: "Use RPE to determine when to add weight. Stop at RIR 2 on top set."
+
+      exercises:
+        - id: "squat-main"
+          name: "Barbell Back Squat"
+          modality: strength
+          target_sets: 5
+          target_reps: 5
+          target_load: "Work up to top set at RPE 8"
+          target_notes: "Aim for RIR 2. If moving well, add 5-10 lbs next week."
+          cues: "Chest up, knees out, drive through heels"
+
+        - id: "rdl"
+          name: "Romanian Deadlift"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          target_load: "60% of deadlift 1RM"
+          target_notes: "Focus on hamstring stretch"
+
+        - id: "leg-press"
+          name: "Leg Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 12
+          target_load: "RPE 7-8"
+          target_notes: "Back-off volume work"
+
+    # Day 2 - Bench Focus
+    - id: "bench-day"
+      order: 1
+      focus: "Upper Body - Bench Press Emphasis"
+      target_session_length_min: 70
+      notes: "Use autoregulation on main lift. Listen to your body."
+
+      exercises:
+        - id: "bench-main"
+          name: "Barbell Bench Press"
+          modality: strength
+          target_sets: 5
+          target_reps: 5
+          target_load: "Work up to top set at RPE 8"
+          target_notes: "Back-off sets at -10% from top set"
+          cues: "Retract scapula, leg drive, press to lockout"
+
+        - id: "rows"
+          name: "Barbell Rows"
+          modality: strength
+          target_sets: 4
+          target_reps: 8
+          target_load: "RPE 7"
+          target_notes: "Pull to lower chest"
+
+        - id: "ohp"
+          name: "Overhead Press"
+          modality: strength
+          target_sets: 3
+          target_reps: 8
+          target_load: "70% of 1RM"
+          target_notes: "Strict press, no leg drive"
+
+    # Day 3 - Deadlift Focus
+    - id: "deadlift-day"
+      order: 2
+      focus: "Lower Body - Deadlift Emphasis"
+      target_session_length_min: 65
+      notes: "Deadlifts are taxing - use conservative RPE targets"
+
+      exercises:
+        - id: "deadlift-main"
+          name: "Conventional Deadlift"
+          modality: strength
+          target_sets: 3
+          target_reps: 5
+          target_load: "Top set at RPE 8"
+          target_notes: "Focus on bar speed. Stop if speed slows significantly."
+          cues: "Hinge at hips, maintain neutral spine, pull slack out before lift"
+
+        - id: "front-squat"
+          name: "Front Squat"
+          modality: strength
+          target_sets: 3
+          target_reps: 6
+          target_load: "65% of back squat"
+          target_notes: "Quad-focused accessory"
+
+        - id: "pull-ups"
+          name: "Pull-ups"
+          modality: strength
+          target_sets: 3
+          target_reps: 10
+          target_notes: "Perform AMRAP. Aim for 8-12 reps per set. Add weight if hitting 12+ easily."
