@@ -72,7 +72,7 @@
   async function loadExample(example: Example) {
     loading = true;
     try {
-      const response = await fetch(`/examples/${example.filename}`);
+      const response = await fetch(`${import.meta.env.BASE_URL}examples/${example.filename}`);
       if (!response.ok) {
         throw new Error(`Failed to load example: ${response.statusText}`);
       }
