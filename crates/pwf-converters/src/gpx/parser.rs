@@ -398,7 +398,9 @@ fn extract_time_info(waypoints: &[&Waypoint]) -> (Option<String>, Option<String>
                     chrono::DateTime::parse_from_rfc3339(&end_str),
                 ) {
                     let duration = end_dt.signed_duration_since(start_dt);
-                    Some(duration.num_seconds().max(0) as u32)
+                    // Safely convert i64 to u32, saturating at u32::MAX to prevent overflow
+                    let seconds = duration.num_seconds().max(0);
+                    Some(seconds.min(u32::MAX as i64) as u32)
                 } else {
                     None
                 }
@@ -420,8 +422,11 @@ fn extract_date_from_time(timestamp: &Option<String>) -> String {
     timestamp
         .as_ref()
         .and_then(|t| t.split('T').next())
-        .unwrap_or("2025-01-01")
-        .to_string()
+        .map(|s| s.to_string())
+        .unwrap_or_else(|| {
+            // Use current date as fallback instead of hardcoded date
+            chrono::Local::now().format("%Y-%m-%d").to_string()
+        })
 }
 
 /// Calculate total distance along the track
