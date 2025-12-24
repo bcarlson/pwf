@@ -15,10 +15,26 @@ Format conversion library for the Portable Workout Format (PWF). This library en
   - Training Center XML format (Garmin Connect, Strava exports)
   - GPS routes, heart rate, cadence, and multi-lap workouts
 
+- **GPX → PWF** ✅
+  - GPS Exchange Format (universal GPS track format)
+  - Imports GPS routes with elevation and timestamps
+  - Compatible with Garmin, Strava, AllTrails, komoot, and all GPS apps
+
 #### Export (from PWF)
 - **PWF → TCX** ✅
   - Export to Training Center XML for Garmin Connect, Strava, TrainingPeaks
   - Full GPS, heart rate, power, and cadence support
+
+- **PWF → GPX** ✅
+  - Export GPS routes to GPX 1.1 format
+  - Compatible with mapping apps, route sharing platforms
+  - Includes lat/lon coordinates, elevation, and timestamps
+  - Valid for import to Garmin Connect, Strava, Komoot, AllTrails, etc.
+
+- **PWF → CSV** ✅
+  - Export time-series telemetry data for spreadsheet analysis
+  - All telemetry fields including heart rate, power, cadence, GPS, etc.
+  - Compatible with Excel, Google Sheets, R, Python pandas
 
 ### FIT Format Support
 
@@ -87,14 +103,26 @@ pwf convert --from fit --to pwf activity.fit workout.yaml
 # Import from TCX
 pwf convert --from tcx --to pwf activity.tcx workout.yaml
 
+# Import from GPX
+pwf convert --from gpx --to pwf route.gpx workout.yaml
+
 # Export to TCX
 pwf convert --from pwf --to tcx workout.yaml activity.tcx
 
+# Export to GPX (GPS routes)
+pwf convert --from pwf --to gpx workout.yaml route.gpx
+
+# Export to CSV (time-series telemetry data)
+pwf convert --from pwf --to csv workout.yaml telemetry.csv
+
 # Summary only (skip time-series GPS data for imports)
+pwf convert --from gpx --to pwf --summary-only route.gpx workout.yaml
 pwf convert --from tcx --to pwf --summary-only activity.tcx workout.yaml
 
 # Verbose output (show conversion warnings and progress)
+pwf convert --from gpx --to pwf --verbose route.gpx workout.yaml
 pwf convert --from fit --to pwf --verbose activity.fit workout.yaml
+pwf convert --from pwf --to csv --verbose workout.yaml telemetry.csv
 ```
 
 ### TCX Format Support
@@ -132,7 +160,7 @@ The TCX (Training Center XML) converter extracts:
 ### Library Usage
 
 ```rust
-use pwf_converters::{fit_to_pwf, tcx_to_pwf, pwf_to_tcx};
+use pwf_converters::{fit_to_pwf, tcx_to_pwf, gpx_to_pwf, pwf_to_tcx, pwf_to_gpx};
 use std::fs::File;
 
 // Import: Convert FIT file to PWF YAML
@@ -143,9 +171,17 @@ let result = fit_to_pwf(fit_file, false)?;
 let tcx_file = File::open("activity.tcx")?;
 let result = tcx_to_pwf(tcx_file, false)?;
 
+// Import: Convert GPX file to PWF YAML
+let gpx_file = File::open("route.gpx")?;
+let result = gpx_to_pwf(gpx_file, false)?;
+
 // Export: Convert PWF history to TCX XML
 let history: pwf_core::history::WpsHistory = pwf_core::history::parse(&pwf_yaml)?;
 let result = pwf_to_tcx(&history)?;
+
+// Export: Convert PWF history to GPX (GPS routes only)
+let history: pwf_core::history::WpsHistory = pwf_core::history::parse(&pwf_yaml)?;
+let result = pwf_to_gpx(&history)?;
 
 // Check for warnings (both import and export)
 if result.has_warnings() {
@@ -159,6 +195,9 @@ std::fs::write("workout.yaml", &result.pwf_yaml)?;
 
 // Save TCX XML (export)
 std::fs::write("activity.tcx", &result.tcx_xml)?;
+
+// Save GPX XML (export)
+std::fs::write("route.gpx", &result.gpx_xml)?;
 ```
 
 ## Conversion Quality
@@ -326,12 +365,157 @@ For detailed analysis, see: [FIT_EXPORT_ANALYSIS.md](../../FIT_EXPORT_ANALYSIS.m
 **Future Consideration:**
 We monitor the Rust ecosystem for FIT writing libraries. If a production-ready library emerges (version 1.0+, well-documented, actively maintained), we will implement FIT export.
 
+### PWF → CSV (Time-Series Telemetry Export) ✅
+
+**Status:** Fully implemented
+
+Export second-by-second time-series telemetry data from PWF workouts to CSV format for in-depth analysis in spreadsheet applications, Python, R, or statistical tools.
+
+```bash
+# Export telemetry to CSV
+pwf convert --from pwf --to csv workout.yaml telemetry.csv
+
+# Verbose output with export statistics
+pwf convert --from pwf --to csv --verbose workout.yaml telemetry.csv
+```
+
+**CSV Export Features:**
+- ✅ All time-series telemetry fields (28 columns)
+- ✅ Multiple workouts combined into one CSV
+- ✅ ISO 8601 timestamps for easy sorting/filtering
+- ✅ Empty cells for missing/optional fields
+- ✅ Compatible with Excel, Google Sheets, Numbers
+- ✅ Ready for pandas, R, or statistical analysis
+- ✅ Proper CSV escaping and formatting
+
+**Exported Fields:**
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| `workout_label` | Workout identifier | `workout-123-Cycling-set1` |
+| `timestamp` | ISO 8601 timestamp | `2025-01-15T14:30:00Z` |
+| `elapsed_sec` | Seconds since start | `0`, `1`, `2`, ... |
+| `heart_rate` | Heart rate (bpm) | `145`, `147`, `149` |
+| `power` | Power output (watts) | `200`, `205`, `210` |
+| `cadence` | Cadence (RPM/SPM) | `90`, `91`, `92` |
+| `speed_mps` | Speed (m/s) | `5.2`, `5.3`, `5.4` |
+| `elevation_m` | Elevation (meters) | `100.5`, `100.8`, `101.0` |
+| `latitude` | Latitude (degrees) | `37.7749` |
+| `longitude` | Longitude (degrees) | `-122.4194` |
+| `distance_m` | Cumulative distance (m) | `0.0`, `5.3`, `10.7` |
+| `temperature_c` | Temperature (°C) | `20.0` |
+| `grade_percent` | Grade/slope (%) | `2.5`, `-1.0` |
+| `respiration_rate` | Breaths per minute | `18`, `20` |
+| `core_temperature_c` | Core temp (°C) | `37.2` |
+| `muscle_oxygen_percent` | SmO2 (%) | `65.5` |
+| `power_balance` | L/R power balance (%) | `51.2` |
+| `left_pedal_smoothness` | Left smoothness (%) | `28.5` |
+| `right_pedal_smoothness` | Right smoothness (%) | `26.8` |
+| `left_torque_effectiveness` | Left TE (%) | `92.3` |
+| `right_torque_effectiveness` | Right TE (%) | `90.7` |
+| `stride_length_m` | Stride length (m) | `1.25` |
+| `vertical_oscillation_cm` | Vert. osc. (cm) | `8.5` |
+| `ground_contact_time_ms` | GCT (ms) | `245` |
+| `ground_contact_balance` | L/R GCT balance (%) | `50.2` |
+| `stroke_rate` | Stroke rate (SPM) | `32` |
+| `stroke_count` | Cumulative strokes | `120` |
+| `swolf` | SWOLF efficiency score | `45` |
+
+**Example CSV Output:**
+```csv
+workout_label,timestamp,elapsed_sec,heart_rate,power,cadence,speed_mps,elevation_m,latitude,longitude,distance_m,temperature_c
+workout-123-Cycling-set1,2025-01-15T14:30:00Z,0,145,200,90,5.2,100.5,37.7749,-122.4194,0.0,20.0
+workout-123-Cycling-set1,2025-01-15T14:30:01Z,1,147,205,91,5.3,100.8,37.7750,-122.4195,5.3,20.0
+workout-123-Cycling-set1,2025-01-15T14:30:02Z,2,149,210,92,5.4,101.0,37.7751,-122.4196,10.7,20.0
+```
+
+**Use Cases:**
+- **Excel/Sheets**: Create charts, calculate statistics, filter by thresholds
+- **Python pandas**: `df = pd.read_csv('telemetry.csv')` for data analysis
+- **R**: `data <- read.csv('telemetry.csv')` for statistical modeling
+- **Tableau/Power BI**: Import for interactive dashboards
+- **Custom analysis**: Build your own metrics and visualizations
+
+**Requirements:**
+- PWF history file must contain **time-series telemetry data** (not just summary metrics)
+- Time-series data is recorded second-by-second during workouts with GPS/sensors
+- FIT files from Garmin/Wahoo/COROS imported with `pwf convert` include time-series data
+
+**Library Usage:**
+```rust
+use pwf_converters::{export_telemetry_to_csv, CsvExportOptions};
+use std::fs;
+
+// Parse PWF history
+let pwf_content = fs::read_to_string("workout.yaml")?;
+let history: pwf_core::history::WpsHistory = pwf_core::history::parse(&pwf_content)?;
+
+// Export to CSV
+let options = CsvExportOptions::default();
+let result = export_telemetry_to_csv(&history, &options)?;
+
+// Check warnings and save
+if result.has_warnings() {
+    for warning in &result.warnings {
+        println!("Warning: {}", warning);
+    }
+}
+
+println!("Exported {} data points from {} workouts",
+         result.data_points, result.workouts_processed);
+
+fs::write("telemetry.csv", &result.csv_data)?;
+```
+
+**Error Handling:**
+The CSV exporter validates data before export:
+- ✅ All time-series arrays must have matching lengths
+- ✅ Clear error messages if no telemetry data found
+- ⚠️ Warnings for validation issues (logged but export continues)
+- ❌ Error if only summary metrics (no time-series data)
+
+**Note:** If you only have summary telemetry (heart_rate_avg, power_avg, etc.) without time-series arrays, CSV export will fail with a helpful error message. Time-series data is required for CSV export.
+
+### GPX Format Support
+
+The GPX (GPS Exchange Format) converter provides bidirectional conversion:
+
+#### GPX → PWF Import ✅
+
+Import GPS tracks from GPX files into PWF history format:
+
+**Supported Data:**
+- **GPS Tracks**: Position history with lat/lon coordinates
+- **Elevation Data**: Ascent, descent, min/max elevation
+- **Timestamps**: ISO 8601 format for each track point
+- **Distance Calculation**: Haversine formula for accurate distances
+- **Bounding Box**: Automatic calculation for map display
+- **Sport Detection**: Infers sport type from track metadata
+
+**Usage:**
+```bash
+# Import GPX track
+pwf convert --from gpx --to pwf route.gpx workout.yaml
+
+# Summary only (skip time-series position data)
+pwf convert --from gpx --to pwf --summary-only route.gpx workout.yaml
+```
+
+**Limitations:**
+- Standard GPX doesn't include heart rate, power, or cadence
+- Sport type is inferred from metadata (may default to "Other")
+- Each track becomes a separate workout
+- Routes and waypoints are not fully supported (use tracks)
+
+#### GPX ← PWF Export ✅
+
+Export PWF workouts with GPS data to GPX format for navigation apps.
+
+**See "PWF → GPX" section above for export details.**
+
 ## Future Formats
 
 Planned converter support:
-- **GPX → PWF** (GPS Exchange Format import for basic GPS tracks)
-- **GPX ← PWF** (Export routes for navigation apps)
-- **PWF → CSV** (Export time-series telemetry data for spreadsheet analysis)
 - **PWF → FIT** (If production-ready Rust library emerges - see `FIT_EXPORT_ANALYSIS.md`)
 
 ## Contributing

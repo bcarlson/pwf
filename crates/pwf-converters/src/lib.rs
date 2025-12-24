@@ -19,11 +19,18 @@
 //! ```
 
 pub mod common;
+pub mod csv;
 pub mod error;
 pub mod fit;
+pub mod gpx;
 pub mod tcx;
 
 // Re-export main types and functions
-pub use error::{ConversionError, ConversionResult, ConversionWarning, TcxExportResult};
+pub use csv::{export_telemetry_to_csv, CsvExportOptions};
+pub use error::{
+    ConversionError, ConversionResult, ConversionWarning, CsvExportResult, GpxExportResult,
+    TcxExportResult,
+};
 pub use fit::fit_to_pwf;
+pub use gpx::{gpx_to_pwf, pwf_to_gpx};
 pub use tcx::{pwf_to_tcx, tcx_to_pwf};

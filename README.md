@@ -287,19 +287,24 @@ Add to your `.vscode/settings.json`:
 - [x] **Exercise library references**
 - [x] **Workout templates**
 
-### Future Considerations
-- [ ] **GPX Format Support** (GPS Exchange Format)
-  - GPX → PWF import for basic GPS tracks
+### v1.2.0 (Current)
+- [x] **GPX Format Support** (GPS Exchange Format)
+  - GPX → PWF import for GPS tracks
   - PWF → GPX export for route sharing
-- [ ] **CSV Export** (Time-series data for spreadsheets)
+  - Full CLI integration: `pwf convert --from gpx --to pwf` and `pwf convert --from pwf --to gpx`
+- [x] **CSV Export** (Time-series data for spreadsheets)
   - Export telemetry data to CSV for analysis
   - Compatible with Excel, Google Sheets
+  - CLI command: `pwf convert --from pwf --to csv`
+- [x] **Expanded Sport Type Mappings**
+  - 22 sport types (up from 7)
+  - Comprehensive FIT, TCX, and GPX mappings
+  - Includes: hiking, yoga, pilates, crossfit, skiing, snowboarding, kayaking, etc.
+
+### Future Considerations
 - [ ] **FIT Export** (if production-ready Rust library emerges)
   - Monitor ecosystem for FIT writing libraries
   - Currently recommended: use TCX export
-- [ ] **Additional Sport Types**
-  - Expand sport type mappings
-  - Rowing, skiing, hiking, etc.
 - [ ] **Web Interface**
   - Browser-based validator
   - Visual plan builder
