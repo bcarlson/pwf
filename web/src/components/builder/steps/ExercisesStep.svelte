@@ -1,11 +1,14 @@
 <script lang="ts">
   import ExerciseForm from '../forms/ExerciseForm.svelte';
   import { builderState } from '../../../lib/builderState';
+  import { dndzone } from 'svelte-dnd-action';
+  import type { DndEvent } from 'svelte-dnd-action';
 
   $: days = $builderState.plan.cycle.days;
   $: currentDayIndex = $builderState.currentDayIndex;
   $: currentDay = days[currentDayIndex];
-  $: hasExercises = currentDay?.exercises.length > 0;
+  $: exercises = currentDay?.exercises.map((ex, i) => ({ ...ex, id: i })) || [];
+  $: hasExercises = exercises.length > 0;
 
   function setDay(index: number) {
     builderState.setCurrentDay(index);
@@ -13,6 +16,19 @@
 
   function addExercise() {
     builderState.addExercise(currentDayIndex);
+  }
+
+  function handleDndConsider(e: CustomEvent<DndEvent>) {
+    // Only update local array for visual feedback during drag
+    exercises = e.detail.items as any;
+  }
+
+  function handleDndFinalize(e: CustomEvent<DndEvent>) {
+    // Update both local and global state when drag completes
+    const reorderedExercises = e.detail.items.map(({ id, ...ex }: any) => ex);
+    builderState.reorderExercises(currentDayIndex, reorderedExercises);
+    // Re-sync local array with updated state to ensure consistency
+    exercises = currentDay?.exercises.map((ex, i) => ({ ...ex, id: i })) || [];
   }
 
   $: hasValidationErrors = days.some(day => day.exercises.length === 0);
@@ -70,12 +86,24 @@
 
   <!-- Exercises list -->
   {#if hasExercises}
-    <div class="exercises-list">
-      {#each currentDay.exercises as exercise, index}
-        <ExerciseForm
-          dayIndex={currentDayIndex}
-          exerciseIndex={index}
-        />
+    <div class="exercises-list"
+         use:dndzone={{
+           items: exercises,
+           flipDurationMs: 200,
+           dragDisabled: false,
+           dropFromOthersDisabled: true
+         }}
+         on:consider={handleDndConsider}
+         on:finalize={handleDndFinalize}
+    >
+      {#each exercises as exercise, index (exercise.id)}
+        <div class="exercise-wrapper">
+          <span class="drag-handle" title="Drag to reorder">⋮⋮</span>
+          <ExerciseForm
+            dayIndex={currentDayIndex}
+            exerciseIndex={index}
+          />
+        </div>
       {/each}
     </div>
   {:else}
@@ -221,6 +249,34 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+  }
+
+  .exercise-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    cursor: grab;
+  }
+
+  .exercise-wrapper:active {
+    cursor: grabbing;
+  }
+
+  .exercise-wrapper .drag-handle {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    cursor: grab;
+    user-select: none;
+    line-height: 1;
+    margin-top: 1.5rem; /* Align with exercise form header */
+  }
+
+  .exercise-wrapper .drag-handle:active {
+    cursor: grabbing;
+  }
+
+  .exercise-wrapper > :global(.exercise-form) {
+    flex: 1;
   }
 
   .empty-state {
