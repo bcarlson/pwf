@@ -8,7 +8,7 @@ import { writable } from 'svelte/store';
 export const wasmReady = writable<boolean>(false);
 
 // Current active tab
-export type TabType = 'validate' | 'convert' | 'visualize';
+export type TabType = 'validate' | 'convert' | 'visualize' | 'builder';
 export const currentTab = writable<TabType>('validate');
 
 // File upload state
