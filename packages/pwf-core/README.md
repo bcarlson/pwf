@@ -1,4 +1,4 @@
-# @pwf/core
+# @pwf-dev/core
 
 TypeScript/JavaScript core library for parsing, validating, and generating PWF files in Node.js and browser environments.
 
@@ -25,7 +25,7 @@ import {
   PlanBuilder,
   isValidationIssueList,
   toYAML
-} from '@pwf/core';
+} from '@pwf-dev/core';
 
 const plan = parsePlan(yamlString);
 const history = parseHistory(yamlString);
