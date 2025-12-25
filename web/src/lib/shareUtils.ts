@@ -49,33 +49,50 @@ function validatePlanStructure(plan: any): plan is PlanDraft {
  */
 export function decodePlanFromUrl(url: string = window.location.href): PlanDraft | null {
   try {
+    console.log('[PWF Share] Decoding plan from URL:', url);
     const urlObj = new URL(url);
     const planParam = urlObj.searchParams.get('plan');
+    console.log('[PWF Share] Search param plan:', planParam ? 'found' : 'not found');
 
     if (!planParam) {
       // Try hash-based routing
       const hash = urlObj.hash;
+      console.log('[PWF Share] Checking hash:', hash.substring(0, 50) + '...');
       const match = hash.match(/[?&]plan=([^&]+)/);
       if (match) {
+        console.log('[PWF Share] Found plan in hash, compressed length:', match[1].length);
         const compressed = match[1];
         const json = decompressFromEncodedURIComponent(compressed);
         if (json) {
+          console.log('[PWF Share] Decompressed JSON length:', json.length);
           const parsed = JSON.parse(json);
-          return validatePlanStructure(parsed) ? parsed : null;
+          const isValid = validatePlanStructure(parsed);
+          console.log('[PWF Share] Plan validation:', isValid ? 'PASSED ✓' : 'FAILED ✗');
+          if (isValid) {
+            console.log('[PWF Share] Plan loaded:', parsed.meta?.name || 'Unnamed Plan');
+          }
+          return isValid ? parsed : null;
+        } else {
+          console.error('[PWF Share] Failed to decompress plan data');
         }
+      } else {
+        console.log('[PWF Share] No plan parameter found in hash');
       }
       return null;
     }
 
     const json = decompressFromEncodedURIComponent(planParam);
     if (!json) {
+      console.error('[PWF Share] Failed to decompress plan from search param');
       return null;
     }
 
     const parsed = JSON.parse(json);
-    return validatePlanStructure(parsed) ? parsed : null;
+    const isValid = validatePlanStructure(parsed);
+    console.log('[PWF Share] Plan validation:', isValid ? 'PASSED ✓' : 'FAILED ✗');
+    return isValid ? parsed : null;
   } catch (error) {
-    console.error('Failed to decode plan from URL:', error);
+    console.error('[PWF Share] Failed to decode plan from URL:', error);
     return null;
   }
 }
