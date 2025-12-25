@@ -19,12 +19,16 @@
   }
 
   function handleDndConsider(e: CustomEvent<DndEvent>) {
+    // Only update local array for visual feedback during drag
     exercises = e.detail.items as any;
   }
 
   function handleDndFinalize(e: CustomEvent<DndEvent>) {
+    // Update both local and global state when drag completes
     const reorderedExercises = e.detail.items.map(({ id, ...ex }: any) => ex);
     builderState.reorderExercises(currentDayIndex, reorderedExercises);
+    // Re-sync local array with updated state to ensure consistency
+    exercises = currentDay?.exercises.map((ex, i) => ({ ...ex, id: i })) || [];
   }
 
   $: hasValidationErrors = days.some(day => day.exercises.length === 0);
@@ -83,7 +87,12 @@
   <!-- Exercises list -->
   {#if hasExercises}
     <div class="exercises-list"
-         use:dndzone={{ items: exercises, flipDurationMs: 200 }}
+         use:dndzone={{
+           items: exercises,
+           flipDurationMs: 200,
+           dragDisabled: false,
+           dropFromOthersDisabled: true
+         }}
          on:consider={handleDndConsider}
          on:finalize={handleDndFinalize}
     >

@@ -43,12 +43,16 @@ describe('shareUtils', () => {
       expect(url.length).toBeGreaterThan('https://example.com/#/builder?plan='.length);
     });
 
-    it('should use window.location.origin as default base URL', () => {
-      (window as any).location = { origin: 'https://test.com' };
+    it('should use window.location as default base URL', () => {
+      (window as any).location = {
+        origin: 'https://test.com',
+        href: 'https://test.com/pwf/index.html',
+        pathname: '/pwf/index.html'
+      };
 
       const url = encodePlanToUrl(mockPlan);
 
-      expect(url).toContain('https://test.com/#/builder?plan=');
+      expect(url).toContain('https://test.com/pwf/#/builder?plan=');
     });
 
     it('should throw error for invalid plan', () => {
@@ -115,7 +119,11 @@ describe('shareUtils', () => {
 
   describe('copyShareLink', () => {
     beforeEach(() => {
-      (window as any).location = { origin: 'https://test.com' };
+      (window as any).location = {
+        origin: 'https://test.com',
+        href: 'https://test.com/app/index.html',
+        pathname: '/app/index.html'
+      };
     });
 
     it('should copy share link to clipboard', async () => {

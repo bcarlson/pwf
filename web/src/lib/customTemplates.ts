@@ -38,8 +38,16 @@ export function saveCustomTemplate(
 ): CustomTemplate {
   const templates = getCustomTemplates();
 
+  // Generate unique ID using crypto.randomUUID if available, fallback to timestamp + random
+  const generateId = (): string => {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return `custom-${crypto.randomUUID()}`;
+    }
+    return `custom-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+  };
+
   const newTemplate: CustomTemplate = {
-    id: `custom-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    id: generateId(),
     name,
     description,
     plan,

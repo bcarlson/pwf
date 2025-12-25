@@ -19,12 +19,16 @@
   }
 
   function handleDndConsider(e: CustomEvent<DndEvent>) {
+    // Only update local array for visual feedback during drag
     days = e.detail.items as any;
   }
 
   function handleDndFinalize(e: CustomEvent<DndEvent>) {
+    // Update both local and global state when drag completes
     const reorderedDays = e.detail.items.map(({ id, ...day }: any) => day);
     builderState.reorderDays(reorderedDays);
+    // Re-sync local array with updated state to ensure consistency
+    days = $builderState.plan.cycle.days.map((day, index) => ({ ...day, id: index }));
   }
 </script>
 
@@ -43,7 +47,12 @@
   {/if}
 
   <div class="days-list"
-       use:dndzone={{ items: days, flipDurationMs: 200 }}
+       use:dndzone={{
+         items: days,
+         flipDurationMs: 200,
+         dragDisabled: false,
+         dropFromOthersDisabled: true
+       }}
        on:consider={handleDndConsider}
        on:finalize={handleDndFinalize}
   >
