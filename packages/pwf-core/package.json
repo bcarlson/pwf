@@ -1,6 +1,6 @@
 {
-  "name": "@pwf/core",
-  "version": "0.1.0",
+  "name": "@pwf-dev/core",
+  "version": "0.1.1",
   "description": "Portable Workout Format core parser and validator",
   "type": "module",
   "main": "./dist/index.cjs",

@@ -3,7 +3,7 @@
 A human-readable, YAML-based specification for defining workout plans and exporting workout history.
 
 [![CI](https://github.com/bcarlson/pwf/actions/workflows/ci.yaml/badge.svg)](https://github.com/bcarlson/pwf/actions/workflows/ci.yaml)
-[![npm](https://img.shields.io/npm/v/%40pwf%2Fcore)](https://www.npmjs.com/package/@pwf/core)
+[![npm](https://img.shields.io/npm/v/%40pwf-dev%2Fcore)](https://www.npmjs.com/package/@pwf-dev/core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## Overview
