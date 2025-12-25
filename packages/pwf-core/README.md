@@ -9,10 +9,12 @@ npm install
 npm run build
 ```
 
-Generate API docs:
+Generate API documentation:
 ```bash
-npm run docs
+npm run docs  # Generates HTML docs in ./docs/
 ```
+
+View the generated documentation by opening `docs/index.html` in a browser.
 
 ## Usage
 
