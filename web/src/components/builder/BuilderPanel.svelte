@@ -16,13 +16,17 @@
 
   // Load plan from URL if present and load custom templates
   onMount(() => {
+    console.log('[BuilderPanel] Component mounted');
     customTemplates = getCustomTemplates();
 
     const sharedPlan = getPlanFromCurrentUrl();
+    console.log('[BuilderPanel] Shared plan from URL:', sharedPlan ? 'FOUND ✓' : 'NOT FOUND');
     if (sharedPlan) {
+      console.log('[BuilderPanel] Loading shared plan:', sharedPlan.meta?.name || 'Unnamed');
       builderState.loadPlan(sharedPlan);
       builderState.nextStep(); // Move to first step
       selectedTemplate = 'scratch'; // Show wizard
+      console.log('[BuilderPanel] Wizard should now be visible');
     }
   });
 
