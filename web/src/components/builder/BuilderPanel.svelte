@@ -1,14 +1,30 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import BuilderWizard from './BuilderWizard.svelte';
   import { builderState } from '../../lib/builderState';
   import { parse as parseYAML } from 'yaml';
   import { convertToDraft } from './utils/yamlImport';
   import { getAllTemplates, type WorkoutTemplate } from '../../lib/workoutTemplates';
+  import { getPlanFromCurrentUrl } from '../../lib/shareUtils';
+  import { getCustomTemplates, deleteCustomTemplate, type CustomTemplate } from '../../lib/customTemplates';
 
   let selectedTemplate: 'templates' | 'scratch' | 'load-yaml' | null = null;
   let yamlInput: string = '';
   let errorMessage: string = '';
   let templates = getAllTemplates();
+  let customTemplates: CustomTemplate[] = [];
+
+  // Load plan from URL if present and load custom templates
+  onMount(() => {
+    customTemplates = getCustomTemplates();
+
+    const sharedPlan = getPlanFromCurrentUrl();
+    if (sharedPlan) {
+      builderState.loadPlan(sharedPlan);
+      builderState.nextStep(); // Move to first step
+      selectedTemplate = 'scratch'; // Show wizard
+    }
+  });
 
   function selectTemplate(choice: 'templates' | 'scratch' | 'load-yaml') {
     selectedTemplate = choice;
@@ -25,6 +41,24 @@
     builderState.loadPlan(template.plan);
     builderState.nextStep();
     selectedTemplate = 'scratch'; // Switch to wizard mode
+  }
+
+  function loadCustomTemplate(template: CustomTemplate) {
+    builderState.loadPlan(template.plan);
+    builderState.nextStep();
+    selectedTemplate = 'scratch'; // Switch to wizard mode
+  }
+
+  function handleDeleteCustomTemplate(id: string) {
+    if (confirm('Are you sure you want to delete this template?')) {
+      try {
+        deleteCustomTemplate(id);
+        customTemplates = getCustomTemplates(); // Refresh list
+      } catch (error) {
+        console.error('Failed to delete template:', error);
+        alert('Failed to delete template.');
+      }
+    }
   }
 
   function handleYamlLoad() {
@@ -73,6 +107,7 @@
     yamlInput = '';
     errorMessage = '';
     builderState.reset();
+    customTemplates = getCustomTemplates(); // Refresh custom templates
   }
 
   $: showWizard = selectedTemplate === 'scratch' && $builderState.currentStep > 0;
@@ -125,7 +160,42 @@
       <!-- Template Gallery -->
       {#if selectedTemplate === 'templates'}
         <div class="template-gallery">
-          <h3>Choose a Template</h3>
+          <!-- Custom Templates Section -->
+          {#if customTemplates.length > 0}
+            <div class="custom-templates-section">
+              <h3>My Custom Templates</h3>
+              <div class="template-grid">
+                {#each customTemplates as template}
+                  <div class="custom-template-wrapper">
+                    <button
+                      class="workout-template custom-template"
+                      on:click={() => loadCustomTemplate(template)}
+                    >
+                      <div class="template-header">
+                        <h4>{template.name}</h4>
+                        <span class="badge badge-custom">Custom</span>
+                      </div>
+                      <p class="template-description">{template.description || 'No description'}</p>
+                      <div class="template-meta">
+                        <span>📅 {template.plan.meta?.days_per_week || 'N/A'} days/week</span>
+                        <span>🏋️ {template.plan.cycle.days.length} workouts</span>
+                      </div>
+                    </button>
+                    <button
+                      class="btn-delete-template"
+                      on:click|stopPropagation={() => handleDeleteCustomTemplate(template.id)}
+                      title="Delete template"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
+
+          <!-- Built-in Templates Section -->
+          <h3>{customTemplates.length > 0 ? 'Built-in Templates' : 'Choose a Template'}</h3>
           <div class="template-grid">
             {#each templates as template}
               <button
@@ -491,6 +561,64 @@
     justify-content: center;
     padding-top: 1rem;
     border-top: 1px solid var(--border-color);
+  }
+
+  /* Custom Templates Styles */
+  .custom-templates-section {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid var(--border-color);
+  }
+
+  .custom-templates-section h3 {
+    margin-bottom: 1.5rem;
+  }
+
+  .custom-template-wrapper {
+    position: relative;
+  }
+
+  .custom-template {
+    border: 2px solid var(--success-color);
+  }
+
+  .custom-template:hover {
+    border-color: var(--success-color);
+  }
+
+  .btn-delete-template {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: var(--error-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.2s;
+    z-index: 10;
+  }
+
+  .custom-template-wrapper:hover .btn-delete-template {
+    opacity: 1;
+  }
+
+  .btn-delete-template:hover {
+    background: #c82333;
+    transform: scale(1.1);
+  }
+
+  .badge-custom {
+    background: rgba(25, 135, 84, 0.1);
+    border: 1px solid var(--success-color);
+    color: var(--success-color);
   }
 
   @media (max-width: 768px) {

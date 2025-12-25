@@ -197,6 +197,17 @@ function createBuilderState() {
       };
     }),
 
+    reorderDays: (newDays: Day[]) => update(state => ({
+      ...state,
+      plan: {
+        ...state.plan,
+        cycle: {
+          ...state.plan.cycle,
+          days: newDays
+        }
+      }
+    })),
+
     // Exercise operations
     addExercise: (dayIndex: number) => update(state => {
       const newDays = [...state.plan.cycle.days];
@@ -238,6 +249,25 @@ function createBuilderState() {
       newDays[dayIndex].exercises[exerciseIndex] = {
         ...newDays[dayIndex].exercises[exerciseIndex],
         ...exercise
+      };
+
+      return {
+        ...state,
+        plan: {
+          ...state.plan,
+          cycle: {
+            ...state.plan.cycle,
+            days: newDays
+          }
+        }
+      };
+    }),
+
+    reorderExercises: (dayIndex: number, newExercises: Exercise[]) => update(state => {
+      const newDays = [...state.plan.cycle.days];
+      newDays[dayIndex] = {
+        ...newDays[dayIndex],
+        exercises: newExercises
       };
 
       return {

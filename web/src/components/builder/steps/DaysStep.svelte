@@ -1,8 +1,10 @@
 <script lang="ts">
   import DayForm from '../forms/DayForm.svelte';
   import { builderState } from '../../../lib/builderState';
+  import { dndzone } from 'svelte-dnd-action';
+  import type { DndEvent } from 'svelte-dnd-action';
 
-  $: days = $builderState.plan.cycle.days;
+  $: days = $builderState.plan.cycle.days.map((day, index) => ({ ...day, id: index }));
   $: hasValidDays = days.length >= 1;
 
   function addDay() {
@@ -14,6 +16,15 @@
       return; // Prevent removing the last day
     }
     builderState.removeDay(index);
+  }
+
+  function handleDndConsider(e: CustomEvent<DndEvent>) {
+    days = e.detail.items as any;
+  }
+
+  function handleDndFinalize(e: CustomEvent<DndEvent>) {
+    const reorderedDays = e.detail.items.map(({ id, ...day }: any) => day);
+    builderState.reorderDays(reorderedDays);
   }
 </script>
 
@@ -31,11 +42,18 @@
     </div>
   {/if}
 
-  <div class="days-list">
-    {#each days as day, index}
+  <div class="days-list"
+       use:dndzone={{ items: days, flipDurationMs: 200 }}
+       on:consider={handleDndConsider}
+       on:finalize={handleDndFinalize}
+  >
+    {#each days as day, index (day.id)}
       <div class="day-card">
         <div class="day-card-header">
-          <h3>Day {index + 1}</h3>
+          <div class="day-header-left">
+            <span class="drag-handle" title="Drag to reorder">⋮⋮</span>
+            <h3>Day {index + 1}</h3>
+          </div>
           {#if days.length > 1}
             <button
               type="button"
@@ -115,6 +133,12 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    cursor: grab;
+    transition: all 0.2s;
+  }
+
+  .day-card:active {
+    cursor: grabbing;
   }
 
   .day-card-header {
@@ -123,6 +147,24 @@
     align-items: center;
     padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--border-color);
+  }
+
+  .day-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .drag-handle {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    cursor: grab;
+    user-select: none;
+    line-height: 1;
+  }
+
+  .drag-handle:active {
+    cursor: grabbing;
   }
 
   .day-card-header h3 {
