@@ -33,10 +33,10 @@ describe('BuilderPanel', () => {
       expect(getByText('Import YAML')).toBeTruthy();
     });
 
-    it('should show "Coming Soon" badges on templates and import options', () => {
-      const { getAllByText } = render(BuilderPanel);
-      const comingSoonBadges = getAllByText('Coming Soon');
-      expect(comingSoonBadges.length).toBe(2);
+    it('should not show "Coming Soon" badges anymore', () => {
+      const { queryByText } = render(BuilderPanel);
+      const comingSoonBadge = queryByText('Coming Soon');
+      expect(comingSoonBadge).toBeNull();
     });
   });
 
@@ -50,13 +50,14 @@ describe('BuilderPanel', () => {
       expect(templatesButton?.classList.contains('selected')).toBe(true);
     });
 
-    it('should display error message when templates option is selected', async () => {
+    it('should display template gallery when templates option is selected', async () => {
       const { getByText } = render(BuilderPanel);
       const templatesButton = getByText('Use a Template').closest('button');
 
       await fireEvent.click(templatesButton);
 
-      expect(getByText('Template selection coming in Phase 2')).toBeTruthy();
+      expect(getByText('Choose a Template')).toBeTruthy();
+      expect(getByText('5×5 Strength Program')).toBeTruthy();
     });
 
     it('should select "scratch" option and start wizard', async () => {
@@ -100,20 +101,21 @@ describe('BuilderPanel', () => {
       expect(getByText('or paste YAML content')).toBeTruthy();
     });
 
-    it('should clear error message when switching templates', async () => {
+    it('should hide template gallery when switching to another option', async () => {
       const { getByText, queryByText } = render(BuilderPanel);
 
-      // Select templates to show error
+      // Select templates to show gallery
       const templatesButton = getByText('Use a Template').closest('button');
       await fireEvent.click(templatesButton);
-      expect(getByText('Template selection coming in Phase 2')).toBeTruthy();
+      expect(getByText('Choose a Template')).toBeTruthy();
 
       // Select different option
       const yamlButton = getByText('Import YAML').closest('button');
       await fireEvent.click(yamlButton);
 
-      // Error should be cleared
-      expect(queryByText('Template selection coming in Phase 2')).toBeNull();
+      // Gallery should be hidden
+      expect(queryByText('Choose a Template')).toBeNull();
+      expect(getByText('Import YAML File')).toBeTruthy();
     });
   });
 
@@ -153,18 +155,25 @@ describe('BuilderPanel', () => {
       expect(getByText('Please enter YAML content')).toBeTruthy();
     });
 
-    it('should show "coming in Phase 2" message when loading valid YAML', async () => {
-      const { getByText, getByPlaceholderText } = render(BuilderPanel);
+    it('should load valid YAML and start wizard', async () => {
+      const { getByText, getByPlaceholderText, queryByText } = render(BuilderPanel);
       const yamlButton = getByText('Import YAML').closest('button');
       await fireEvent.click(yamlButton);
 
       const textarea = getByPlaceholderText('Paste your PWF YAML content here...');
-      await fireEvent.input(textarea, { target: { value: 'plan_version: 1\nmeta:\n  name: Test' } });
+      const validYaml = 'plan_version: 1\nmeta:\n  name: Test Plan\ncycle:\n  days:\n    - exercises: []';
+      await fireEvent.input(textarea, { target: { value: validYaml } });
 
       const loadButton = getByText('Load YAML');
       await fireEvent.click(loadButton);
 
-      expect(getByText('YAML import coming in Phase 2')).toBeTruthy();
+      // Should switch to wizard mode
+      expect(queryByText('Import YAML File')).toBeNull();
+
+      // Verify state was loaded
+      const state = get(builderState);
+      expect(state.plan.meta?.name).toBe('Test Plan');
+      expect(state.currentStep).toBe(1);
     });
 
     it('should show file upload button', async () => {
@@ -176,14 +185,15 @@ describe('BuilderPanel', () => {
     });
 
     it('should handle file upload with valid content', async () => {
-      const { getByText, container } = render(BuilderPanel);
+      const { getByText, container, queryByText } = render(BuilderPanel);
       const yamlButton = getByText('Import YAML').closest('button');
       await fireEvent.click(yamlButton);
 
       const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;
       expect(fileInput).toBeTruthy();
 
-      const file = new File(['plan_version: 1\nmeta:\n  name: Test'], 'test.yaml', { type: 'text/yaml' });
+      const validYaml = 'plan_version: 1\nmeta:\n  name: Test Plan\ncycle:\n  days:\n    - exercises: []';
+      const file = new File([validYaml], 'test.yaml', { type: 'text/yaml' });
 
       Object.defineProperty(fileInput, 'files', {
         value: [file],
@@ -195,7 +205,12 @@ describe('BuilderPanel', () => {
       // Wait for FileReader to complete
       await new Promise(resolve => setTimeout(resolve, 50));
 
-      expect(getByText('YAML import coming in Phase 2')).toBeTruthy();
+      // Should switch to wizard mode
+      expect(queryByText('Import YAML File')).toBeNull();
+
+      // Verify state was loaded
+      const state = get(builderState);
+      expect(state.plan.meta?.name).toBe('Test Plan');
     });
 
     it('should handle file upload error', async () => {
@@ -245,9 +260,9 @@ describe('BuilderPanel', () => {
       await fireEvent.change(fileInput);
       await new Promise(resolve => setTimeout(resolve, 50));
 
-      // Should not show any error or success message
+      // Should not show any error and should stay on import screen
       expect(queryByText('Failed to read file')).toBeNull();
-      expect(queryByText('YAML import coming in Phase 2')).toBeNull();
+      expect(queryByText('Import YAML File')).toBeTruthy();
     });
 
     it('should show Cancel button in YAML import area', async () => {
@@ -334,22 +349,26 @@ describe('BuilderPanel', () => {
   });
 
   describe('Error Display', () => {
-    it('should show error banner when errorMessage is set', async () => {
+    it('should show error banner when YAML import fails', async () => {
       const { getByText, container } = render(BuilderPanel);
-      const templatesButton = getByText('Use a Template').closest('button');
+      const yamlButton = getByText('Import YAML').closest('button');
+      await fireEvent.click(yamlButton);
 
-      await fireEvent.click(templatesButton);
+      const loadButton = getByText('Load YAML');
+      await fireEvent.click(loadButton);
 
       const errorBanner = container.querySelector('.error-banner');
       expect(errorBanner).toBeTruthy();
-      expect(errorBanner?.textContent).toContain('Template selection coming in Phase 2');
+      expect(errorBanner?.textContent).toContain('Please enter YAML content');
     });
 
     it('should show error icon in error banner', async () => {
       const { getByText, container } = render(BuilderPanel);
-      const templatesButton = getByText('Use a Template').closest('button');
+      const yamlButton = getByText('Import YAML').closest('button');
+      await fireEvent.click(yamlButton);
 
-      await fireEvent.click(templatesButton);
+      const loadButton = getByText('Load YAML');
+      await fireEvent.click(loadButton);
 
       const errorIcon = container.querySelector('.error-icon');
       expect(errorIcon).toBeTruthy();
