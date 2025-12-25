@@ -1,10 +1,14 @@
 <script lang="ts">
   import BuilderWizard from './BuilderWizard.svelte';
   import { builderState } from '../../lib/builderState';
+  import { parse as parseYAML } from 'yaml';
+  import { convertToDraft } from './utils/yamlImport';
+  import { getAllTemplates, type WorkoutTemplate } from '../../lib/workoutTemplates';
 
   let selectedTemplate: 'templates' | 'scratch' | 'load-yaml' | null = null;
   let yamlInput: string = '';
   let errorMessage: string = '';
+  let templates = getAllTemplates();
 
   function selectTemplate(choice: 'templates' | 'scratch' | 'load-yaml') {
     selectedTemplate = choice;
@@ -14,10 +18,13 @@
       // Start with empty plan
       builderState.reset();
       builderState.nextStep();
-    } else if (choice === 'templates') {
-      // Will show template selector in next phase
-      errorMessage = 'Template selection coming in Phase 2';
     }
+  }
+
+  function loadTemplate(template: WorkoutTemplate) {
+    builderState.loadPlan(template.plan);
+    builderState.nextStep();
+    selectedTemplate = 'scratch'; // Switch to wizard mode
   }
 
   function handleYamlLoad() {
@@ -27,10 +34,20 @@
     }
 
     try {
-      // TODO: Parse YAML and populate builder state
-      errorMessage = 'YAML import coming in Phase 2';
+      // Parse YAML and convert to draft format
+      const parsed = parseYAML(yamlInput);
+      const draft = convertToDraft(parsed);
+
+      // Load into builder state
+      builderState.loadPlan(draft);
+      builderState.nextStep(); // Move to first step
+
+      // Clear input and switch to wizard
+      selectedTemplate = 'scratch';
+      yamlInput = '';
+      errorMessage = '';
     } catch (error) {
-      errorMessage = `Failed to parse YAML: ${error}`;
+      errorMessage = `Failed to parse YAML: ${error instanceof Error ? error.message : String(error)}`;
     }
   }
 
@@ -80,7 +97,6 @@
           <div class="card-icon">📋</div>
           <h3>Use a Template</h3>
           <p>Start from a pre-built workout plan template</p>
-          <span class="badge coming-soon">Coming Soon</span>
         </button>
 
         <!-- Option 2: Start from Scratch -->
@@ -103,9 +119,41 @@
           <div class="card-icon">📄</div>
           <h3>Import YAML</h3>
           <p>Load an existing PWF YAML file to edit</p>
-          <span class="badge coming-soon">Coming Soon</span>
         </button>
       </div>
+
+      <!-- Template Gallery -->
+      {#if selectedTemplate === 'templates'}
+        <div class="template-gallery">
+          <h3>Choose a Template</h3>
+          <div class="template-grid">
+            {#each templates as template}
+              <button
+                class="workout-template"
+                on:click={() => loadTemplate(template)}
+              >
+                <div class="template-header">
+                  <h4>{template.name}</h4>
+                  <div class="template-badges">
+                    <span class="badge badge-{template.category}">{template.category}</span>
+                    <span class="badge badge-{template.difficulty}">{template.difficulty}</span>
+                  </div>
+                </div>
+                <p class="template-description">{template.description}</p>
+                <div class="template-meta">
+                  <span>📅 {template.plan.meta?.days_per_week || 3} days/week</span>
+                  <span>🏋️ {template.plan.cycle.days.length} workouts</span>
+                </div>
+              </button>
+            {/each}
+          </div>
+          <div class="template-actions">
+            <button class="btn-secondary" on:click={resetSelection}>
+              Back
+            </button>
+          </div>
+        </div>
+      {/if}
 
       <!-- YAML Import Area -->
       {#if selectedTemplate === 'load-yaml'}
@@ -326,6 +374,125 @@
     font-size: 1.5rem;
   }
 
+  .template-gallery {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 2rem;
+  }
+
+  .template-gallery h3 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  .template-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .workout-template {
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1.5rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .workout-template:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .template-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .template-header h4 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+  }
+
+  .template-badges {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .template-description {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+  }
+
+  .template-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .badge-strength {
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid var(--error-color);
+    color: var(--error-color);
+  }
+
+  .badge-cardio {
+    background: rgba(13, 110, 253, 0.1);
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+  }
+
+  .badge-hybrid {
+    background: rgba(111, 66, 193, 0.1);
+    border: 1px solid #6f42c1;
+    color: #6f42c1;
+  }
+
+  .badge-beginner {
+    background: rgba(25, 135, 84, 0.1);
+    border: 1px solid var(--success-color);
+    color: var(--success-color);
+  }
+
+  .badge-intermediate {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid var(--warning-color);
+    color: #856404;
+  }
+
+  .badge-advanced {
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid var(--error-color);
+    color: var(--error-color);
+  }
+
+  .template-actions {
+    display: flex;
+    justify-content: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+  }
+
   @media (max-width: 768px) {
     .builder-panel {
       padding: 1rem;
@@ -337,6 +504,10 @@
 
     .panel-intro h2 {
       font-size: 1.5rem;
+    }
+
+    .template-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>
