@@ -5,11 +5,18 @@
   import { validatePlan } from '../../../lib/wasm';
   import type { ValidationResult } from '../../../lib/stores';
   import { generateYAML } from '../utils/yamlGenerator';
+  import { copyShareLink } from '../../../lib/shareUtils';
+  import { saveCustomTemplate } from '../../../lib/customTemplates';
 
   $: draft = $builderState.plan;
   let yamlContent = '';
   let validationResult: ValidationResult | null = null;
   let copySuccess = false;
+  let shareSuccess = false;
+  let saveTemplateSuccess = false;
+  let showSaveTemplateDialog = false;
+  let templateName = '';
+  let templateDescription = '';
 
   $: {
     // Generate YAML when draft changes
@@ -49,6 +56,56 @@
     }).catch(err => {
       console.error('Failed to copy to clipboard:', err);
     });
+  }
+
+  async function copyShareUrl() {
+    try {
+      await copyShareLink(draft);
+      shareSuccess = true;
+      setTimeout(() => {
+        shareSuccess = false;
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to copy share link:', error);
+    }
+  }
+
+  function openSaveTemplateDialog() {
+    // Pre-fill with plan name if available
+    templateName = draft.meta?.name || '';
+    templateDescription = draft.meta?.description || '';
+    showSaveTemplateDialog = true;
+  }
+
+  function closeSaveTemplateDialog() {
+    showSaveTemplateDialog = false;
+    templateName = '';
+    templateDescription = '';
+  }
+
+  function handleSaveTemplate() {
+    if (!templateName.trim()) {
+      alert('Please enter a template name');
+      return;
+    }
+
+    try {
+      saveCustomTemplate(
+        templateName.trim(),
+        templateDescription.trim(),
+        draft
+      );
+
+      saveTemplateSuccess = true;
+      setTimeout(() => {
+        saveTemplateSuccess = false;
+      }, 2000);
+
+      closeSaveTemplateDialog();
+    } catch (error) {
+      console.error('Failed to save template:', error);
+      alert('Failed to save template. Storage may be full.');
+    }
   }
 
   // Parse plan for tree view
@@ -153,7 +210,7 @@
       on:click={copyToClipboard}
       disabled={!yamlContent}
     >
-      {copySuccess ? 'Copied!' : 'Copy to Clipboard'}
+      {copySuccess ? 'Copied!' : 'Copy YAML'}
     </button>
     <button
       type="button"
@@ -163,8 +220,73 @@
     >
       Download YAML
     </button>
+    <button
+      type="button"
+      class="btn btn-share"
+      on:click={copyShareUrl}
+      title="Copy shareable link"
+    >
+      {shareSuccess ? 'Link Copied! 🔗' : 'Share Link 🔗'}
+    </button>
+    <button
+      type="button"
+      class="btn btn-save-template"
+      on:click={openSaveTemplateDialog}
+      title="Save as custom template"
+    >
+      {saveTemplateSuccess ? 'Template Saved! 💾' : 'Save as Template 💾'}
+    </button>
   </div>
 </div>
+
+<!-- Save Template Dialog -->
+{#if showSaveTemplateDialog}
+  <div class="modal-overlay" on:click={closeSaveTemplateDialog}>
+    <div class="modal-content" on:click|stopPropagation>
+      <div class="modal-header">
+        <h3>Save as Custom Template</h3>
+        <button class="btn-close" on:click={closeSaveTemplateDialog}>×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="template-name">Template Name *</label>
+          <input
+            id="template-name"
+            type="text"
+            bind:value={templateName}
+            placeholder="e.g., My Strength Program"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="template-description">Description</label>
+          <textarea
+            id="template-description"
+            bind:value={templateDescription}
+            placeholder="Describe this template..."
+            rows="3"
+          ></textarea>
+        </div>
+
+        <p class="help-text">
+          This template will be saved to your browser's local storage and appear
+          in the template gallery.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" on:click={closeSaveTemplateDialog}>
+          Cancel
+        </button>
+        <button type="button" class="btn" on:click={handleSaveTemplate}>
+          Save Template
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
 
 <style>
   .review-step {
@@ -351,6 +473,140 @@
     cursor: not-allowed;
   }
 
+  .btn-share {
+    background: var(--accent-color);
+    color: white;
+  }
+
+  .btn-share:hover {
+    background: #0056b3;
+  }
+
+  .btn-save-template {
+    background: var(--success-color);
+    color: white;
+  }
+
+  .btn-save-template:hover {
+    background: #157347;
+  }
+
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+  }
+
+  .modal-content {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+  }
+
+  .btn-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+
+  .btn-close:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  .form-group:last-of-type {
+    margin-bottom: 0;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+  }
+
+  .help-text {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .modal-footer button {
+    flex: 0 0 auto;
+    min-width: 100px;
+  }
+
   @media (max-width: 768px) {
     .step-header h2 {
       font-size: 1.5rem;
@@ -363,6 +619,19 @@
     .yaml-preview {
       padding: 1rem;
       max-height: 400px;
+    }
+
+    .modal-content {
+      max-width: 100%;
+      margin: 1rem;
+    }
+
+    .modal-footer {
+      flex-direction: column-reverse;
+    }
+
+    .modal-footer button {
+      width: 100%;
     }
   }
 </style>
