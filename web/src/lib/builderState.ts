@@ -252,6 +252,16 @@ function createBuilderState() {
       };
     }),
 
+    // Load plan
+    loadPlan: (plan: PlanDraft) => set({
+      currentStep: 0,
+      plan: {
+        ...plan,
+        cycle: plan.cycle || { days: [{ exercises: [] }] }
+      },
+      currentDayIndex: 0
+    }),
+
     // Reset
     reset: () => set({
       currentStep: 0,
