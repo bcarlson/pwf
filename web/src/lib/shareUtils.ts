@@ -62,18 +62,29 @@ export function decodePlanFromUrl(url: string = window.location.href): PlanDraft
       if (match) {
         console.log('[PWF Share] Found plan in hash, compressed length:', match[1].length);
         const compressed = match[1];
-        const json = decompressFromEncodedURIComponent(compressed);
-        if (json) {
-          console.log('[PWF Share] Decompressed JSON length:', json.length);
-          const parsed = JSON.parse(json);
-          const isValid = validatePlanStructure(parsed);
-          console.log('[PWF Share] Plan validation:', isValid ? 'PASSED ✓' : 'FAILED ✗');
-          if (isValid) {
-            console.log('[PWF Share] Plan loaded:', parsed.meta?.name || 'Unnamed Plan');
+        console.log('[PWF Share] Compressed data (first 100 chars):', compressed.substring(0, 100));
+
+        try {
+          const json = decompressFromEncodedURIComponent(compressed);
+          if (json) {
+            console.log('[PWF Share] Decompressed JSON length:', json.length);
+            console.log('[PWF Share] Decompressed JSON (first 200 chars):', json.substring(0, 200));
+            const parsed = JSON.parse(json);
+            const isValid = validatePlanStructure(parsed);
+            console.log('[PWF Share] Plan validation:', isValid ? 'PASSED ✓' : 'FAILED ✗');
+            if (isValid) {
+              console.log('[PWF Share] Plan loaded:', parsed.meta?.name || 'Unnamed Plan');
+              console.log('[PWF Share] Days:', parsed.cycle.days.length);
+              console.log('[PWF Share] Total exercises:', parsed.cycle.days.reduce((sum: number, d: any) => sum + (d.exercises?.length || 0), 0));
+            }
+            return isValid ? parsed : null;
+          } else {
+            console.error('[PWF Share] Failed to decompress plan data - decompression returned null/empty');
+            console.error('[PWF Share] This usually means the compressed data is corrupted or invalid');
           }
-          return isValid ? parsed : null;
-        } else {
-          console.error('[PWF Share] Failed to decompress plan data');
+        } catch (error) {
+          console.error('[PWF Share] Error during decompression:', error);
+          console.error('[PWF Share] Compressed string length:', compressed.length);
         }
       } else {
         console.log('[PWF Share] No plan parameter found in hash');
