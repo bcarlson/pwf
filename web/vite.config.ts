@@ -11,6 +11,16 @@ export default defineConfig({
     }),
     wasm()
   ],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test-setup.ts'],
+    coverage: {
+      reporter: ['text', 'json', 'html'],
+      include: ['src/**/*.ts', 'src/**/*.svelte'],
+      exclude: ['src/**/*.test.ts', 'src/**/__tests__/**', 'src/test-setup.ts']
+    }
+  },
   base: '/pwf/',  // GitHub Pages deployment path (change to '/' for custom domain)
   build: {
     outDir: 'dist',

@@ -23,7 +23,9 @@
       const newValue = value.substring(0, start) + '  ' + value.substring(end);
       value = newValue;
       setTimeout(() => {
-        textarea.selectionStart = textarea.selectionEnd = start + 2;
+        if (textarea) {
+          textarea.selectionStart = textarea.selectionEnd = start + 2;
+        }
       }, 0);
       dispatch('change', { value });
     }
