@@ -5,14 +5,35 @@
   import ValidatorPanel from './components/validator/ValidatorPanel.svelte';
   import ConverterPanel from './components/converter/ConverterPanel.svelte';
   import VisualizerPanel from './components/visualizer/VisualizerPanel.svelte';
+  import BuilderPanel from './components/builder/BuilderPanel.svelte';
 
-  // Load WASM on mount
+  // Load WASM on mount and handle routing
   onMount(async () => {
     await loadWasm();
+
+    // Handle hash-based routing for builder
+    const hash = window.location.hash;
+    if (hash.startsWith('#/builder')) {
+      currentTab.set('builder');
+    }
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', () => {
+      const newHash = window.location.hash;
+      if (newHash.startsWith('#/builder')) {
+        currentTab.set('builder');
+      }
+    });
   });
 
   function switchTab(tab: TabType) {
     currentTab.set(tab);
+    // Update URL hash for builder tab
+    if (tab === 'builder') {
+      window.location.hash = '#/builder';
+    } else {
+      window.location.hash = '';
+    }
   }
 
   function toggleDarkMode() {
@@ -59,6 +80,12 @@
     >
       📊 Visualize
     </button>
+    <button
+      class:active={$currentTab === 'builder'}
+      on:click={() => switchTab('builder')}
+    >
+      ✏️ Plan Builder
+    </button>
   </nav>
 
   <!-- Main Content -->
@@ -79,6 +106,10 @@
     {:else if $currentTab === 'visualize'}
       <div class="tab-content">
         <VisualizerPanel />
+      </div>
+    {:else if $currentTab === 'builder'}
+      <div class="tab-content">
+        <BuilderPanel />
       </div>
     {/if}
   </main>
