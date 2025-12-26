@@ -80,7 +80,28 @@ personal_records:
 | Hard to share plans between apps | Standard format all apps can read |
 | Workout history trapped in one app | Export your complete history |
 
-## Installation
+## Web Interface
+
+**Try it now**: [https://bcarlson.github.io/pwf/](https://bcarlson.github.io/pwf/)
+
+The PWF Web Tools provide a browser-based interface with no installation required:
+
+### Features
+
+- **Validator** - Paste or upload YAML files for instant validation with syntax highlighting
+- **Converter** - Convert between FIT, TCX, GPX, CSV, and PWF formats in your browser
+- **Visualizer** - View GPS routes on interactive maps, telemetry charts, and plan structure
+- **Plan Builder** - Visual workout plan creator featuring:
+  - Step-by-step wizard interface (Plan Info → Days → Exercises → Review)
+  - Pre-built templates (5×5 strength, PPL split, HIIT cardio, calisthenics)
+  - Drag-and-drop exercise reordering
+  - Custom template library (save/load/delete)
+  - YAML import/export
+  - Shareable plan links (URL-based with compression)
+
+All tools run entirely in your browser using WebAssembly. **No data is uploaded to servers** - everything happens client-side.
+
+## CLI Installation
 
 ### Download Binary
 
@@ -250,72 +271,68 @@ Add to your `.vscode/settings.json`:
 
 ## Roadmap
 
-### v1.2.0 (Current - Released 2025-12-23)
+### v1.4.0 (Current - Released 2025-12-25)
+- [x] **Web Interface** (https://bcarlson.github.io/pwf/)
+  - Browser-based validator with syntax highlighting
+  - Visual plan builder with templates and drag-and-drop
+  - Format converter UI (FIT/TCX/GPX/CSV ↔ PWF)
+  - GPS map visualizer and telemetry charts
+  - Shareable plan links with URL compression
+  - Custom template library
+  - WASM-powered, client-side only (no server uploads)
+
+### v1.3.0 (Released 2025-12-23)
+- [x] **GPX Format Support** (GPS Exchange Format)
+  - GPX → PWF import for GPS tracks
+  - PWF → GPX export for route sharing
+  - Full CLI integration
+- [x] **CSV Export** (Time-series data for spreadsheets)
+  - Export telemetry data to CSV for analysis
+  - Compatible with Excel, Google Sheets
+- [x] **Expanded Sport Type Mappings**
+  - 22 sport types (up from 7)
+  - Comprehensive FIT, TCX, and GPX mappings
+
+### v1.2.0 (Released 2025-12-23)
 - [x] **TCX Format Conversion (Bidirectional)**
   - TCX → PWF import (Training Center XML)
   - PWF → TCX export (Garmin Connect, Strava compatible)
   - GPS routes, heart rate, power, cadence support
-  - Multi-lap and multi-sport activities
 - [x] **FIT Export Analysis**
   - Comprehensive evaluation of FIT writing options
   - Documented alternatives and workarounds
 - [x] **Enhanced Test Coverage**
   - 729 tests (93.84% coverage)
-  - Comprehensive converter test suites
 
 ### v1.1.0 (Released 2025-12-22)
 - [x] **FIT Format Import**
   - FIT → PWF conversion (Garmin, COROS, Wahoo, Polar, Suunto)
-  - Multi-sport activities (triathlon/duathlon)
-  - Swimming data (pool config, stroke types, SWOLF)
-  - Power metrics (NP, TSS, IF, VI, FTP)
-  - Device information extraction
+  - Multi-sport activities, swimming data, power metrics
 - [x] **pwf-converters Library**
   - Format conversion infrastructure
-  - Warning system for data fidelity
 - [x] **Superset/circuit grouping**
 - [x] **Rest period specifications**
-- [x] **Percentage-based loading**
 
 ### v1.0.1 (Released 2025-12-21)
 - [x] **PWF v2.1 Advanced Features**
-  - Time-series telemetry data
-  - GPS route tracking
-  - Multi-sport activity segments
-  - Pool swimming length tracking
+  - Time-series telemetry, GPS route tracking
+  - Multi-sport segments, pool swimming
 - [x] **Multi-week periodization**
-- [x] **Progressive overload rules**
 - [x] **Exercise library references**
-- [x] **Workout templates**
-
-### v1.2.0 (Current)
-- [x] **GPX Format Support** (GPS Exchange Format)
-  - GPX → PWF import for GPS tracks
-  - PWF → GPX export for route sharing
-  - Full CLI integration: `pwf convert --from gpx --to pwf` and `pwf convert --from pwf --to gpx`
-- [x] **CSV Export** (Time-series data for spreadsheets)
-  - Export telemetry data to CSV for analysis
-  - Compatible with Excel, Google Sheets
-  - CLI command: `pwf convert --from pwf --to csv`
-- [x] **Expanded Sport Type Mappings**
-  - 22 sport types (up from 7)
-  - Comprehensive FIT, TCX, and GPX mappings
-  - Includes: hiking, yoga, pilates, crossfit, skiing, snowboarding, kayaking, etc.
 
 ### Future Considerations
 - [ ] **FIT Export** (if production-ready Rust library emerges)
   - Monitor ecosystem for FIT writing libraries
   - Currently recommended: use TCX export
-- [ ] **Web Interface**
-  - Browser-based validator
-  - Visual plan builder
-  - Conversion tool UI
+- [ ] **Mobile Apps** (iOS/Android)
+  - Native mobile applications
+  - Offline-first sync capabilities
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
 
 ## Adopters
 
-- [OwnLift](https://ownlift.com) - Privacy-first workout tracking
+- [OwnLift](https://ownlift.app) - Privacy-first workout tracking
 
 *Using PWF? [Open a PR](https://github.com/bcarlson/pwf/pulls) to add your app!*
 
