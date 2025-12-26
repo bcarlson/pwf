@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2025-12-25
+
+### Added
+- **Web Interface Launch** (https://bcarlson.github.io/pwf/)
+  - Browser-based PWF validator with Monaco editor and syntax highlighting
+  - Format converter UI supporting FIT/TCX/GPX/CSV ↔ PWF conversions
+  - Workout visualizer with GPS maps (Leaflet.js) and telemetry charts (Chart.js)
+  - All tools run client-side using WebAssembly - no data uploaded to servers
+
+- **Visual Plan Builder**
+  - Multi-step wizard interface (Plan Info → Days → Exercises → Review)
+  - 4 pre-built workout templates:
+    - 5×5 Strength Program (beginner)
+    - Push/Pull/Legs Split (intermediate)
+    - HIIT Cardio Program (intermediate)
+    - Beginner Calisthenics (beginner)
+  - Custom template library with save/load/delete functionality
+  - YAML import for editing existing plans
+  - Drag-and-drop exercise reordering using svelte-dnd-action
+  - Live YAML preview during plan creation
+  - Progress indicator across wizard steps
+  - Form validation for all exercise modalities
+
+- **Plan Sharing**
+  - URL-based plan sharing with LZ-String compression
+  - Hash-based routing (#/builder?plan=...)
+  - Share link generation and clipboard copy
+  - Plan validation on URL load
+
+- **Developer Infrastructure**
+  - @pwf-dev/core TypeScript package published to npm
+  - pwf-wasm crate with WebAssembly bindings
+  - GitHub Pages deployment workflow (.github/workflows/deploy-web.yaml)
+  - PWA manifest and service worker for offline support
+  - 96% test coverage for web components (37 tests)
+
+### Changed
+- Updated main README.md to document web interface features
+- Fixed OwnLift adopter URL (ownlift.app)
+- Reorganized roadmap to reflect completed web features
+
 ## [1.3.0] - 2025-12-24
 
 ### Added
