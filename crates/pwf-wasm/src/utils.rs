@@ -67,7 +67,7 @@ pub fn get_supported_sports() -> JsValue {
         "Walking",
         "Yoga",
         "Pilates",
-        "CrossFit",
+        "FunctionalFitness",
         "Calisthenics",
         "Cardio",
         "CrossCountrySkiing",

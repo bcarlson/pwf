@@ -74,9 +74,9 @@ describe('ExampleGallery', () => {
       expect(getByText('Sample workout history with telemetry')).toBeTruthy();
     });
 
-    it('should render CrossFit Workout example', () => {
+    it('should render Functional Fitness example', () => {
       const { getByText } = render(ExampleGallery);
-      expect(getByText('CrossFit Workout')).toBeTruthy();
+      expect(getByText('Functional Fitness')).toBeTruthy();
       expect(getByText('High-intensity functional fitness')).toBeTruthy();
     });
 
@@ -420,21 +420,21 @@ describe('ExampleGallery', () => {
       });
     });
 
-    it('should load CrossFit Workout example', async () => {
+    it('should load Functional Fitness example', async () => {
       vi.mocked(fetch).mockResolvedValueOnce({
         ok: true,
-        text: async () => 'crossfit content'
+        text: async () => 'functional fitness content'
       } as Response);
 
       const { getByText } = render(ExampleGallery);
-      const button = getByText('CrossFit Workout').closest('button');
+      const button = getByText('Functional Fitness').closest('button');
 
       if (button) {
         await fireEvent.click(button);
       }
 
       await waitFor(() => {
-        expect(fetch).toHaveBeenCalledWith(`${BASE_URL}examples/history-crossfit.yaml`);
+        expect(fetch).toHaveBeenCalledWith(`${BASE_URL}examples/history-functional-fitness.yaml`);
       });
     });
 
@@ -577,7 +577,7 @@ describe('ExampleGallery', () => {
         eventDetail = event.detail;
       });
 
-      const button = component.getByText('CrossFit Workout').closest('button');
+      const button = component.getByText('Functional Fitness').closest('button');
       if (button) {
         await fireEvent.click(button);
       }

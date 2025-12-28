@@ -36,9 +36,9 @@
       type: 'history'
     },
     {
-      name: 'CrossFit Workout',
+      name: 'Functional Fitness',
       description: 'High-intensity functional fitness',
-      filename: 'history-crossfit.yaml',
+      filename: 'history-functional-fitness.yaml',
       type: 'history'
     },
     {

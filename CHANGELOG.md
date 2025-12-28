@@ -98,7 +98,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Configurable field selection and metadata inclusion
 - **Expanded Sport Type Mappings**
   - Sport enum expanded from 7 to 22 types
-  - New sports: Hiking, Walking, Yoga, Pilates, CrossFit, Calisthenics, Cardio, Cross-Country Skiing, Downhill Skiing, Snowboarding, Stand-Up Paddleboarding, Kayaking, Elliptical, Stair Climbing
+  - New sports: Hiking, Walking, Yoga, Pilates, Functional Fitness, Calisthenics, Cardio, Cross-Country Skiing, Downhill Skiing, Snowboarding, Stand-Up Paddleboarding, Kayaking, Elliptical, Stair Climbing
   - Comprehensive FIT sport code mappings (62 codes + subsports)
   - TCX sport mappings with common extensions
   - GPX activity type inference from metadata
