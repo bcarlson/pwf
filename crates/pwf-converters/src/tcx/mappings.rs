@@ -20,7 +20,9 @@ pub fn map_tcx_sport(tcx_sport: &str) -> Sport {
         "walking" => Sport::Walking,
         "yoga" => Sport::Yoga,
         "pilates" => Sport::Pilates,
-        "crossfit" | "cross-fit" => Sport::CrossFit,
+        "crossfit" | "cross-fit" | "functional-fitness" | "functionalfitness" => {
+            Sport::FunctionalFitness
+        }
         "calisthenics" => Sport::Calisthenics,
         "cardio" | "fitness" => Sport::Cardio,
         "cross_country_skiing" | "cross-country-skiing" | "xc_skiing" | "xc-skiing" => {
@@ -62,7 +64,7 @@ pub fn map_pwf_sport_to_tcx(sport: &Sport) -> String {
         Sport::Walking => "Walking".to_string(),   // Extension
         Sport::Yoga => "Yoga".to_string(),         // Extension
         Sport::Pilates => "Pilates".to_string(),   // Extension
-        Sport::CrossFit => "CrossFit".to_string(), // Extension
+        Sport::FunctionalFitness => "FunctionalFitness".to_string(), // Extension
         Sport::Calisthenics => "Calisthenics".to_string(), // Extension
         Sport::Cardio => "Cardio".to_string(),     // Extension
         Sport::CrossCountrySkiing => "CrossCountrySkiing".to_string(), // Extension
@@ -112,9 +114,13 @@ mod tests {
     }
 
     #[test]
-    fn test_map_tcx_sport_crossfit_calisthenics() {
-        assert_eq!(map_tcx_sport("CrossFit"), Sport::CrossFit);
-        assert_eq!(map_tcx_sport("cross-fit"), Sport::CrossFit);
+    fn test_map_tcx_sport_functional_fitness_calisthenics() {
+        assert_eq!(map_tcx_sport("FunctionalFitness"), Sport::FunctionalFitness);
+        assert_eq!(
+            map_tcx_sport("functional-fitness"),
+            Sport::FunctionalFitness
+        );
+        assert_eq!(map_tcx_sport("cross-fit"), Sport::FunctionalFitness);
         assert_eq!(map_tcx_sport("Calisthenics"), Sport::Calisthenics);
     }
 
@@ -191,7 +197,10 @@ mod tests {
         assert_eq!(map_pwf_sport_to_tcx(&Sport::Walking), "Walking");
         assert_eq!(map_pwf_sport_to_tcx(&Sport::Yoga), "Yoga");
         assert_eq!(map_pwf_sport_to_tcx(&Sport::Pilates), "Pilates");
-        assert_eq!(map_pwf_sport_to_tcx(&Sport::CrossFit), "CrossFit");
+        assert_eq!(
+            map_pwf_sport_to_tcx(&Sport::FunctionalFitness),
+            "FunctionalFitness"
+        );
         assert_eq!(map_pwf_sport_to_tcx(&Sport::Calisthenics), "Calisthenics");
         assert_eq!(map_pwf_sport_to_tcx(&Sport::Cardio), "Cardio");
         assert_eq!(
@@ -218,7 +227,11 @@ mod tests {
             ("Walking", Sport::Walking, "Walking"),
             ("Yoga", Sport::Yoga, "Yoga"),
             ("Pilates", Sport::Pilates, "Pilates"),
-            ("CrossFit", Sport::CrossFit, "CrossFit"),
+            (
+                "FunctionalFitness",
+                Sport::FunctionalFitness,
+                "FunctionalFitness",
+            ),
             ("Calisthenics", Sport::Calisthenics, "Calisthenics"),
             ("Cardio", Sport::Cardio, "Cardio"),
             ("Elliptical", Sport::Elliptical, "Elliptical"),

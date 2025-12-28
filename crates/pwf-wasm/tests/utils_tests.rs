@@ -64,7 +64,7 @@ fn test_get_supported_sports() {
     assert!(sport_strings.contains(&"Hiking"));
     assert!(sport_strings.contains(&"Walking"));
     assert!(sport_strings.contains(&"Yoga"));
-    assert!(sport_strings.contains(&"CrossFit"));
+    assert!(sport_strings.contains(&"FunctionalFitness"));
     assert!(sport_strings.contains(&"Other"));
 }
 

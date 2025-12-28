@@ -40,7 +40,7 @@ pub fn map_fit_sport(fit_sport: u8, fit_subsport: Option<u8>) -> Sport {
         45 => Sport::Cardio,             // Cardio training
         46 => Sport::StrengthTraining,   // Floor climbing / strength variant
         54 => Sport::Calisthenics,       // Functional strength training
-        62 => Sport::CrossFit,           // CrossFit (unofficial)
+        62 => Sport::FunctionalFitness,  // Functional Fitness / HIIT (unofficial)
         _ => {
             // Handle subsport for more granular mapping
             match fit_subsport {
@@ -139,8 +139,8 @@ mod tests {
     }
 
     #[test]
-    fn test_map_fit_sport_crossfit() {
-        assert_eq!(map_fit_sport(62, None), Sport::CrossFit);
+    fn test_map_fit_sport_functional_fitness() {
+        assert_eq!(map_fit_sport(62, None), Sport::FunctionalFitness);
     }
 
     #[test]
