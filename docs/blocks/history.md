@@ -403,7 +403,7 @@ workouts:
 - `walking` - Walking activities
 - `yoga` - Yoga practice
 - `pilates` - Pilates practice
-- `cross-fit` - CrossFit and high-intensity functional training
+- `functional-fitness` - Functional fitness and high-intensity interval training (HIIT)
 - `calisthenics` - Bodyweight exercises, calisthenics, HIIT
 - `cardio` - General cardio/fitness equipment
 - `cross-country-skiing` - Cross-country (Nordic) skiing

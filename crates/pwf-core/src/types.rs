@@ -120,7 +120,7 @@ pub enum Sport {
     Walking,
     Yoga,
     Pilates,
-    CrossFit,
+    FunctionalFitness,
     Calisthenics,
     Cardio,
     CrossCountrySkiing,
@@ -147,7 +147,7 @@ impl fmt::Display for Sport {
             Sport::Walking => write!(f, "walking"),
             Sport::Yoga => write!(f, "yoga"),
             Sport::Pilates => write!(f, "pilates"),
-            Sport::CrossFit => write!(f, "cross-fit"),
+            Sport::FunctionalFitness => write!(f, "functional-fitness"),
             Sport::Calisthenics => write!(f, "calisthenics"),
             Sport::Cardio => write!(f, "cardio"),
             Sport::CrossCountrySkiing => write!(f, "cross-country-skiing"),
@@ -178,7 +178,7 @@ impl std::str::FromStr for Sport {
             "walking" => Ok(Sport::Walking),
             "yoga" => Ok(Sport::Yoga),
             "pilates" => Ok(Sport::Pilates),
-            "cross-fit" => Ok(Sport::CrossFit),
+            "cross-fit" | "functional-fitness" => Ok(Sport::FunctionalFitness),
             "calisthenics" => Ok(Sport::Calisthenics),
             "cardio" => Ok(Sport::Cardio),
             "cross-country-skiing" => Ok(Sport::CrossCountrySkiing),
@@ -745,7 +745,7 @@ mod tests {
         assert_eq!(Sport::Walking.to_string(), "walking");
         assert_eq!(Sport::Yoga.to_string(), "yoga");
         assert_eq!(Sport::Pilates.to_string(), "pilates");
-        assert_eq!(Sport::CrossFit.to_string(), "cross-fit");
+        assert_eq!(Sport::FunctionalFitness.to_string(), "functional-fitness");
         assert_eq!(Sport::Calisthenics.to_string(), "calisthenics");
         assert_eq!(Sport::Cardio.to_string(), "cardio");
         assert_eq!(
@@ -774,7 +774,8 @@ mod tests {
         assert_eq!(Sport::from_str("walking").unwrap(), Sport::Walking);
         assert_eq!(Sport::from_str("yoga").unwrap(), Sport::Yoga);
         assert_eq!(Sport::from_str("pilates").unwrap(), Sport::Pilates);
-        assert_eq!(Sport::from_str("cross-fit").unwrap(), Sport::CrossFit);
+        assert_eq!(Sport::from_str("functional-fitness").unwrap(), Sport::FunctionalFitness);
+        assert_eq!(Sport::from_str("cross-fit").unwrap(), Sport::FunctionalFitness);
         assert_eq!(
             Sport::from_str("calisthenics").unwrap(),
             Sport::Calisthenics
@@ -848,8 +849,8 @@ mod tests {
             "\"pilates\""
         );
         assert_eq!(
-            serde_json::to_string(&Sport::CrossFit).unwrap(),
-            "\"cross-fit\""
+            serde_json::to_string(&Sport::FunctionalFitness).unwrap(),
+            "\"functional-fitness\""
         );
         assert_eq!(
             serde_json::to_string(&Sport::Calisthenics).unwrap(),
@@ -905,7 +906,7 @@ mod tests {
             Sport::Walking,
             Sport::Yoga,
             Sport::Pilates,
-            Sport::CrossFit,
+            Sport::FunctionalFitness,
             Sport::Calisthenics,
             Sport::Cardio,
             Sport::CrossCountrySkiing,

@@ -1,11 +1,11 @@
-# PWF History Export v1 - CrossFit Example
-# Demonstrates cross-fit sport type with WOD (Workout of the Day)
+# PWF History Export v1 - Functional Fitness Example
+# Demonstrates functional-fitness sport type with AMRAP workout
 
 history_version: 1
 exported_at: "2025-01-22T19:00:00Z"
 
 export_source:
-  app_name: "CrossFit Logger"
+  app_name: "Functional Fitness Logger"
   app_version: "3.0.0"
   platform: "ios"
 
@@ -18,8 +18,8 @@ workouts:
     started_at: "2025-01-22T18:00:00Z"
     ended_at: "2025-01-22T18:55:00Z"
     duration_sec: 3300
-    title: "CrossFit WOD - Cindy"
-    sport: cross-fit
+    title: "Functional Fitness AMRAP"
+    sport: functional-fitness
     notes: "20-minute AMRAP (As Many Rounds As Possible): 5 Pull-ups, 10 Push-ups, 15 Air Squats"
     exercises:
       - name: "Warm-up"
@@ -34,7 +34,7 @@ workouts:
           - reps: 5
             notes: "Practice strict form"
 
-      - name: "WOD - Cindy (AMRAP 20min)"
+      - name: "AMRAP 20min"
         modality: interval
         notes: "Completed 18 rounds + 5 pull-ups"
         sets:
@@ -59,7 +59,7 @@ workouts:
       total_calories: 485
 
 personal_records:
-  - exercise_name: "Cindy WOD"
+  - exercise_name: "AMRAP"
     record_type: "max_reps"
     value: 18
     unit: "rounds"
