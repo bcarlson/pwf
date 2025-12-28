@@ -774,8 +774,14 @@ mod tests {
         assert_eq!(Sport::from_str("walking").unwrap(), Sport::Walking);
         assert_eq!(Sport::from_str("yoga").unwrap(), Sport::Yoga);
         assert_eq!(Sport::from_str("pilates").unwrap(), Sport::Pilates);
-        assert_eq!(Sport::from_str("functional-fitness").unwrap(), Sport::FunctionalFitness);
-        assert_eq!(Sport::from_str("cross-fit").unwrap(), Sport::FunctionalFitness);
+        assert_eq!(
+            Sport::from_str("functional-fitness").unwrap(),
+            Sport::FunctionalFitness
+        );
+        assert_eq!(
+            Sport::from_str("cross-fit").unwrap(),
+            Sport::FunctionalFitness
+        );
         assert_eq!(
             Sport::from_str("calisthenics").unwrap(),
             Sport::Calisthenics
