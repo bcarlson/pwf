@@ -131,7 +131,7 @@ describe('FormatSelector', () => {
 
     const formatInfo = container.querySelector('.format-info');
     expect(formatInfo).toBeTruthy();
-    expect(formatInfo?.textContent).toContain('FIT (Garmin)');
+    expect(formatInfo?.textContent).toContain('FIT');
     expect(formatInfo?.textContent).toContain('PWF (Portable Workout Format)');
   });
 
@@ -190,7 +190,7 @@ describe('FormatSelector', () => {
     const sourceSelect = container.querySelector('#source-format') as HTMLSelectElement;
 
     const fitOption = Array.from(sourceSelect.options).find(opt => opt.value === 'fit');
-    expect(fitOption?.textContent).toBe('FIT (Garmin)');
+    expect(fitOption?.textContent).toBe('FIT');
 
     const tcxOption = Array.from(sourceSelect.options).find(opt => opt.value === 'tcx');
     expect(tcxOption?.textContent).toBe('TCX (Training Center XML)');

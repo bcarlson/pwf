@@ -15,7 +15,7 @@
   };
 
   const formats: Format[] = [
-    { id: 'fit', name: 'FIT (Garmin)', extension: '.fit', canImport: true, canExport: false },
+    { id: 'fit', name: 'FIT', extension: '.fit', canImport: true, canExport: false },
     { id: 'tcx', name: 'TCX (Training Center XML)', extension: '.tcx', canImport: true, canExport: true },
     { id: 'gpx', name: 'GPX (GPS Exchange)', extension: '.gpx', canImport: true, canExport: true },
     { id: 'pwf', name: 'PWF (Portable Workout Format)', extension: '.yaml', canImport: true, canExport: true },
