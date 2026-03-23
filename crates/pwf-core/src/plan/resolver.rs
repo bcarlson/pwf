@@ -1,6 +1,6 @@
 //! Exercise and template resolution logic for merging library exercises and templates with plan overrides
 
-use super::types::{LibraryExercise, PlanDay, PlanExercise, WorkoutTemplate};
+use super::types::{Equipment, LibraryExercise, PlanDay, PlanExercise, WorkoutTemplate};
 use crate::Modality;
 
 /// Resolved exercise with all fields merged from library and overrides
@@ -21,6 +21,7 @@ pub struct ResolvedExercise {
     pub target_notes: Option<String>,
     pub link: Option<String>,
     pub image: Option<String>,
+    pub equipment: Option<Equipment>,
     pub group: Option<String>,
     pub group_type: Option<super::types::GroupType>,
     pub rest_between_sets_sec: Option<u32>,
@@ -63,6 +64,7 @@ pub fn resolve_exercise(
                 .image
                 .clone()
                 .or_else(|| lib_exercise.image.clone()),
+            equipment: exercise.equipment,
             group: exercise.group.clone(),
             group_type: exercise.group_type,
             rest_between_sets_sec: exercise.rest_between_sets_sec,
@@ -89,6 +91,7 @@ pub fn resolve_exercise(
             target_notes: exercise.target_notes.clone(),
             link: exercise.link.clone(),
             image: exercise.image.clone(),
+            equipment: exercise.equipment,
             group: exercise.group.clone(),
             group_type: exercise.group_type,
             rest_between_sets_sec: exercise.rest_between_sets_sec,
@@ -176,6 +179,7 @@ mod tests {
             name: None,
             exercise_ref: Some("squat".to_string()),
             modality: None,
+            equipment: None,
             target_sets: Some(5), // Override
             target_reps: None,    // Use default
             target_duration_sec: None,
@@ -222,6 +226,7 @@ mod tests {
             name: Some("Push-ups".to_string()),
             exercise_ref: None,
             modality: Some(Modality::Strength),
+            equipment: None,
             target_sets: Some(3),
             target_reps: Some(15),
             target_duration_sec: None,
@@ -262,6 +267,7 @@ mod tests {
             name: None,
             exercise_ref: Some("nonexistent".to_string()),
             modality: None,
+            equipment: None,
             target_sets: None,
             target_reps: None,
             target_duration_sec: None,
@@ -313,6 +319,7 @@ mod tests {
             name: Some("Modified Plank".to_string()),
             exercise_ref: Some("plank".to_string()),
             modality: Some(Modality::Countdown),
+            equipment: None,
             target_sets: Some(4),
             target_reps: None,
             target_duration_sec: Some(45),
@@ -363,6 +370,7 @@ mod tests {
                     name: Some("Bench Press".to_string()),
                     exercise_ref: None,
                     modality: Some(Modality::Strength),
+                    equipment: None,
                     target_sets: Some(4),
                     target_reps: Some(8),
                     target_duration_sec: None,
@@ -389,6 +397,7 @@ mod tests {
                     name: Some("Dumbbell Press".to_string()),
                     exercise_ref: None,
                     modality: Some(Modality::Strength),
+                    equipment: None,
                     target_sets: Some(3),
                     target_reps: Some(10),
                     target_duration_sec: None,
@@ -452,6 +461,7 @@ mod tests {
                 name: Some("Squat".to_string()),
                 exercise_ref: None,
                 modality: Some(Modality::Strength),
+                equipment: None,
                 target_sets: Some(5),
                 target_reps: Some(5),
                 target_duration_sec: None,
@@ -488,6 +498,7 @@ mod tests {
                 name: Some("Leg Press".to_string()),
                 exercise_ref: None,
                 modality: Some(Modality::Strength),
+                equipment: None,
                 target_sets: Some(3),
                 target_reps: Some(12),
                 target_duration_sec: None,
@@ -537,6 +548,7 @@ mod tests {
                 name: Some("Pull-ups".to_string()),
                 exercise_ref: None,
                 modality: Some(Modality::Strength),
+                equipment: None,
                 target_sets: Some(4),
                 target_reps: Some(10),
                 target_duration_sec: None,

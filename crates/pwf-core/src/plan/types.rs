@@ -148,6 +148,20 @@ pub enum GroupType {
     Circuit,
 }
 
+/// Equipment type for exercises
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Equipment {
+    Barbell,
+    Dumbbell,
+    Kettlebell,
+    Bodyweight,
+    Cable,
+    Machine,
+    ResistanceBand,
+    Other,
+}
+
 /// Difficulty level for exercises
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -325,6 +339,8 @@ pub struct PlanExercise {
     pub exercise_ref: Option<String>,
     #[serde(default)]
     pub modality: Option<Modality>,
+    #[serde(default)]
+    pub equipment: Option<Equipment>,
     #[serde(default)]
     pub target_sets: Option<u32>,
     #[serde(default)]
@@ -681,6 +697,7 @@ title: "Basic Plan"
             name: Some("Bench Press".to_string()),
             exercise_ref: None,
             modality: Some(Modality::Strength),
+            equipment: None,
             target_sets: Some(4),
             target_reps: Some(8),
             target_duration_sec: None,
@@ -733,6 +750,7 @@ title: "Basic Plan"
                 exercise_ref: None,
 
                 modality: Some(modality),
+                equipment: None,
                 target_sets: None,
                 target_reps: None,
                 target_duration_sec: None,
@@ -773,6 +791,7 @@ title: "Basic Plan"
             exercise_ref: None,
 
             modality: Some(Modality::Countdown),
+            equipment: None,
             target_sets: Some(3),
             target_reps: None,
             target_duration_sec: Some(60),
@@ -813,6 +832,7 @@ title: "Basic Plan"
             exercise_ref: None,
 
             modality: Some(Modality::Stopwatch),
+            equipment: None,
             target_sets: None,
             target_reps: None,
             target_duration_sec: None,
@@ -853,6 +873,7 @@ title: "Basic Plan"
             exercise_ref: None,
 
             modality: Some(Modality::Interval),
+            equipment: None,
             target_sets: Some(8),
             target_reps: None,
             target_duration_sec: Some(30),
@@ -951,6 +972,7 @@ title: "Basic Plan"
             exercise_ref: None,
 
             modality: Some(Modality::Strength),
+            equipment: None,
             target_sets: Some(999999),
             target_reps: Some(999999),
             target_duration_sec: Some(999999),
@@ -1025,6 +1047,7 @@ title: "Basic Plan"
                             exercise_ref: None,
 
                             modality: Some(Modality::Strength),
+                            equipment: None,
                             target_sets: Some(3),
                             target_reps: Some(8),
                             target_duration_sec: None,
@@ -1052,6 +1075,7 @@ title: "Basic Plan"
                             exercise_ref: None,
 
                             modality: Some(Modality::Countdown),
+                            equipment: None,
                             target_sets: Some(3),
                             target_reps: None,
                             target_duration_sec: Some(60),
@@ -1181,6 +1205,7 @@ recommendedFirst: false
             exercise_ref: None,
 
             modality: Some(Modality::Strength),
+            equipment: None,
             target_sets: Some(3),
             target_reps: Some(8),
             target_duration_sec: None,
@@ -1218,6 +1243,7 @@ recommendedFirst: false
             exercise_ref: None,
 
             modality: Some(Modality::Strength),
+            equipment: None,
             target_sets: Some(5),
             target_reps: Some(5),
             target_duration_sec: None,
@@ -1277,5 +1303,59 @@ group_type: circuit
         let exercise: PlanExercise = serde_yaml::from_str(yaml).unwrap();
         assert_eq!(exercise.group, Some("circuit1".to_string()));
         assert_eq!(exercise.group_type, Some(GroupType::Circuit));
+    }
+
+    #[test]
+    fn test_equipment_all_variants_roundtrip() {
+        let variants = vec![
+            (Equipment::Barbell, "barbell"),
+            (Equipment::Dumbbell, "dumbbell"),
+            (Equipment::Kettlebell, "kettlebell"),
+            (Equipment::Bodyweight, "bodyweight"),
+            (Equipment::Cable, "cable"),
+            (Equipment::Machine, "machine"),
+            (Equipment::ResistanceBand, "resistance_band"),
+            (Equipment::Other, "other"),
+        ];
+
+        for (variant, expected_str) in variants {
+            let yaml = format!(
+                "name: \"Test\"\nmodality: strength\nequipment: {}",
+                expected_str
+            );
+            let exercise: PlanExercise = serde_yaml::from_str(&yaml).unwrap();
+            assert_eq!(exercise.equipment, Some(variant));
+
+            let serialized = serde_yaml::to_string(&exercise).unwrap();
+            assert!(
+                serialized.contains(&format!("equipment: {}", expected_str)),
+                "Expected '{}' in serialized output: {}",
+                expected_str,
+                serialized
+            );
+        }
+    }
+
+    #[test]
+    fn test_equipment_optional_omitted() {
+        let yaml = r#"
+name: "Squat"
+modality: strength
+target_sets: 3
+"#;
+        let exercise: PlanExercise = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(exercise.equipment, None);
+    }
+
+    #[test]
+    fn test_equipment_with_exercise_ref() {
+        let yaml = r#"
+exercise_ref: "squat"
+equipment: barbell
+target_sets: 5
+"#;
+        let exercise: PlanExercise = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(exercise.equipment, Some(Equipment::Barbell));
+        assert_eq!(exercise.exercise_ref, Some("squat".to_string()));
     }
 }

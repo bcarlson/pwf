@@ -231,6 +231,11 @@
           "enum": ["strength", "countdown", "stopwatch", "interval", "cycling", "running", "rowing", "swimming"],
           "description": "Exercise type"
         },
+        "equipment": {
+          "type": "string",
+          "enum": ["barbell", "dumbbell", "kettlebell", "bodyweight", "cable", "machine", "resistance_band", "other"],
+          "description": "Primary equipment used for this exercise"
+        },
         "target_sets": {
           "type": "integer",
           "minimum": 1,
