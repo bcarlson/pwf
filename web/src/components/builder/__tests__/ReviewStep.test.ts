@@ -165,9 +165,9 @@ describe('ReviewStep', () => {
     expect(getByText(/plan_version: 1/)).toBeTruthy();
   });
 
-  it('should render Copy to Clipboard button', () => {
+  it('should render Copy YAML button', () => {
     const { getByText } = render(ReviewStep);
-    expect(getByText('Copy to Clipboard')).toBeTruthy();
+    expect(getByText('Copy YAML')).toBeTruthy();
   });
 
   it('should render Download YAML button', () => {
@@ -179,7 +179,7 @@ describe('ReviewStep', () => {
     const clipboardSpy = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
 
     const { getByText } = render(ReviewStep);
-    const copyButton = getByText('Copy to Clipboard');
+    const copyButton = getByText('Copy YAML');
 
     await fireEvent.click(copyButton);
 
@@ -190,7 +190,7 @@ describe('ReviewStep', () => {
     vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
 
     const { getByText, queryByText } = render(ReviewStep);
-    const copyButton = getByText('Copy to Clipboard');
+    const copyButton = getByText('Copy YAML');
 
     await fireEvent.click(copyButton);
 
@@ -314,7 +314,7 @@ describe('ReviewStep', () => {
     vi.mocked(yamlGenerator.generateYAML).mockReturnValue('');
 
     const { getByText } = render(ReviewStep);
-    const copyButton = getByText('Copy to Clipboard') as HTMLButtonElement;
+    const copyButton = getByText('Copy YAML') as HTMLButtonElement;
     const downloadButton = getByText('Download YAML') as HTMLButtonElement;
 
     expect(copyButton.disabled).toBe(true);
