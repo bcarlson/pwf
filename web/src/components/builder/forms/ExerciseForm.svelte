@@ -1,22 +1,24 @@
 <script lang="ts">
   import { builderState, type Exercise } from '../../../lib/builderState';
-  import { getSupportedModalities } from '../../../lib/wasm';
+  import { getSupportedModalities, getExerciseEquipmentTypes } from '../../../lib/wasm';
   import ModalityFields from './ModalityFields.svelte';
 
   export let dayIndex: number;
   export let exerciseIndex: number;
 
   let supportedModalities: string[] = [];
-  const equipmentTypes = ['barbell', 'dumbbell', 'kettlebell', 'bodyweight', 'cable', 'machine', 'resistance_band', 'other'];
+  let equipmentTypes: string[] = [];
 
   $: exercise = $builderState.plan.cycle.days[dayIndex]?.exercises[exerciseIndex];
 
   // Load supported options from WASM
   try {
     supportedModalities = getSupportedModalities();
+    equipmentTypes = getExerciseEquipmentTypes();
   } catch (e) {
     console.warn('Could not load options from WASM:', e);
     supportedModalities = ['strength', 'countdown', 'stopwatch', 'interval', 'distance', 'continuous', 'pace', 'speed'];
+    equipmentTypes = ['barbell', 'dumbbell', 'kettlebell', 'bodyweight', 'cable', 'machine', 'resistance_band', 'other'];
   }
 
   function updateExercise(field: keyof Exercise, value: any) {

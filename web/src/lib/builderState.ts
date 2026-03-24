@@ -39,15 +39,8 @@ export interface IntervalPhase {
   cadence_rpm?: number;
 }
 
-export type Equipment =
-  | 'barbell'
-  | 'dumbbell'
-  | 'kettlebell'
-  | 'bodyweight'
-  | 'cable'
-  | 'machine'
-  | 'resistance_band'
-  | 'other';
+export type { Equipment } from './modalityTypes';
+import type { Equipment } from './modalityTypes';
 
 export interface Exercise {
   id?: string;

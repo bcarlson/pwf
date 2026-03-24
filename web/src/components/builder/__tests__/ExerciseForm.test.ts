@@ -11,7 +11,8 @@ import * as wasm from '../../../lib/wasm';
 
 // Mock WASM module
 vi.mock('../../../lib/wasm', () => ({
-  getSupportedModalities: vi.fn(() => ['strength', 'countdown', 'stopwatch', 'interval'])
+  getSupportedModalities: vi.fn(() => ['strength', 'countdown', 'stopwatch', 'interval']),
+  getExerciseEquipmentTypes: vi.fn(() => ['barbell', 'dumbbell', 'kettlebell', 'bodyweight', 'cable', 'machine', 'resistance_band', 'other'])
 }));
 
 describe('ExerciseForm', () => {

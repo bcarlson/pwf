@@ -28,6 +28,22 @@ pub struct ResolvedExercise {
     pub rest_after_sec: Option<u32>,
 }
 
+/// Try to parse a free-form equipment string into the Equipment enum.
+/// Returns None if the string doesn't match any known variant.
+fn parse_equipment(s: &str) -> Option<Equipment> {
+    match s {
+        "barbell" => Some(Equipment::Barbell),
+        "dumbbell" | "dumbbells" => Some(Equipment::Dumbbell),
+        "kettlebell" => Some(Equipment::Kettlebell),
+        "bodyweight" => Some(Equipment::Bodyweight),
+        "cable" | "cables" => Some(Equipment::Cable),
+        "machine" => Some(Equipment::Machine),
+        "resistance_band" | "bands" => Some(Equipment::ResistanceBand),
+        "other" => Some(Equipment::Other),
+        _ => None,
+    }
+}
+
 /// Resolve a plan exercise, merging library exercise if exercise_ref is present
 pub fn resolve_exercise(
     exercise: &PlanExercise,
@@ -64,7 +80,12 @@ pub fn resolve_exercise(
                 .image
                 .clone()
                 .or_else(|| lib_exercise.image.clone()),
-            equipment: exercise.equipment,
+            equipment: exercise.equipment.or_else(|| {
+                lib_exercise
+                    .equipment
+                    .iter()
+                    .find_map(|s| parse_equipment(s))
+            }),
             group: exercise.group.clone(),
             group_type: exercise.group_type,
             rest_between_sets_sec: exercise.rest_between_sets_sec,
@@ -215,6 +236,8 @@ mod tests {
             Some("Add 2.5kg from last week".to_string())
         );
         assert_eq!(resolved.rest_between_sets_sec, Some(180));
+        // Equipment falls back from library
+        assert_eq!(resolved.equipment, Some(Equipment::Barbell));
     }
 
     #[test]
@@ -301,7 +324,7 @@ mod tests {
             id: "plank".to_string(),
             name: "Plank Hold".to_string(),
             description: None,
-            equipment: vec![],
+            equipment: vec!["bodyweight".to_string()],
             muscle_groups: vec!["core".to_string()],
             difficulty: Some(Difficulty::Beginner),
             modality: Modality::Countdown,
@@ -319,7 +342,7 @@ mod tests {
             name: Some("Modified Plank".to_string()),
             exercise_ref: Some("plank".to_string()),
             modality: Some(Modality::Countdown),
-            equipment: None,
+            equipment: Some(Equipment::Machine), // Override library's bodyweight
             target_sets: Some(4),
             target_reps: None,
             target_duration_sec: Some(45),
@@ -353,6 +376,8 @@ mod tests {
             resolved.link,
             Some("https://example.com/modified".to_string())
         );
+        // Plan exercise overrides library equipment
+        assert_eq!(resolved.equipment, Some(Equipment::Machine));
     }
 
     #[test]

@@ -1358,4 +1358,15 @@ target_sets: 5
         assert_eq!(exercise.equipment, Some(Equipment::Barbell));
         assert_eq!(exercise.exercise_ref, Some("squat".to_string()));
     }
+
+    #[test]
+    fn test_equipment_invalid_value_rejected() {
+        let yaml = r#"
+name: "Squat"
+modality: strength
+equipment: trampoline
+"#;
+        let result = serde_yaml::from_str::<PlanExercise>(yaml);
+        assert!(result.is_err());
+    }
 }
