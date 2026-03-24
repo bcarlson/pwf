@@ -83,9 +83,10 @@ pub fn get_supported_sports() -> JsValue {
     serde_wasm_bindgen::to_value(&sports).unwrap_or(JsValue::NULL)
 }
 
-/// Get a list of supported equipment tags.
+/// Get a list of suggested equipment tags for plan-level metadata.
 ///
-/// Returns an array of equipment tag names that PWF supports.
+/// Returns an array of common equipment tag names. Plan-level `meta.equipment`
+/// accepts any free-form string, so this list is for UI suggestions only.
 ///
 /// # Example
 ///
@@ -108,4 +109,31 @@ pub fn get_supported_equipment() -> JsValue {
     ];
 
     serde_wasm_bindgen::to_value(&equipment).unwrap_or(JsValue::NULL)
+}
+
+/// Get the valid equipment types for per-exercise equipment fields.
+///
+/// Returns the enum values accepted by `cycle.days[].exercises[].equipment`.
+/// Unlike plan-level `meta.equipment`, this is a strict enum.
+///
+/// # Example
+///
+/// ```javascript
+/// const types = get_exercise_equipment_types();
+/// console.log(types); // ["barbell", "dumbbell", "kettlebell", ...]
+/// ```
+#[wasm_bindgen]
+pub fn get_exercise_equipment_types() -> JsValue {
+    let types = vec![
+        "barbell",
+        "dumbbell",
+        "kettlebell",
+        "bodyweight",
+        "cable",
+        "machine",
+        "resistance_band",
+        "other",
+    ];
+
+    serde_wasm_bindgen::to_value(&types).unwrap_or(JsValue::NULL)
 }

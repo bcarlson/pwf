@@ -10,6 +10,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { get } from 'svelte/store';
 import { wasmReady } from '../stores';
 
+
 describe('wasm.ts', () => {
   beforeEach(() => {
     // Reset wasmReady store

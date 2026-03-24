@@ -90,7 +90,6 @@ describe('YAML Generation', () => {
                   target_sets: 3,
                   target_reps: 10,
                   notes: '',  // Empty string should be removed
-                  equipment: [],  // Empty array should be removed
                 },
               ],
             },
@@ -194,12 +193,12 @@ describe('YAML Generation', () => {
       expect(parsed.cycle.days[2]).toBeTruthy();
     });
 
-    it('should preserve equipment array when present', () => {
+    it('should preserve equipment when present', () => {
       const draft: PlanDraft = {
         plan_version: 1,
         meta: {
           name: 'Equipment Test',
-          equipment: ['barbell', 'dumbbells'],
+          equipment: ['barbell', 'dumbbell'],
         },
         cycle: {
           days: [
@@ -210,7 +209,7 @@ describe('YAML Generation', () => {
                   modality: 'strength',
                   target_sets: 3,
                   target_reps: 10,
-                  equipment: ['barbell', 'bench'],
+                  equipment: 'barbell',
                 },
               ],
             },
@@ -221,9 +220,9 @@ describe('YAML Generation', () => {
       const yaml = generateYAML(draft);
 
       expect(yaml).toContain('equipment:');
+      // Meta equipment is still an array
       expect(yaml).toContain('- barbell');
-      expect(yaml).toContain('- dumbbells');
-      expect(yaml).toContain('- bench');
+      expect(yaml).toContain('- dumbbell');
     });
   });
 
@@ -370,7 +369,7 @@ describe('YAML Generation', () => {
                   target_hr_zone: 3,
                   target_pace_sec_per_km: 240,
                   notes: 'Detailed notes',
-                  equipment: ['bike', 'power meter'],
+                  equipment: 'machine',
                 },
               ],
             },
@@ -385,7 +384,7 @@ describe('YAML Generation', () => {
       expect(exercise.name).toBe('Complex Exercise');
       expect(exercise.target_duration_sec).toBe(3600);
       expect(exercise.target_power_zone).toBe(3);
-      expect(exercise.equipment).toContain('bike');
+      expect(exercise.equipment).toBe('machine');
     });
   });
 });

@@ -57,10 +57,11 @@ describe('App.svelte', () => {
       const { container } = render(App);
 
       const buttons = container.querySelectorAll('nav.tabs button');
-      expect(buttons.length).toBe(3);
+      expect(buttons.length).toBe(4);
       expect(buttons[0].textContent).toContain('Validate');
       expect(buttons[1].textContent).toContain('Convert');
       expect(buttons[2].textContent).toContain('Visualize');
+      expect(buttons[3].textContent).toContain('Plan Builder');
     });
 
     it('should render footer with version and links', () => {

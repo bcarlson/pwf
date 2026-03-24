@@ -147,10 +147,10 @@
                       {/if}
 
                       <!-- Common fields -->
-                      {#if exercise.equipment && exercise.equipment.length > 0}
+                      {#if exercise.equipment}
                         <div class="detail-row">
                           <span class="detail-label">Equipment:</span>
-                          <span class="detail-value">{exercise.equipment.join(', ')}</span>
+                          <span class="detail-value">{exercise.equipment.replace(/_/g, ' ')}</span>
                         </div>
                       {/if}
 

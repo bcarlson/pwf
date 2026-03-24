@@ -55,11 +55,19 @@ export function getSupportedSports(): string[] {
 }
 
 /**
- * Get supported equipment
+ * Get suggested equipment tags for plan-level metadata
  */
 export function getSupportedEquipment(): string[] {
   if (!wasmModule) throw new Error('WASM not initialized');
   return wasmModule.get_supported_equipment();
+}
+
+/**
+ * Get valid equipment types for per-exercise equipment field
+ */
+export function getExerciseEquipmentTypes(): string[] {
+  if (!wasmModule) throw new Error('WASM not initialized');
+  return wasmModule.get_exercise_equipment_types();
 }
 
 /**

@@ -12,7 +12,7 @@ import * as wasm from '../../../lib/wasm';
 // Mock WASM module
 vi.mock('../../../lib/wasm', () => ({
   getSupportedModalities: vi.fn(() => ['strength', 'countdown', 'stopwatch', 'interval']),
-  getSupportedEquipment: vi.fn(() => ['barbell', 'dumbbell', 'kettlebell'])
+  getExerciseEquipmentTypes: vi.fn(() => ['barbell', 'dumbbell', 'kettlebell', 'bodyweight', 'cable', 'machine', 'resistance_band', 'other'])
 }));
 
 describe('ExerciseForm', () => {
@@ -99,22 +99,22 @@ describe('ExerciseForm', () => {
     expect(state.plan.cycle.days[0].exercises[0].target_reps).toBeUndefined();
   });
 
-  it('should toggle equipment selection', async () => {
-    const { getByText } = render(ExerciseForm, {
+  it('should select equipment from dropdown', async () => {
+    const { getByLabelText } = render(ExerciseForm, {
       props: { dayIndex: 0, exerciseIndex: 0 }
     });
 
-    const barbellChip = getByText('barbell');
-    await fireEvent.click(barbellChip);
+    const equipmentSelect = getByLabelText(/Equipment/) as HTMLSelectElement;
+    await fireEvent.change(equipmentSelect, { target: { value: 'barbell' } });
 
     let state = get(builderState);
-    expect(state.plan.cycle.days[0].exercises[0].equipment).toContain('barbell');
+    expect(state.plan.cycle.days[0].exercises[0].equipment).toBe('barbell');
 
-    // Click again to deselect
-    await fireEvent.click(barbellChip);
+    // Select none to clear
+    await fireEvent.change(equipmentSelect, { target: { value: '' } });
 
     state = get(builderState);
-    expect(state.plan.cycle.days[0].exercises[0].equipment).not.toContain('barbell');
+    expect(state.plan.cycle.days[0].exercises[0].equipment).toBeUndefined();
   });
 
   it('should update exercise notes', async () => {
@@ -162,11 +162,22 @@ describe('ExerciseForm', () => {
     expect(options).toContain('interval');
   });
 
-  it('should render equipment grid', () => {
+  it('should render equipment dropdown with all options', () => {
     const { container } = render(ExerciseForm, {
       props: { dayIndex: 0, exerciseIndex: 0 }
     });
 
-    expect(container.querySelector('.equipment-grid')).toBeTruthy();
+    const selects = container.querySelectorAll('select');
+    const equipmentSelect = Array.from(selects).find(s =>
+      Array.from(s.options).some(o => o.value === 'barbell')
+    ) as HTMLSelectElement;
+
+    expect(equipmentSelect).toBeTruthy();
+    const values = Array.from(equipmentSelect.options).map(o => o.value);
+    expect(values).toContain('');
+    expect(values).toContain('barbell');
+    expect(values).toContain('dumbbell');
+    expect(values).toContain('bodyweight');
+    expect(values).toContain('resistance_band');
   });
 });

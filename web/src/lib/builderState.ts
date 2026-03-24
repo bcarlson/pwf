@@ -39,10 +39,14 @@ export interface IntervalPhase {
   cadence_rpm?: number;
 }
 
+export type { Equipment } from './modalityTypes';
+import type { Equipment } from './modalityTypes';
+
 export interface Exercise {
   id?: string;
   name: string;
   modality: Modality;
+  equipment?: Equipment;
 
   // Strength fields
   target_sets?: number;

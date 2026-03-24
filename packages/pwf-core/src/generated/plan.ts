@@ -161,6 +161,10 @@ export interface Exercise {
    */
   modality: "strength" | "countdown" | "stopwatch" | "interval" | "cycling" | "running" | "rowing" | "swimming";
   /**
+   * Primary equipment used for this exercise
+   */
+  equipment?: "barbell" | "dumbbell" | "kettlebell" | "bodyweight" | "cable" | "machine" | "resistance_band" | "other";
+  /**
    * Target number of sets
    */
   target_sets?: number;

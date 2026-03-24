@@ -132,7 +132,7 @@ export function createAllModalitiesPlan(): PlanDraft {
               modality: 'strength',
               target_sets: 3,
               target_reps: 10,
-              equipment: ['barbell'],
+              equipment: 'barbell',
             },
             {
               name: 'Plank Hold',
@@ -169,7 +169,7 @@ export function createAllModalitiesPlan(): PlanDraft {
               name: 'Tabata Kettlebell Swings',
               modality: 'tabata',
               target_sets: 8,
-              equipment: ['kettlebell'],
+              equipment: 'kettlebell',
             },
             {
               name: 'Long Bike Ride',

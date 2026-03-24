@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import wasm from 'vite-plugin-wasm';
 import sveltePreprocess from 'svelte-preprocess';
+import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -15,6 +16,10 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test-setup.ts'],
+    alias: {
+      // Mock the WASM module in tests since .wasm files are not available
+      '../wasm/pwf_wasm': path.resolve(__dirname, 'src/__mocks__/pwf_wasm.ts'),
+    },
     coverage: {
       reporter: ['text', 'json', 'html'],
       include: ['src/**/*.ts', 'src/**/*.svelte'],

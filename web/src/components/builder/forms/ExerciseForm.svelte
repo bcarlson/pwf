@@ -1,37 +1,28 @@
 <script lang="ts">
   import { builderState, type Exercise } from '../../../lib/builderState';
-  import { getSupportedModalities, getSupportedEquipment } from '../../../lib/wasm';
+  import { getSupportedModalities, getExerciseEquipmentTypes } from '../../../lib/wasm';
   import ModalityFields from './ModalityFields.svelte';
 
   export let dayIndex: number;
   export let exerciseIndex: number;
 
   let supportedModalities: string[] = [];
-  let supportedEquipment: string[] = [];
+  let equipmentTypes: string[] = [];
 
   $: exercise = $builderState.plan.cycle.days[dayIndex]?.exercises[exerciseIndex];
 
   // Load supported options from WASM
   try {
     supportedModalities = getSupportedModalities();
-    supportedEquipment = getSupportedEquipment();
+    equipmentTypes = getExerciseEquipmentTypes();
   } catch (e) {
     console.warn('Could not load options from WASM:', e);
     supportedModalities = ['strength', 'countdown', 'stopwatch', 'interval', 'distance', 'continuous', 'pace', 'speed'];
-    supportedEquipment = ['barbell', 'dumbbell', 'kettlebell', 'resistance_band', 'pull_up_bar'];
+    equipmentTypes = ['barbell', 'dumbbell', 'kettlebell', 'bodyweight', 'cable', 'machine', 'resistance_band', 'other'];
   }
 
   function updateExercise(field: keyof Exercise, value: any) {
     builderState.updateExercise(dayIndex, exerciseIndex, { [field]: value });
-  }
-
-  function toggleEquipment(equipment: string) {
-    const currentEquipment = exercise.equipment || [];
-    if (currentEquipment.includes(equipment)) {
-      updateExercise('equipment', currentEquipment.filter(e => e !== equipment));
-    } else {
-      updateExercise('equipment', [...currentEquipment, equipment]);
-    }
   }
 
   function deleteExercise() {
@@ -106,22 +97,22 @@
   {/if}
 
   <div class="form-group">
-    <label>
+    <label for="exercise-equipment-{dayIndex}-{exerciseIndex}">
       Equipment
       <span class="optional">optional</span>
     </label>
-    <div class="equipment-grid">
-      {#each supportedEquipment as equipment}
-        <button
-          type="button"
-          class="equipment-chip"
-          class:selected={exercise?.equipment?.includes(equipment)}
-          on:click={() => toggleEquipment(equipment)}
-        >
-          {equipment.replace(/_/g, ' ')}
-        </button>
+    <select
+      id="exercise-equipment-{dayIndex}-{exerciseIndex}"
+      value={exercise?.equipment || ''}
+      on:change={(e) => updateExercise('equipment', e.currentTarget.value || undefined)}
+    >
+      <option value="">None</option>
+      {#each equipmentTypes as eq}
+        <option value={eq}>
+          {eq.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+        </option>
       {/each}
-    </div>
+    </select>
   </div>
 
   <div class="form-group">
@@ -208,42 +199,9 @@
     font-style: italic;
   }
 
-  .equipment-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 0.5rem;
-  }
-
-  .equipment-chip {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: all 0.2s;
-    text-transform: capitalize;
-    font-size: 0.85rem;
-  }
-
-  .equipment-chip:hover {
-    background: var(--bg-hover);
-    border-color: var(--accent-color);
-  }
-
-  .equipment-chip.selected {
-    background: var(--accent-color);
-    color: white;
-    border-color: var(--accent-color);
-  }
-
   @media (max-width: 768px) {
     .exercise-form {
       padding: 0.75rem;
-    }
-
-    .equipment-grid {
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
     }
 
     .form-header {
