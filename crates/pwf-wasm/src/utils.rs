@@ -97,14 +97,13 @@ pub fn get_supported_sports() -> JsValue {
 pub fn get_supported_equipment() -> JsValue {
     let equipment = vec![
         "barbell",
-        "dumbbells",
+        "dumbbell",
         "kettlebell",
-        "pullup_bar",
-        "bench",
-        "cables",
-        "bands",
         "bodyweight",
+        "cable",
         "machine",
+        "resistance_band",
+        "other",
     ];
 
     serde_wasm_bindgen::to_value(&equipment).unwrap_or(JsValue::NULL)

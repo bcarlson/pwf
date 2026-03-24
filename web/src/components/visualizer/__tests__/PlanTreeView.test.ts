@@ -572,7 +572,7 @@ describe('PlanTreeView', () => {
                 modality: 'strength',
                 target_sets: 3,
                 target_reps: 10,
-                equipment: ['barbell', 'bench']
+                equipment: 'barbell'
               }
             ]
           }
@@ -592,7 +592,7 @@ describe('PlanTreeView', () => {
 
     const details = container.querySelector('.exercise-details');
     expect(details?.textContent).toContain('Equipment:');
-    expect(details?.textContent).toContain('barbell, bench');
+    expect(details?.textContent).toContain('barbell');
   });
 
   it('should not display equipment when not present', async () => {
@@ -610,28 +610,9 @@ describe('PlanTreeView', () => {
     expect(details?.textContent).not.toContain('Equipment:');
   });
 
-  it('should not display equipment when array is empty', async () => {
-    const emptyEquipmentPlan = {
-      ...basicPlan,
-      cycle: {
-        days: [
-          {
-            exercises: [
-              {
-                name: 'Bench Press',
-                modality: 'strength',
-                target_sets: 3,
-                target_reps: 10,
-                equipment: []
-              }
-            ]
-          }
-        ]
-      }
-    };
-
+  it('should not display equipment when undefined', async () => {
     const { container, getByText } = render(PlanTreeView, {
-      props: { plan: emptyEquipmentPlan }
+      props: { plan: basicPlan }
     });
 
     const dayHeader = getByText(/Day 1/).closest('button') as HTMLElement;
